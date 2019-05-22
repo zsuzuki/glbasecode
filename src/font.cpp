@@ -1,4 +1,5 @@
 #include "font.h"
+#include "codeconv.h"
 #include <GLFW/glfw3.h>
 #include <OpenGL/gl.h>
 #include <ft2build.h>
@@ -160,11 +161,15 @@ namespace
 void
 render(FT_Face face, const char* text, float x, float y, float sx, float sy)
 {
-  const char* p;
-
-  for (p = text; *p; p++)
+  auto     p = text;
+  char32_t ch;
+  while (int r = CodeConv::U8ToU32(p, ch))
   {
-    if (FT_Load_Char(face, *p, FT_LOAD_RENDER))
+    if (ch == '\0')
+      break;
+
+    p += r;
+    if (FT_Load_Char(face, ch, FT_LOAD_RENDER))
       continue;
 
     FT_GlyphSlot g = face->glyph;

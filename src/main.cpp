@@ -101,7 +101,7 @@ main(int argc, char** argv)
     Primitive2D::cleanup();
 
     font->setColor(0.0f, 1.0f, 0.0f);
-    font->print("Hello,World", 0.0f, 0.0f);
+    font->print("こんにちは、世界", -0.3f, -0.3f);
     font->setColor(0.8f, 0.8f, 1.0f);
     font->print("Status: Echo", -0.98f, -1.0f);
     font->print("Title: Top", -0.98f, 1.0f - (32.0f / 480.0f));

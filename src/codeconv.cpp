@@ -6,6 +6,12 @@
 #include <cstdint>
 #include <string>
 
+#include "codeconv.h"
+
+namespace CodeConv
+{
+namespace
+{
 int
 GetU8ByteCount(char ch)
 {
@@ -33,15 +39,16 @@ IsU8LaterByte(char ch)
 {
   return 0x80 <= uint8_t(ch) && uint8_t(ch) < 0xC0;
 }
+} // namespace
 
-bool
-ConvChU8ToU32(const std::array<char, 4>& u8Ch, char32_t& u32Ch)
+int
+U8ToU32(const char* msg, char32_t& u32Ch)
 {
-  int numBytes = GetU8ByteCount(u8Ch[0]);
+  int numBytes = GetU8ByteCount(*msg);
   if (numBytes == 0)
-  {
-    return false;
-  }
+    return 0;
+
+  const char* u8Ch = msg;
   switch (numBytes)
   {
   case 1:
@@ -50,11 +57,11 @@ ConvChU8ToU32(const std::array<char, 4>& u8Ch, char32_t& u32Ch)
   case 2:
     if (!IsU8LaterByte(u8Ch[1]))
     {
-      return false;
+      return 0;
     }
     if ((uint8_t(u8Ch[0]) & 0x1E) == 0)
     {
-      return false;
+      return 0;
     }
 
     u32Ch = char32_t(u8Ch[0] & 0x1F) << 6;
@@ -63,11 +70,11 @@ ConvChU8ToU32(const std::array<char, 4>& u8Ch, char32_t& u32Ch)
   case 3:
     if (!IsU8LaterByte(u8Ch[1]) || !IsU8LaterByte(u8Ch[2]))
     {
-      return false;
+      return 0;
     }
     if ((uint8_t(u8Ch[0]) & 0x0F) == 0 && (uint8_t(u8Ch[1]) & 0x20) == 0)
     {
-      return false;
+      return 0;
     }
 
     u32Ch = char32_t(u8Ch[0] & 0x0F) << 12;
@@ -78,11 +85,11 @@ ConvChU8ToU32(const std::array<char, 4>& u8Ch, char32_t& u32Ch)
     if (!IsU8LaterByte(u8Ch[1]) || !IsU8LaterByte(u8Ch[2]) ||
         !IsU8LaterByte(u8Ch[3]))
     {
-      return false;
+      return 0;
     }
     if ((uint8_t(u8Ch[0]) & 0x07) == 0 && (uint8_t(u8Ch[1]) & 0x30) == 0)
     {
-      return false;
+      return 0;
     }
 
     u32Ch = char32_t(u8Ch[0] & 0x07) << 18;
@@ -91,16 +98,9 @@ ConvChU8ToU32(const std::array<char, 4>& u8Ch, char32_t& u32Ch)
     u32Ch |= char32_t(u8Ch[3] & 0x3F);
     break;
   default:
-    return false;
+    return 0;
   }
 
-  return true;
+  return numBytes;
 }
-
-std::u32string
-u8to32(std::string str)
-{
-  for (char c : str)
-  {
-  }
-}
+} // namespace CodeConv
