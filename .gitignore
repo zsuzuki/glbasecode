@@ -1,0 +1,4 @@
+autogen/
+build/
+.vscode/
+*.log
