@@ -8,3 +8,5 @@ https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Text_Ren
 linmath.hは以下から取得。
 https://github.com/datenwolf/linmath.h
 
+文字コード変換は以下のサイトから取得。
+https://qiita.com/benikabocha/items/e943deb299d0f816f161
