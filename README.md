@@ -114,3 +114,8 @@ https://qiita.com/benikabocha/items/e943deb299d0f816f161
 
 床井研究室のページ。
 http://marina.sys.wakayama-u.ac.jp/~tokoi/
+
+# ライセンス
+
+本プログラムは表示フォントに「源ノ角ゴシック Code JP」(https://github.com/adobe-fonts/source-han-code-jp) を使用しています。
+Licensed under SIL Open Font License 1.1 (http://scripts.sil.org/OFL)
