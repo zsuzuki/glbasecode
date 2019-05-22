@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "font.h"
+#include "primitive2d.h"
 
 namespace
 {
@@ -72,6 +73,7 @@ main(int argc, char** argv)
 
   testInit();
 
+  Primitive2D::initialize();
   FontDraw::initialize();
 
   auto font = FontDraw::create("font/SourceHanCodeJP-Normal.otf");
@@ -86,6 +88,18 @@ main(int argc, char** argv)
     testSetup();
     testRender(window);
 
+    Primitive2D::setup(window);
+    {
+      static const Primitive2D::VertexList vl = {
+          {-0.4f, -0.4f, 1.0f, 0.0f, 0.0f},
+          {0.4f, -0.4f, 0.0f, 1.0f, 0.0f},
+          {0.4f, 0.4f, 0.0f, 0.0f, 1.0f},
+          {-0.4f, 0.4f, 1.0f, 1.0f, 1.0f},
+      };
+      Primitive2D::drawLine(vl, 4.0f);
+    }
+    Primitive2D::cleanup();
+
     font->setColor(0.0f, 1.0f, 0.0f);
     font->print("Hello,World", 0.0f, 0.0f);
     font->setColor(0.8f, 0.8f, 1.0f);
@@ -99,6 +113,7 @@ main(int argc, char** argv)
   }
 
   FontDraw::terminate();
+  Primitive2D::terminate();
 
   // GLFWの終了処理
   glfwTerminate();

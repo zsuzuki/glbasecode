@@ -15,7 +15,7 @@ include_directories(include)
 include_directories(${GLFW_INCLUDE_DIRS})
 include_directories(${FREETYPE_INCLUDE_DIRS})
 
-set(main_src src/main.cpp src/font.cpp src/test.cpp)
+set(main_src src/main.cpp src/font.cpp src/test.cpp src/primitive2d.cpp)
 
 add_executable(${PROJECT_NAME} ${main_src})
 

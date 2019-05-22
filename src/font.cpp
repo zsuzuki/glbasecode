@@ -148,6 +148,8 @@ terminate()
   glDeleteBuffers(1, &vbo);
   glDeleteProgram(program);
   glDeleteTextures(1, &tex);
+  glDeleteShader(vertex_shader);
+  glDeleteShader(fragment_shader);
 }
 
 //
