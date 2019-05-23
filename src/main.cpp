@@ -97,6 +97,11 @@ main(int argc, char** argv)
           {-0.4f, 0.4f, 1.0f, 1.0f, 1.0f},
       };
       Primitive2D::drawLine(vl, 4.0f);
+      static const Primitive2D::Vertex v = {0.0f, 0.0f, 0.5f, 1.0f, 1.0f};
+      Primitive2D::drawCircle(v, 0.5f, 5, 8.0f);
+      Primitive2D::drawCircle(v, 0.52f, 6, 4.0f);
+      Primitive2D::drawCircle(v, 0.54f, 8, 2.0f);
+      Primitive2D::drawCircle(v, 0.56f, 16);
     }
     Primitive2D::cleanup();
 

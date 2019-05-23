@@ -4,6 +4,8 @@
 #include <OpenGL/gl.h>
 #include <array>
 #include <iostream>
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 namespace Primitive2D
 {
@@ -108,36 +110,54 @@ cleanup()
 //
 // primitive draw
 //
+namespace
+{
+void
+draw(const VertexList& vlist, GLenum p)
+{
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer[0]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vlist.size(), vlist.data(),
+               GL_STATIC_DRAW);
+  glDrawArrays(p, 0, vlist.size());
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+} // namespace
 
 void
 drawLine(const VertexList& vlist, float w)
 {
-  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer[0]);
   glLineWidth(w);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vlist.size(), vlist.data(),
-               GL_STATIC_DRAW);
-  glDrawArrays(GL_LINE_STRIP, 0, vlist.size());
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  draw(vlist, GL_LINE_STRIP);
 }
 
 void
 drawQuads(const VertexList& vlist)
 {
-  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer[0]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vlist.size(), vlist.data(),
-               GL_STATIC_DRAW);
-  glDrawArrays(GL_QUADS, 0, vlist.size());
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  draw(vlist, GL_QUADS);
 }
 
 void
 drawTriangles(const VertexList& vlist)
 {
-  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer[0]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vlist.size(), vlist.data(),
-               GL_STATIC_DRAW);
-  glDrawArrays(GL_TRIANGLES, 0, vlist.size());
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  draw(vlist, GL_TRIANGLES);
+}
+
+void
+drawCircle(const Vertex& vtx, float rad, int num, float w)
+{
+  VertexList vlist;
+  vlist.resize(num);
+  float ofs = num & 1 ? 0.0f : 0.5f;
+  for (int i = 0; i < num; i++)
+  {
+    auto& v = vlist[i];
+    v       = vtx;
+    auto r  = (ofs + i) / (float)num;
+    v.x     = std::sinf(2.0f * M_PI * r) * rad;
+    v.y     = std::cosf(2.0f * M_PI * r) * rad;
+  }
+  glLineWidth(w);
+  draw(vlist, GL_LINE_LOOP);
 }
 
 } // namespace Primitive2D
