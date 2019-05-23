@@ -1,10 +1,4 @@
-#ifdef MSC_VER
-#include <GL/gl.h>
-#include <Windows.h>
-#else
-#include <OpenGL/gl.h>
-#endif
-#include <GLFW/glfw3.h>
+#include "gl.h"
 #include <iostream>
 
 #include "font.h"
@@ -12,19 +6,16 @@
 
 namespace
 {
+// key check
 void
-error_callback(int error, const char* description)
-{
-  std::cerr << "Error: " << description << std::endl;
-}
-void
-key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+key_callback(int key, int scancode, int action, int mods)
 {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, GLFW_TRUE);
+    Graphics::finish();
 }
+// file drag&drop
 void
-drop_file(GLFWwindow* window, int num, const char** paths)
+drop_file(int num, const char** paths)
 {
   for (int i = 0; i < num; i++)
   {
@@ -33,45 +24,22 @@ drop_file(GLFWwindow* window, int num, const char** paths)
 }
 } // namespace
 
+//
+//
+//
 int
 main(int argc, char** argv)
 {
-  glfwSetErrorCallback(error_callback);
-
-  // GLFW初期化
-  if (glfwInit() == GL_FALSE)
-  {
+  if (!Graphics::initialize("Sample"))
     return 1;
-  }
 
-  // ウィンドウ生成
-  const char* title  = "Sample";
-  int         w      = 640;
-  int         h      = 480;
-  GLFWwindow* window = glfwCreateWindow(w, h, title, nullptr, nullptr);
-  if (!window)
+  Graphics::setKeyCallback(key_callback);
+  Graphics::setDropCallback(drop_file);
+
   {
-    glfwTerminate();
-    return 1;
+    extern void testInit();
+    testInit();
   }
-
-  // callback
-  glfwSetKeyCallback(window, key_callback);
-  glfwSetDropCallback(window, drop_file);
-
-  // バージョン2.1指定
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-
-  // コンテキストの作成
-  glfwMakeContextCurrent(window);
-  glfwSwapInterval(1);
-
-  extern void testInit();
-  extern void testSetup();
-  extern void testRender(GLFWwindow*);
-
-  testInit();
 
   Primitive2D::initialize();
   FontDraw::initialize();
@@ -79,14 +47,14 @@ main(int argc, char** argv)
   auto font = FontDraw::create("font/SourceHanCodeJP-Normal.otf");
 
   // フレームループ
-  while (glfwWindowShouldClose(window) == GL_FALSE)
+  while (auto window = Graphics::setupFrame())
   {
-    // バッファのクリア
-    glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    testSetup();
-    testRender(window);
+    {
+      extern void testSetup();
+      extern void testRender(GLFWwindow*);
+      testSetup();
+      testRender(window);
+    }
 
     Primitive2D::setup(window);
     {
@@ -112,16 +80,13 @@ main(int argc, char** argv)
     font->print("Title: Top", -0.98f, 1.0f - (32.0f / 480.0f));
     FontDraw::render(window);
 
-    // ダブルバッファのスワップ
-    glfwSwapBuffers(window);
-    glfwPollEvents();
+    Graphics::cleanupFrame();
   }
 
   FontDraw::terminate();
   Primitive2D::terminate();
 
-  // GLFWの終了処理
-  glfwTerminate();
+  Graphics::terminate();
 
   return 0;
 }

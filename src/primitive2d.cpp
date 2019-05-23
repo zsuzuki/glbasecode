@@ -1,11 +1,10 @@
-#include "primitive2d.h"
+#include "gl.h"
+// ↑windowsでのdefineの都合上、一番先頭に置く
 #include "linmath.h"
-#include <GLFW/glfw3.h>
-#include <OpenGL/gl.h>
+#include "primitive2d.h"
 #include <array>
-#include <iostream>
-#define _USE_MATH_DEFINES
 #include <cmath>
+#include <iostream>
 
 namespace Primitive2D
 {

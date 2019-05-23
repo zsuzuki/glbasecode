@@ -1,7 +1,6 @@
 #include "font.h"
 #include "codeconv.h"
-#include <GLFW/glfw3.h>
-#include <OpenGL/gl.h>
+#include "gl.h"
 #include <ft2build.h>
 #include <iostream>
 #include <vector>
