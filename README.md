@@ -94,11 +94,12 @@ using VertexList = std::vector<Vertex>;
 
 ## 描画メソッド
 
-| 関数                                        | 機能         |
-| ------------------------------------------- | ------------ |
-| drawLines(const VertexList& vl,float width) | ラインの描画 |
-| drawQuads(const VertexList& vl)             | 四角形の描画 |
-| drawTriangles(const VertexList& vl)         | 三角形の描画 |
+| 関数                                                       | 機能         |
+| ---------------------------------------------------------- | ------------ |
+| drawLines(const VertexList& vl,float width)                | ラインの描画 |
+| drawQuads(const VertexList& vl)                            | 四角形の描画 |
+| drawTriangles(const VertexList& vl)                        | 三角形の描画 |
+| drawCircle(const Vertex& vl,float rad,int num,float width) | 円の描画     |
 
 
 # 参考

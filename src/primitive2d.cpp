@@ -153,8 +153,8 @@ drawCircle(const Vertex& vtx, float rad, int num, float w)
     auto& v = vlist[i];
     v       = vtx;
     auto r  = (ofs + i) / (float)num;
-    v.x     = std::sinf(2.0f * M_PI * r) * rad;
-    v.y     = std::cosf(2.0f * M_PI * r) * rad;
+    v.x += std::sinf(2.0f * M_PI * r) * rad;
+    v.y += std::cosf(2.0f * M_PI * r) * rad;
   }
   glLineWidth(w);
   draw(vlist, GL_LINE_LOOP);
