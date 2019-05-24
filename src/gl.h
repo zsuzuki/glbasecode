@@ -15,6 +15,12 @@ namespace Graphics
 //
 using KeyCallback  = void (*)(int, int, int, int);
 using DropCallback = void (*)(int, const char**);
+
+struct WindowSize
+{
+  double width;
+  double height;
+};
 //
 bool        initialize(const char* appname);
 GLFWwindow* setupFrame();
@@ -23,4 +29,5 @@ void        terminate();
 void        finish();
 void        setKeyCallback(KeyCallback);
 void        setDropCallback(DropCallback);
+WindowSize  getWindowSize();
 } // namespace Graphics

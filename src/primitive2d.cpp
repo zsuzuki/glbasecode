@@ -75,9 +75,8 @@ terminate()
 void
 setup(GLFWwindow* window)
 {
-  int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
-  float ratio = width / (float)height;
+  auto ws    = Graphics::getWindowSize();
+  auto ratio = ws.width / ws.height;
 
   mat4x4 mvp;
   mat4x4_ortho(mvp, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);

@@ -8,11 +8,44 @@ Windows/Macでの動作テスト。
 
 ## 必要ライブラリ
 
+windows版はvcpkgで必要パッケージをインストールした。
+
 - opengl
 - glfw3
 - freetype2
+- glew(windowでは必要)
+
 
 # クラス
+
+## Graphics
+
+現状ではOpenGL(glfw3)のラッパーであり、基本的なループのための機能を提供。
+初期化と終了の他、現状では
+
+- キー入力コールバック
+- ファイルのドラッグアンドドロップのコールバック
+- ウィンドウサイズの取得
+
+程度の機能がある。
+
+```c++
+#include "gl.h"
+
+int
+main()
+{
+    if (!Graphics::initialize())
+        return 1; // エラー
+
+    while (auto window = Graphics::setupFrame())
+    {
+        Graphics::cleanupFrame();
+    }
+
+    Graphics::terminate();
+}
+```
 
 ## FontDraw
 
@@ -24,16 +57,16 @@ FreeType2を使用してフォントの描画を行う。
 int
 main()
 {
-    GLFWwindow* window = glfwCreateWindow(w, h, title, nullptr, nullptr);
     FontDraw::initialize();
 
     auto font = FontDraw::create("font/SourceHanCodeJP-Normal.otf");
-    while (true)
+    while (auto window = Graphics::setupFrame())
     {
         font->setColor(0.0f, 1.0f, 0.0f);
         font->print("Hello,World", 0.0f, 0.0f);
 
         FontDraw::render(window);
+        Graphics::cleanupFrame();
     }
     FontDraw::terminate();
 }
@@ -66,14 +99,14 @@ Widget(後述)の`print()`によってリクエストされた文字列を描画
 int
 main()
 {
-    GLFWwindow* window = glfwCreateWindow(w, h, title, nullptr, nullptr);
     Primitive2D::initialize();
 
     auto font = FontDraw::create("font/SourceHanCodeJP-Normal.otf");
-    while (true)
+    while (auto window = Graphics::setupFrame())
     {
         Primitive2D::setup(window);
         Primitive2D::cleanup();
+        Graphics::cleanupFrame();
     }
     Primitive2D::terminate();
 }

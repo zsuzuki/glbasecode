@@ -9,6 +9,7 @@ namespace
 GLFWwindow*  window        = nullptr;
 KeyCallback  key_callback  = nullptr;
 DropCallback drop_callback = nullptr;
+WindowSize   window_size{};
 
 void
 error_callback(int error, const char* description)
@@ -103,7 +104,11 @@ setupFrame()
   if (glfwWindowShouldClose(window) == GL_TRUE)
     return nullptr;
 
-  // バッファのクリア
+  int w, h;
+  glfwGetFramebufferSize(window, &w, &h);
+  window_size.width  = w;
+  window_size.height = h;
+
   glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
   return window;
@@ -117,4 +122,12 @@ cleanupFrame()
   glfwSwapBuffers(window);
   glfwPollEvents();
 }
+
+//
+WindowSize
+getWindowSize()
+{
+  return window_size;
+}
+
 } // namespace Graphics

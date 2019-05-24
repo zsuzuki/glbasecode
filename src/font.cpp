@@ -217,10 +217,9 @@ render(GLFWwindow* window)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // render
-  int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
-  float bsx = 2.0f / (float)width;
-  float bsy = 2.0f / (float)height;
+  auto ws  = Graphics::getWindowSize();
+  auto bsx = 2.0 / ws.width;
+  auto bsy = 2.0 / ws.height;
   for (auto& ds : draw_set)
   {
     glUniform4fv(uniform_color, 1, (GLfloat*)&ds.color);
