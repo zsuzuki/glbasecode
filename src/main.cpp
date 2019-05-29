@@ -22,6 +22,13 @@ drop_file(int num, const char** paths)
     std::cout << paths[i] << std::endl;
   }
 }
+// mouse push
+void
+mouse_button(int button, int action, int mods)
+{
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    std::cout << "Left Button" << std::endl;
+}
 } // namespace
 
 //
@@ -37,6 +44,7 @@ main(int argc, char** argv)
 
   Graphics::setKeyCallback(key_callback);
   Graphics::setDropCallback(drop_file);
+  Graphics::setMouseButtonCallback(mouse_button);
 
   {
     extern void testInit();

@@ -6,10 +6,14 @@ namespace Graphics
 namespace
 {
 //
-GLFWwindow*  window        = nullptr;
-KeyCallback  key_callback  = nullptr;
-DropCallback drop_callback = nullptr;
-WindowSize   window_size{};
+GLFWwindow*      window        = nullptr;
+KeyCallback      key_callback  = nullptr;
+DropCallback     drop_callback = nullptr;
+MouseBtnCallback mbtn_callback = nullptr;
+WindowSize       window_size{};
+Locate           mouse_pos{};
+float            xscale = 1.0f;
+float            yscale = 1.0f;
 
 void
 error_callback(int error, const char* description)
@@ -41,12 +45,14 @@ initialize(const char* appname, int w, int h)
   }
 
   // バージョン2.1指定
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
   // コンテキストの作成
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
+
+  glfwGetWindowContentScale(window, &xscale, &yscale);
 
 #if defined(_MSC_VER)
   if (glewInit() != GLEW_OK)
@@ -55,6 +61,21 @@ initialize(const char* appname, int w, int h)
     return false;
   }
 #endif
+
+  glfwSetKeyCallback(
+      window, [](auto window, int key, int scancode, int action, int mods) {
+        if (key_callback)
+          key_callback(key, scancode, action, mods);
+      });
+  glfwSetDropCallback(window, [](auto window, int num, const char** paths) {
+    if (drop_callback)
+      drop_callback(num, paths);
+  });
+  glfwSetMouseButtonCallback(window,
+                             [](auto window, int btn, int action, int mods) {
+                               if (mbtn_callback)
+                                 mbtn_callback(btn, action, mods);
+                             });
 
   return true;
 }
@@ -78,21 +99,19 @@ void
 setKeyCallback(KeyCallback cb)
 {
   key_callback = cb;
-  glfwSetKeyCallback(
-      window, [](auto window, int key, int scancode, int action, int mods) {
-        if (key_callback)
-          key_callback(key, scancode, action, mods);
-      });
 }
 //
 void
 setDropCallback(DropCallback cb)
 {
   drop_callback = cb;
-  glfwSetDropCallback(window, [](auto window, int num, const char** paths) {
-    if (drop_callback)
-      drop_callback(num, paths);
-  });
+}
+
+//
+void
+setMouseButtonCallback(MouseBtnCallback cb)
+{
+  mbtn_callback = cb;
 }
 
 //
@@ -106,6 +125,10 @@ setupFrame()
   glfwGetFramebufferSize(window, &w, &h);
   window_size.width  = w;
   window_size.height = h;
+
+  glfwGetCursorPos(window, &mouse_pos.x, &mouse_pos.y);
+  mouse_pos.x *= xscale;
+  mouse_pos.y *= yscale;
 
   glViewport(0, 0, w, h);
   glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
@@ -127,6 +150,13 @@ WindowSize
 getWindowSize()
 {
   return window_size;
+}
+
+//
+Locate
+getMousePosition()
+{
+  return mouse_pos;
 }
 
 } // namespace Graphics
