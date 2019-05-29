@@ -22,7 +22,7 @@ struct WindowSize
   double height;
 };
 //
-bool        initialize(const char* appname);
+bool        initialize(const char* appname, int w, int h);
 GLFWwindow* setupFrame();
 void        cleanupFrame();
 void        terminate();

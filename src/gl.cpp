@@ -21,7 +21,7 @@ error_callback(int error, const char* description)
 
 //
 bool
-initialize(const char* appname)
+initialize(const char* appname, int w, int h)
 {
   glfwSetErrorCallback(error_callback);
 
@@ -33,8 +33,6 @@ initialize(const char* appname)
   }
 
   // ウィンドウ生成
-  int w  = 1024;
-  int h  = 1024;
   window = glfwCreateWindow(w, h, appname, nullptr, nullptr);
   if (!window)
   {
@@ -109,6 +107,7 @@ setupFrame()
   window_size.width  = w;
   window_size.height = h;
 
+  glViewport(0, 0, w, h);
   glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
   return window;

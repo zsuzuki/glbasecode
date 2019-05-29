@@ -30,7 +30,9 @@ drop_file(int num, const char** paths)
 int
 main(int argc, char** argv)
 {
-  if (!Graphics::initialize("Sample"))
+  int w = 1024;
+  int h = 1024;
+  if (!Graphics::initialize("Sample", w, h))
     return 1;
 
   Graphics::setKeyCallback(key_callback);

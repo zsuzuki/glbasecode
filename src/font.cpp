@@ -223,7 +223,7 @@ render(GLFWwindow* window)
   for (auto& ds : draw_set)
   {
     glUniform4fv(uniform_color, 1, (GLfloat*)&ds.color);
-    render(ds.face, ds.msg, ds.x, ds.y, bsx, bsy);
+    render(ds.face, ds.msg, (float)ds.x, (float)ds.y, (float)bsx, (float)bsy);
   }
 
   // cleanup
@@ -262,7 +262,7 @@ WidgetImpl::setSize(float w, float h)
 {
   current.width  = w;
   current.height = h;
-  FT_Set_Pixel_Sizes(face, 0, current.height);
+  FT_Set_Pixel_Sizes(face, 0, (FT_UInt)current.height);
 }
 
 void
