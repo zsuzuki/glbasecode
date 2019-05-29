@@ -26,6 +26,7 @@ set(main_src
     src/font.cpp
     src/test.cpp
     src/primitive2d.cpp
+    src/text.cpp
     src/codeconv.cpp)
 
 add_executable(${PROJECT_NAME} ${main_src})

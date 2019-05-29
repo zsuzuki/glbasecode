@@ -16,6 +16,7 @@ namespace Graphics
 using KeyCallback      = void (*)(int, int, int, int);
 using DropCallback     = void (*)(int, const char**);
 using MouseBtnCallback = void (*)(int, int, int);
+using TextCallback     = void (*)(int);
 
 struct WindowSize
 {
@@ -32,9 +33,11 @@ GLFWwindow* setupFrame();
 void        cleanupFrame();
 void        terminate();
 void        finish();
+Locate      calcLocate(double x, double y, bool asp = false);
 void        setKeyCallback(KeyCallback);
 void        setDropCallback(DropCallback);
 void        setMouseButtonCallback(MouseBtnCallback);
+void        setTextInputCallback(KeyCallback, TextCallback);
 WindowSize  getWindowSize();
 Locate      getMousePosition();
 } // namespace Graphics

@@ -1,4 +1,5 @@
 #include "gl.h"
+#include <iomanip>
 #include <iostream>
 
 namespace Graphics
@@ -6,10 +7,12 @@ namespace Graphics
 namespace
 {
 //
-GLFWwindow*      window        = nullptr;
-KeyCallback      key_callback  = nullptr;
-DropCallback     drop_callback = nullptr;
-MouseBtnCallback mbtn_callback = nullptr;
+GLFWwindow*      window             = nullptr;
+KeyCallback      key_callback       = nullptr;
+DropCallback     drop_callback      = nullptr;
+MouseBtnCallback mbtn_callback      = nullptr;
+KeyCallback      text_key_callback  = nullptr;
+TextCallback     text_char_callback = nullptr;
 WindowSize       window_size{};
 Locate           mouse_pos{};
 float            xscale = 1.0f;
@@ -66,6 +69,8 @@ initialize(const char* appname, int w, int h)
       window, [](auto window, int key, int scancode, int action, int mods) {
         if (key_callback)
           key_callback(key, scancode, action, mods);
+        if (text_key_callback)
+          text_key_callback(key, scancode, action, mods);
       });
   glfwSetDropCallback(window, [](auto window, int num, const char** paths) {
     if (drop_callback)
@@ -76,6 +81,10 @@ initialize(const char* appname, int w, int h)
                                if (mbtn_callback)
                                  mbtn_callback(btn, action, mods);
                              });
+  glfwSetCharCallback(window, [](auto window, unsigned int codepoint) {
+    if (text_char_callback)
+      text_char_callback(codepoint);
+  });
 
   return true;
 }
@@ -112,6 +121,28 @@ void
 setMouseButtonCallback(MouseBtnCallback cb)
 {
   mbtn_callback = cb;
+}
+
+//
+void
+setTextInputCallback(KeyCallback kcb, TextCallback tcb)
+{
+  text_key_callback  = kcb;
+  text_char_callback = tcb;
+}
+
+//
+Locate
+calcLocate(double x, double y, bool asp)
+{
+  Locate ret;
+  ret.x = -1.0 + x * 2.0 / window_size.width;
+  ret.y = 1.0 - y * 2.0 / window_size.height;
+  if (asp)
+  {
+    ret.x *= window_size.width / window_size.height;
+  }
+  return ret;
 }
 
 //

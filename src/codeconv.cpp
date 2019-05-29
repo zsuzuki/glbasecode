@@ -103,4 +103,36 @@ U8ToU32(const char* msg, char32_t& u32Ch)
 
   return numBytes;
 }
+
+int
+U32ToU8(const char32_t u32Ch, char* u8Ch)
+{
+  if (u32Ch < 0 || u32Ch > 0x10FFFF)
+    return 0;
+
+  if (u32Ch < 128)
+  {
+    u8Ch[0] = char(u32Ch);
+    return 1;
+  }
+  else if (u32Ch < 2048)
+  {
+    u8Ch[0] = 0xC0 | char(u32Ch >> 6);
+    u8Ch[1] = 0x80 | (char(u32Ch) & 0x3F);
+    return 2;
+  }
+  else if (u32Ch < 65536)
+  {
+    u8Ch[0] = 0xE0 | char(u32Ch >> 12);
+    u8Ch[1] = 0x80 | (char(u32Ch >> 6) & 0x3F);
+    u8Ch[2] = 0x80 | (char(u32Ch) & 0x3F);
+    return 3;
+  }
+  u8Ch[0] = 0xF0 | char(u32Ch >> 18);
+  u8Ch[1] = 0x80 | (char(u32Ch >> 12) & 0x3F);
+  u8Ch[2] = 0x80 | (char(u32Ch >> 6) & 0x3F);
+  u8Ch[3] = 0x80 | (char(u32Ch) & 0x3F);
+
+  return 4;
+}
 } // namespace CodeConv
