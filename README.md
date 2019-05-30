@@ -134,6 +134,72 @@ using VertexList = std::vector<Vertex>;
 | drawTriangles(const VertexList& vl)                        | 三角形の描画 |
 | drawCircle(const Vertex& vl,float rad,int num,float width) | 円の描画     |
 
+## TextButton
+
+シンプルなボタンサポート。
+
+```c++
+#include "textbutton.h"
+
+int
+main()
+{
+    auto font = FontDraw::create("font/SourceHanCodeJP-Normal.otf");
+    TextButton::initialize(font);
+
+    TextButton::setButton("Hello",100,100,[]() { std::cout << "Push Button" << std::endl; });
+
+    while (auto window = Graphics::setupFrame())
+    {
+        Primitive2D::setup(window);
+
+        TextButton::update();
+
+        Primitive2D::cleanup();
+        FontDraw::render(window);
+        Graphics::cleanupFrame();
+    }
+}
+
+```
+
+## TextInput
+
+テキスト入力。
+
+```c++
+#include "text.h"
+
+TextInput::Buffer text_buffer;
+bool to_input = false;
+bool end_input = false;
+
+int
+main()
+{
+  if (!Graphics::initialize("Sample", w, h))
+    return 1;
+
+  TextInput::setBuffer(text_buffer, "Hello");
+  while ()
+  {
+      if (TextInput::onInput())
+      {
+          if (end_input)
+          {
+            TextInput::finish();              
+            end_input = false;
+            std::cout << TextInput.get() << std::endl;
+          }
+      }
+      else if (to_input)
+      {
+        TextInput::start(text_buffer, 20);
+        to_input = false;
+      }
+  }
+}
+```
 
 # 参考
 
