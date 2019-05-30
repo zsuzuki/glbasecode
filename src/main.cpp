@@ -66,8 +66,10 @@ main(int argc, char** argv)
     TextInput::start(text_buffer, 20);
     TextButton::bindLayer("Submit");
   });
-  TextButton::setButton("Test", 150, 330,
-                        []() { std::cout << "Test" << std::endl; });
+  TextButton::setButton("Test1", 150, 330,
+                        []() { std::cout << "Test1" << std::endl; });
+  TextButton::setButton("Tes2", 400, 330,
+                        []() { std::cout << "Test2" << std::endl; });
   TextButton::bindLayer("Submit");
   TextButton::setButton("Submit", 150, 260, []() {
     TextInput::finish();
