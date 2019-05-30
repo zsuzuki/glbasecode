@@ -26,6 +26,7 @@ std::map<ColorType, Color> color_map = {
     {ColorType::FocusFont, white},    {ColorType::PressFont, darkgray},
 };
 
+//
 struct Button
 {
   std::string   caption;
@@ -38,6 +39,7 @@ using ButtonPtr  = std::shared_ptr<Button>;
 using ButtonList = std::list<ButtonPtr>;
 std::map<std::string, ButtonList> button_list;
 
+//
 std::string         current_layer = DefaultLayer;
 ButtonPtr           focus_button;
 FontDraw::WidgetPtr font;
@@ -144,7 +146,7 @@ setColor(ColorType ct, float r, float g, float b, float a)
   col.a     = a;
 }
 
-//
+// レイヤー切り替え
 void
 bindLayer(std::string layer)
 {
@@ -180,10 +182,12 @@ update()
     {
       if (focus_button != btn)
       {
+        // フォーカスが切り替わった
         focus_button = btn;
         btn->press   = false;
       }
     }
+    // フォーカルによる色選択
     ColorType bg, fg;
     if (focus)
     {
@@ -195,11 +199,14 @@ update()
       bg = ColorType::UnFocusBG;
       fg = ColorType::UnFocusFont;
     }
+    // 下敷きを描画
     draw_box(btn->lx, btn->ty, btn->rx, btn->by, color_map[bg]);
+    // キャプション
     auto fcol = color_map[fg];
     font->setColor(fcol.r, fcol.g, fcol.b, fcol.a);
     print(btn->caption, btn->x, btn->y);
   }
+  // どこにもフォーカスしていない
   if (!focus)
     focus_button.reset();
 }
