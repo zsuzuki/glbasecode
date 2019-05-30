@@ -4,6 +4,7 @@
 #include "font.h"
 #include "primitive2d.h"
 #include "text.h"
+#include "textbutton.h"
 
 namespace
 {
@@ -15,13 +16,7 @@ key_callback(int key, int scancode, int action, int mods)
 {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     Graphics::finish();
-  else if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
-  {
-    if (TextInput::onInput())
-      TextInput::finish();
-    else
-      TextInput::start(text_buffer, 20);
-  }
+  // else if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
 }
 // file drag&drop
 void
@@ -65,6 +60,18 @@ main(int argc, char** argv)
   FontDraw::initialize();
 
   auto font = FontDraw::create("font/SourceHanCodeJP-Normal.otf");
+  TextButton::initialize(font);
+
+  TextButton::setButton("Input", 150, 260, []() {
+    TextInput::start(text_buffer, 20);
+    TextButton::bindLayer("Submit");
+  });
+  TextButton::bindLayer("Submit");
+  TextButton::setButton("Submit", 150, 260, []() {
+    TextInput::finish();
+    TextButton::bindLayer();
+  });
+  TextButton::bindLayer();
 
   // フレームループ
   while (auto window = Graphics::setupFrame())
@@ -104,6 +111,7 @@ main(int argc, char** argv)
       auto c  = TextInput::getIndex();
       auto l1 = Graphics::calcLocate(60.0 + 21.0 * c, 190.0, true);
       auto l2 = Graphics::calcLocate(84.0 + 21.0 * c, 190.0, true);
+      font->setColor(1.0f, 1.0f, 1.0f);
       font->print("Input:", p.x, p.y);
       font->print(TextInput::get().c_str(), tp.x, tp.y);
       static Primitive2D::VertexList ul = {
@@ -116,6 +124,7 @@ main(int argc, char** argv)
       ul[1].y = l2.y;
       Primitive2D::drawLine(ul, 4.0f);
     }
+    TextButton::update();
     Primitive2D::cleanup();
     FontDraw::render(window);
 

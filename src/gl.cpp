@@ -13,6 +13,7 @@ DropCallback     drop_callback      = nullptr;
 MouseBtnCallback mbtn_callback      = nullptr;
 KeyCallback      text_key_callback  = nullptr;
 TextCallback     text_char_callback = nullptr;
+MouseBtnCallback tbtn_callback      = nullptr;
 WindowSize       window_size{};
 Locate           mouse_pos{};
 float            xscale = 1.0f;
@@ -80,6 +81,8 @@ initialize(const char* appname, int w, int h)
                              [](auto window, int btn, int action, int mods) {
                                if (mbtn_callback)
                                  mbtn_callback(btn, action, mods);
+                               if (tbtn_callback)
+                                 tbtn_callback(btn, action, mods);
                              });
   glfwSetCharCallback(window, [](auto window, unsigned int codepoint) {
     if (text_char_callback)
@@ -121,6 +124,13 @@ void
 setMouseButtonCallback(MouseBtnCallback cb)
 {
   mbtn_callback = cb;
+}
+
+//
+void
+setTextButtonCallback(MouseBtnCallback cb)
+{
+  tbtn_callback = cb;
 }
 
 //

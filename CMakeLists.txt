@@ -27,6 +27,7 @@ set(main_src
     src/test.cpp
     src/primitive2d.cpp
     src/text.cpp
+    src/textbutton.cpp
     src/codeconv.cpp)
 
 add_executable(${PROJECT_NAME} ${main_src})

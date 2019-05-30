@@ -17,7 +17,8 @@ public:
   virtual void setColor(float r, float g, float b, float a = 1.0f) = 0;
   virtual void print(const char* msg, float x, float y)            = 0;
 };
-std::shared_ptr<Widget> create(const char* fontname);
+using WidgetPtr = std::shared_ptr<Widget>;
+WidgetPtr create(const char* fontname);
 
 //
 bool initialize();

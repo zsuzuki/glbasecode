@@ -37,7 +37,8 @@ Locate      calcLocate(double x, double y, bool asp = false);
 void        setKeyCallback(KeyCallback);
 void        setDropCallback(DropCallback);
 void        setMouseButtonCallback(MouseBtnCallback);
-void        setTextInputCallback(KeyCallback, TextCallback);
+void        setTextInputCallback(KeyCallback, TextCallback); // for text only
+void        setTextButtonCallback(MouseBtnCallback); // for textbutton only
 WindowSize  getWindowSize();
 Locate      getMousePosition();
 } // namespace Graphics
