@@ -175,21 +175,26 @@ update()
   bool focus = false;
   for (auto& btn : layer)
   {
-    if (btn->lx < mpos.x && btn->rx > mpos.x)
-      if (btn->ty < mpos.y && btn->by > mpos.y)
-        focus = true;
-    if (focus)
+    bool my_focus = false;
+    if (!focus)
     {
-      if (focus_button != btn)
+      if (btn->lx < mpos.x && btn->rx > mpos.x)
+        if (btn->ty < mpos.y && btn->by > mpos.y)
+          my_focus = true;
+      if (my_focus)
       {
-        // フォーカスが切り替わった
-        focus_button = btn;
-        btn->press   = false;
+        if (focus_button != btn)
+        {
+          // フォーカスが切り替わった
+          focus_button = btn;
+          btn->press   = false;
+        }
       }
+      focus = my_focus;
     }
     // フォーカルによる色選択
     ColorType bg, fg;
-    if (focus)
+    if (my_focus)
     {
       bg = btn->press ? ColorType::PressBG : ColorType::FocusBG;
       fg = btn->press ? ColorType::PressFont : ColorType::FocusFont;
