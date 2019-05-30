@@ -163,6 +163,10 @@ clearLayer(std::string layer)
 {
   auto& target = button_list[layer];
   target.clear();
+  if (current_layer == layer)
+  {
+    focus_button.reset();
+  }
 }
 
 //
