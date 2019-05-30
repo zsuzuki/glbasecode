@@ -101,6 +101,17 @@ getIndex()
 }
 
 //
+CursorOffset
+getIndexPos()
+{
+  CursorOffset ofs;
+  auto         c = getIndex();
+  ofs.left       = 21.0 * c;
+  ofs.right      = ofs.left + 21.0;
+  return ofs;
+}
+
+//
 std::string
 get()
 {

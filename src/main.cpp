@@ -106,11 +106,11 @@ main(int argc, char** argv)
     font->print("Title: Top", -0.98f, 1.0f - (32.0f / 480.0f));
     if (TextInput::onInput())
     {
-      auto p  = Graphics::calcLocate(50.0, 150.0);
-      auto tp = Graphics::calcLocate(60.0, 190.0);
-      auto c  = TextInput::getIndex();
-      auto l1 = Graphics::calcLocate(60.0 + 21.0 * c, 190.0, true);
-      auto l2 = Graphics::calcLocate(84.0 + 21.0 * c, 190.0, true);
+      auto p   = Graphics::calcLocate(50.0, 150.0);
+      auto tp  = Graphics::calcLocate(60.0, 190.0);
+      auto ofs = TextInput::getIndexPos();
+      auto l1  = Graphics::calcLocate(60.0 + ofs.left, 190.0, true);
+      auto l2  = Graphics::calcLocate(60.0 + ofs.right, 190.0, true);
       font->setColor(1.0f, 1.0f, 1.0f);
       font->print("Input:", p.x, p.y);
       font->print(TextInput::get().c_str(), tp.x, tp.y);
