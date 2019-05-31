@@ -26,22 +26,62 @@ key_input(int num, int scancode, int action, int mods)
 {
   if (action != GLFW_PRESS)
     return;
+
+  auto& buffer  = manage->buffer;
+  auto& index   = manage->index;
+  auto  forward = [&]() {
+    if (index != buffer.end())
+      index++;
+  };
+  auto backward = [&]() {
+    if (index != buffer.begin())
+      index--;
+  };
+  auto home = [&]() { index = buffer.begin(); };
+  auto end  = [&]() { index = buffer.end(); };
+  auto del  = [&]() {
+    if (!buffer.empty() && index != buffer.end())
+      index = buffer.erase(index);
+  };
+  auto linedel = [&]() {
+    if (index != buffer.end())
+      index = buffer.erase(index, buffer.end());
+  };
+
   if (num == GLFW_KEY_LEFT)
-  {
-    if (manage->index != manage->buffer.begin())
-      manage->index--;
-  }
+    backward();
   else if (num == GLFW_KEY_RIGHT)
-  {
-    if (manage->index != manage->buffer.end())
-      manage->index++;
-  }
+    forward();
+  else if (num == GLFW_KEY_HOME)
+    home();
+  else if (num == GLFW_KEY_END)
+    end();
+  else if (num == GLFW_KEY_DELETE)
+    (mods == GLFW_MOD_CONTROL) ? linedel() : del();
   else if (num == GLFW_KEY_BACKSPACE)
   {
-    auto& buffer = manage->buffer;
-    auto& index  = manage->index;
     if (index != buffer.begin())
-      index = buffer.erase(--index);
+    {
+      if (mods == GLFW_MOD_CONTROL || mods == GLFW_MOD_SHIFT)
+        index = buffer.erase(buffer.begin(), index);
+      else
+        index = buffer.erase(--index);
+    }
+    }
+  else if (mods == GLFW_MOD_CONTROL)
+  {
+    if (num == GLFW_KEY_A)
+      home();
+    else if (num == GLFW_KEY_E)
+      end();
+    else if (num == GLFW_KEY_F)
+      forward();
+    else if (num == GLFW_KEY_B)
+      backward();
+    else if (num == GLFW_KEY_D)
+      del();
+    else if (num == GLFW_KEY_K)
+      linedel();
   }
 }
 

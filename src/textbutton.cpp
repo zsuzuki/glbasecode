@@ -46,8 +46,17 @@ FontDraw::WidgetPtr font;
 
 //
 void
-text_button(int btn, int action, int mods)
+text_button(int action, bool enter)
 {
+  if (enter && !focus_button)
+  {
+    auto& layer = button_list[current_layer];
+    if (!layer.empty())
+    {
+      focus_button        = *layer.begin();
+      focus_button->press = true;
+    }
+  }
   if (focus_button)
   {
     if (action == GLFW_RELEASE)
