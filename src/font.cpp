@@ -39,21 +39,7 @@ static const char* fragment_shader_text =
     "}";
 
 // 色
-struct Color
-{
-  float r = 1.0f;
-  float g = 1.0f;
-  float b = 1.0f;
-  float a = 1.0f;
-
-  void set(float rr, float gg, float bb, float aa)
-  {
-    r = rr;
-    g = gg;
-    b = bb;
-    a = aa;
-  }
-};
+using Color = Graphics::Color;
 
 // フォント描画1つ分
 struct DrawSet
@@ -85,7 +71,7 @@ public:
   ~WidgetImpl() override = default;
 
   void setSize(float w, float h) override;
-  void setColor(float r, float g, float b, float a) override;
+  void setColor(Graphics::Color c) override;
   void print(const char* msg, float x, float y) override;
 };
 
@@ -266,9 +252,9 @@ WidgetImpl::setSize(float w, float h)
 }
 
 void
-WidgetImpl::setColor(float r, float g, float b, float a)
+WidgetImpl::setColor(Graphics::Color c)
 {
-  current.color.set(r, g, b, a);
+  current.color = c;
 }
 
 void

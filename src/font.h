@@ -1,6 +1,7 @@
 // font render utility
 #pragma once
 
+#include "gl_def.h"
 #include <memory>
 
 struct GLFWwindow;
@@ -13,9 +14,9 @@ class Widget
 public:
   virtual ~Widget() = default;
 
-  virtual void setSize(float w, float h)                           = 0;
-  virtual void setColor(float r, float g, float b, float a = 1.0f) = 0;
-  virtual void print(const char* msg, float x, float y)            = 0;
+  virtual void setSize(float w, float h)                = 0;
+  virtual void setColor(Graphics::Color)                = 0;
+  virtual void print(const char* msg, float x, float y) = 0;
 };
 using WidgetPtr = std::shared_ptr<Widget>;
 WidgetPtr create(const char* fontname);

@@ -114,9 +114,9 @@ main(int argc, char** argv)
       Primitive2D::drawCircle(v, 0.56f, 16);
     }
 
-    font->setColor(0.0f, 1.0f, 0.0f);
+    font->setColor({0.0f, 1.0f, 0.0f});
     font->print("こんにちは、世界", -0.3f, -0.3f);
-    font->setColor(0.8f, 0.8f, 1.0f);
+    font->setColor({0.8f, 0.8f, 1.0f});
     font->print("Status: Echo", -0.98f, -1.0f);
     font->print("Title: Top", -0.98f, 1.0f - (32.0f / 480.0f));
     if (TextInput::onInput())
@@ -126,7 +126,7 @@ main(int argc, char** argv)
       auto ofs = TextInput::getIndexPos();
       auto l1  = Graphics::calcLocate(60.0 + ofs.left, 190.0, true);
       auto l2  = Graphics::calcLocate(60.0 + ofs.right, 190.0, true);
-      font->setColor(1.0f, 1.0f, 1.0f);
+      font->setColor({1.0f, 1.0f, 1.0f});
       font->print("Input:", p.x, p.y);
       font->print(TextInput::get().c_str(), tp.x, tp.y);
       static Primitive2D::VertexList ul = {

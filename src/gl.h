@@ -8,26 +8,11 @@
 #else
 #include <OpenGL/gl.h>
 #endif
+#include "gl_def.h"
 #include <GLFW/glfw3.h>
 
 namespace Graphics
 {
-//
-using KeyCallback      = void (*)(int, int, int, int);
-using DropCallback     = void (*)(int, const char**);
-using MouseBtnCallback = void (*)(int, int, int);
-using TextCallback     = void (*)(int);
-using TextBtnCallback  = void (*)(int, bool);
-
-struct WindowSize
-{
-  double width;
-  double height;
-};
-struct Locate
-{
-  double x, y;
-};
 //
 bool        initialize(const char* appname, int w, int h);
 GLFWwindow* setupFrame();

@@ -232,7 +232,7 @@ update()
     draw_box(btn->lx, btn->ty, btn->rx, btn->by, color_map[bg]);
     // キャプション
     auto fcol = color_map[fg];
-    font->setColor(fcol.r, fcol.g, fcol.b, fcol.a);
+    font->setColor({fcol.r, fcol.g, fcol.b, fcol.a});
     print(btn->caption, btn->x, btn->y);
   }
   // どこにもフォーカスしていない(enterによるホールドもされていない)
