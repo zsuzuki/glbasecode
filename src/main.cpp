@@ -67,15 +67,18 @@ main(int argc, char** argv)
     TextButton::bindLayer("Submit");
   });
   bool newbtn = true;
-  TextButton::setButton("Test1", 150, 330, [&]() {
-    std::cout << "Test1" << std::endl;
-    if (newbtn)
-    {
-      TextButton::setButton("Test2", 400, 330,
-                            []() { std::cout << "Test2" << std::endl; });
-      newbtn = false;
-    }
-  });
+  TextButton::setButton("Test1", 150, 330,
+                        [&]() {
+                          std::cout << "Test1" << std::endl;
+                          if (newbtn)
+                          {
+                            TextButton::setButton("Test2", 400, 330, []() {
+                              std::cout << "Test2" << std::endl;
+                            });
+                            newbtn = false;
+                          }
+                        },
+                        true);
   TextButton::bindLayer("Submit");
   TextButton::setButton("Submit", 150, 260,
                         []() {

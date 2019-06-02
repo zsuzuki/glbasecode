@@ -52,12 +52,14 @@ text_button(int action, bool enter)
 {
   if (enter && action == GLFW_PRESS && !focus_button)
   {
+    // カーソルが乗っていない場合でもenterで実行するか
     auto& layer = button_list[current_layer];
     for (auto& btn : layer)
     {
       if (btn->catch_enter)
       {
-        focus_button        = *layer.begin();
+        // enterを受け付ける場合
+        focus_button        = btn;
         focus_button->press = true;
         break;
       }
@@ -67,6 +69,7 @@ text_button(int action, bool enter)
   {
     if (action == GLFW_RELEASE)
     {
+      // ボタンを放したときに実行
       auto btn = focus_button;
       if (btn->press)
         btn->cb();
@@ -202,6 +205,7 @@ update()
       if (btn->lx < mpos.x && btn->rx > mpos.x)
         if (btn->ty < mpos.y && btn->by > mpos.y)
         {
+          // カーソルが乗っている場合のみ
           my_focus = true;
           focus    = true;
           if (focus_button != btn)
@@ -231,7 +235,7 @@ update()
     font->setColor(fcol.r, fcol.g, fcol.b, fcol.a);
     print(btn->caption, btn->x, btn->y);
   }
-  // どこにもフォーカスしていない
+  // どこにもフォーカスしていない(enterによるホールドもされていない)
   if (!focus && focus_button && focus_button->press == false)
     focus_button.reset();
 }
