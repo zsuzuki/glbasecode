@@ -22,7 +22,8 @@ static constexpr const char* DefaultLayer = "default";
 //
 void initialize(FontDraw::WidgetPtr font);
 //
-void setButton(std::string caption, double x, double y, PressCallback cb);
+void setButton(std::string caption, double x, double y, PressCallback cb,
+               bool catch_enter = false);
 //
 void setColor(ColorType ct, float r, float g, float b, float a = 1.0f);
 //

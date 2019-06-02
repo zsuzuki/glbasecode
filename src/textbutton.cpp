@@ -29,10 +29,12 @@ std::map<ColorType, Color> color_map = {
 //
 struct Button
 {
+
   std::string   caption;
   double        lx, rx, ty, by;
   double        x, y;
   PressCallback cb;
+  bool          catch_enter;
   bool          press;
 };
 using ButtonPtr  = std::shared_ptr<Button>;
@@ -48,13 +50,17 @@ FontDraw::WidgetPtr font;
 void
 text_button(int action, bool enter)
 {
-  if (enter && !focus_button)
+  if (enter && action == GLFW_PRESS && !focus_button)
   {
     auto& layer = button_list[current_layer];
-    if (!layer.empty())
+    for (auto& btn : layer)
     {
-      focus_button        = *layer.begin();
-      focus_button->press = true;
+      if (btn->catch_enter)
+      {
+        focus_button        = *layer.begin();
+        focus_button->press = true;
+        break;
+      }
     }
   }
   if (focus_button)
@@ -120,7 +126,8 @@ initialize(FontDraw::WidgetPtr f)
 
 //
 void
-setButton(std::string caption, double x, double y, PressCallback cb)
+setButton(std::string caption, double x, double y, PressCallback cb,
+          bool catch_enter)
 {
   auto& layer = button_list[current_layer];
 
@@ -130,16 +137,17 @@ setButton(std::string caption, double x, double y, PressCallback cb)
   auto ty = y - 32 - 10;
   auto by = y + 20;
 
-  auto btn     = std::make_shared<Button>();
-  btn->caption = caption;
-  btn->x       = x;
-  btn->y       = y;
-  btn->lx      = lx;
-  btn->rx      = rx;
-  btn->ty      = ty;
-  btn->by      = by;
-  btn->cb      = cb;
-  btn->press   = false;
+  auto btn         = std::make_shared<Button>();
+  btn->caption     = caption;
+  btn->x           = x;
+  btn->y           = y;
+  btn->lx          = lx;
+  btn->rx          = rx;
+  btn->ty          = ty;
+  btn->by          = by;
+  btn->cb          = cb;
+  btn->press       = false;
+  btn->catch_enter = catch_enter;
 
   layer.push_back(btn);
 }
@@ -188,22 +196,21 @@ update()
   bool focus = false;
   for (auto& btn : layer)
   {
-    bool my_focus = false;
+    bool my_focus = focus_button == btn;
     if (!focus)
     {
       if (btn->lx < mpos.x && btn->rx > mpos.x)
         if (btn->ty < mpos.y && btn->by > mpos.y)
-          my_focus = true;
-      if (my_focus)
-      {
-        if (focus_button != btn)
         {
-          // フォーカスが切り替わった
-          focus_button = btn;
-          btn->press   = false;
+          my_focus = true;
+          focus    = true;
+          if (focus_button != btn)
+          {
+            // フォーカスが切り替わった
+            focus_button = btn;
+            btn->press   = false;
+          }
         }
-      }
-      focus = my_focus;
     }
     // フォーカルによる色選択
     ColorType bg, fg;
@@ -225,7 +232,7 @@ update()
     print(btn->caption, btn->x, btn->y);
   }
   // どこにもフォーカスしていない
-  if (!focus)
+  if (!focus && focus_button && focus_button->press == false)
     focus_button.reset();
 }
 

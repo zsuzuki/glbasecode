@@ -77,10 +77,12 @@ main(int argc, char** argv)
     }
   });
   TextButton::bindLayer("Submit");
-  TextButton::setButton("Submit", 150, 260, []() {
-    TextInput::finish();
-    TextButton::bindLayer();
-  });
+  TextButton::setButton("Submit", 150, 260,
+                        []() {
+                          TextInput::finish();
+                          TextButton::bindLayer();
+                        },
+                        true);
   TextButton::bindLayer();
 
   // フレームループ
