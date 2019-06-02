@@ -7,7 +7,12 @@ using KeyCallback      = void (*)(int, int, int, int);
 using DropCallback     = void (*)(int, const char**);
 using MouseBtnCallback = void (*)(int, int, int);
 using TextCallback     = void (*)(int);
-using TextBtnCallback  = void (*)(int, bool);
+struct ClickCallback
+{
+  using Func     = void (*)(int, bool);
+  Func func      = nullptr;
+  bool use_enter = false;
+};
 
 struct WindowSize
 {
@@ -37,4 +42,14 @@ struct Color
     a = aa;
   }
 };
+static const Color White{1.0f, 1.0f, 1.0f, 1.0f};
+static const Color Black{0.0f, 0.0f, 0.0f, 1.0f};
+static const Color Red{1.0f, 0.0f, 0.0f, 1.0f};
+static const Color Green{0.0f, 1.0f, 0.0f, 1.0f};
+static const Color Blue{0.0f, 0.0f, 1.0f, 1.0f};
+static const Color Gray{0.5f, 0.5f, 0.5f, 1.0f};
+static const Color Yellow{1.0f, 1.0f, 0.0f, 1.0f};
+static const Color Magenta{1.0f, 0.0f, 1.0f, 1.0f};
+static const Color Cyan{0.0f, 1.0f, 1.0f, 1.0f};
+
 } // namespace Graphics

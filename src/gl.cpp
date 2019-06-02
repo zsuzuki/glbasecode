@@ -1,6 +1,7 @@
 #include "gl.h"
 #include <iomanip>
 #include <iostream>
+#include <list>
 
 namespace Graphics
 {
@@ -13,11 +14,12 @@ DropCallback     drop_callback      = nullptr;
 MouseBtnCallback mbtn_callback      = nullptr;
 KeyCallback      text_key_callback  = nullptr;
 TextCallback     text_char_callback = nullptr;
-TextBtnCallback  tbtn_callback      = nullptr;
 WindowSize       window_size{};
 Locate           mouse_pos{};
 float            xscale = 1.0f;
 float            yscale = 1.0f;
+
+std::list<ClickCallback> click_callback;
 
 void
 error_callback(int error, const char* description)
@@ -81,19 +83,26 @@ initialize(const char* appname, int w, int h)
         if (text_key_callback)
           text_key_callback(key, scancode, action, mods);
         if (key == GLFW_KEY_ENTER)
-          tbtn_callback(action, true);
+        {
+          for (auto& fn : click_callback)
+            if (fn.use_enter)
+              fn.func(action, true);
+        }
       });
   glfwSetDropCallback(window, [](auto window, int num, const char** paths) {
     if (drop_callback)
       drop_callback(num, paths);
   });
-  glfwSetMouseButtonCallback(
-      window, [](auto window, int btn, int action, int mods) {
-        if (mbtn_callback)
-          mbtn_callback(btn, action, mods);
-        if (btn == GLFW_MOUSE_BUTTON_LEFT && tbtn_callback)
-          tbtn_callback(action, false);
-      });
+  glfwSetMouseButtonCallback(window,
+                             [](auto window, int btn, int action, int mods) {
+                               if (mbtn_callback)
+                                 mbtn_callback(btn, action, mods);
+                               if (btn == GLFW_MOUSE_BUTTON_LEFT)
+                               {
+                                 for (auto& fn : click_callback)
+                                   fn.func(action, false);
+                               }
+                             });
   glfwSetCharCallback(window, [](auto window, unsigned int codepoint) {
     if (text_char_callback)
       text_char_callback(codepoint);
@@ -138,9 +147,9 @@ setMouseButtonCallback(MouseBtnCallback cb)
 
 //
 void
-setTextButtonCallback(TextBtnCallback cb)
+setClickCallback(ClickCallback cb)
 {
-  tbtn_callback = cb;
+  click_callback.push_back(cb);
 }
 
 //

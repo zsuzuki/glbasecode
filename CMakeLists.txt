@@ -24,9 +24,9 @@ set(main_src
     src/main.cpp
     src/gl.cpp
     src/font.cpp
-    src/test.cpp
     src/primitive2d.cpp
     src/text.cpp
+    src/textbox.cpp
     src/textbutton.cpp
     src/codeconv.cpp)
 

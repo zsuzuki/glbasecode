@@ -124,7 +124,7 @@ void
 initialize(FontDraw::WidgetPtr f)
 {
   font = f;
-  Graphics::setTextButtonCallback(text_button);
+  Graphics::setClickCallback({text_button, true});
 }
 
 //

@@ -3,12 +3,11 @@
 
 #include "font.h"
 #include "primitive2d.h"
-#include "text.h"
+#include "textbox.h"
 #include "textbutton.h"
 
 namespace
 {
-TextInput::Buffer text_buffer;
 
 // key check
 void
@@ -47,25 +46,20 @@ main(int argc, char** argv)
   if (!Graphics::initialize("Sample", w, h))
     return 1;
 
-  TextInput::setBuffer(text_buffer, "Hello");
   Graphics::setKeyCallback(key_callback);
   Graphics::setDropCallback(drop_file);
   Graphics::setMouseButtonCallback(mouse_button);
-  {
-    extern void testInit();
-    testInit();
-  }
 
   Primitive2D::initialize();
   FontDraw::initialize();
 
   auto font = FontDraw::create("font/SourceHanCodeJP-Normal.otf");
   TextButton::initialize(font);
+  TextBox::initialize(font);
 
-  TextButton::setButton("Input", 150, 260, []() {
-    TextInput::start(text_buffer, 20);
-    TextButton::bindLayer("Submit");
-  });
+  // put text buttons
+  TextButton::setButton("Input", 150, 260,
+                        []() { TextButton::bindLayer("Submit"); });
   bool newbtn = true;
   TextButton::setButton("Test1", 150, 330,
                         [&]() {
@@ -80,24 +74,19 @@ main(int argc, char** argv)
                         },
                         true);
   TextButton::bindLayer("Submit");
-  TextButton::setButton("Submit", 150, 260,
-                        []() {
-                          TextInput::finish();
-                          TextButton::bindLayer();
-                        },
+  TextButton::setButton("Submit", 150, 260, []() { TextButton::bindLayer(); },
                         true);
   TextButton::bindLayer();
+
+  // put text-boxs
+  TextBox::create("Text", 50, 500, 300, 50);
+  TextBox::create("Sample", 50, 560, 300, 50);
+  auto tb = TextBox::create("", 50, 620, 300, 80);
+  tb->setPlaceHolder("example");
 
   // フレームループ
   while (auto window = Graphics::setupFrame())
   {
-    {
-      extern void testSetup();
-      extern void testRender(GLFWwindow*);
-      testSetup();
-      testRender(window);
-    }
-
     Primitive2D::setup(window);
     {
       static const Primitive2D::VertexList vl = {
@@ -119,26 +108,7 @@ main(int argc, char** argv)
     font->setColor({0.8f, 0.8f, 1.0f});
     font->print("Status: Echo", -0.98f, -1.0f);
     font->print("Title: Top", -0.98f, 1.0f - (32.0f / 480.0f));
-    if (TextInput::onInput())
-    {
-      auto p   = Graphics::calcLocate(50.0, 150.0);
-      auto tp  = Graphics::calcLocate(60.0, 190.0);
-      auto ofs = TextInput::getIndexPos();
-      auto l1  = Graphics::calcLocate(60.0 + ofs.left, 190.0, true);
-      auto l2  = Graphics::calcLocate(60.0 + ofs.right, 190.0, true);
-      font->setColor({1.0f, 1.0f, 1.0f});
-      font->print("Input:", p.x, p.y);
-      font->print(TextInput::get().c_str(), tp.x, tp.y);
-      static Primitive2D::VertexList ul = {
-          {0.0f, 0.0f, 0.0f, 1.0f, 0.0f},
-          {0.0f, 0.0f, 0.0f, 1.0f, 0.0f},
-      };
-      ul[0].x = l1.x;
-      ul[0].y = l1.y;
-      ul[1].x = l2.x;
-      ul[1].y = l2.y;
-      Primitive2D::drawLine(ul, 4.0f);
-    }
+    TextBox::update();
     TextButton::update();
     Primitive2D::cleanup();
     FontDraw::render(window);
