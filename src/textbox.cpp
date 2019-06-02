@@ -168,7 +168,18 @@ clearLayer(std::string layer)
   }
 }
 //
-void eraseItem(ItemPtr) {}
+void
+eraseItem(ItemPtr item)
+{
+  for (auto it = item_list.begin(); it != item_list.end(); it++)
+  {
+    if (*it == item)
+    {
+      item_list.erase(it);
+      break;
+    }
+  }
+}
 
 //
 ItemPtr
