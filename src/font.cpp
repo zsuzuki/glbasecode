@@ -252,7 +252,7 @@ WidgetImpl::setSize(float w, float h)
 }
 
 void
-WidgetImpl::setColor(Graphics::Color c)
+WidgetImpl::setColor(const Graphics::Color c)
 {
   current.color = c;
 }

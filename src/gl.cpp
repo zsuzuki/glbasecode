@@ -43,11 +43,6 @@ initialize(const char* appname, int w, int h)
   }
 
   // ウィンドウ生成
-#if GLFW_VERSION_MAJOR > 3 || \
-    (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3)
-  w /= 2;
-  h /= 2;
-#endif
   window = glfwCreateWindow(w, h, appname, nullptr, nullptr);
   if (!window)
   {
