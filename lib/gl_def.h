@@ -7,6 +7,7 @@ using KeyCallback      = void (*)(int, int, int, int);
 using DropCallback     = void (*)(int, const char**);
 using MouseBtnCallback = void (*)(int, int, int);
 using TextCallback     = void (*)(int);
+using ScrollCallback   = void (*)(double, double);
 struct ClickCallback
 {
   using Func     = void (*)(int, bool);

@@ -33,6 +33,14 @@ mouse_button(int button, int action, int mods)
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     std::cout << "Left Button" << std::endl;
 }
+// scroll
+double scr_x, scr_y;
+void
+scroll(double xofs, double yofs)
+{
+  scr_x = xofs;
+  scr_y = yofs;
+}
 
 } // namespace
 
@@ -50,6 +58,7 @@ main(int argc, char** argv)
   Graphics::setKeyCallback(key_callback);
   Graphics::setDropCallback(drop_file);
   Graphics::setMouseButtonCallback(mouse_button);
+  Graphics::setScrollCallback(scroll);
 
   Primitive2D::initialize();
   FontDraw::initialize();
@@ -124,7 +133,8 @@ main(int argc, char** argv)
     }
 
     font->setColor({0.0f, 1.0f, 0.0f});
-    font->print("こんにちは、世界", -0.3f, -0.3f);
+    font->print("こんにちは、世界", -0.3f + scr_x * 0.01f,
+                -0.3f + scr_y * 0.01f);
     font->setColor({0.8f, 0.8f, 1.0f});
     font->print("Status: Echo", -0.98f, -1.0f);
     font->print("Title: Top", -0.98f, 1.0f - (32.0f / 480.0f));

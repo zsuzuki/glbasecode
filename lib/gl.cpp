@@ -14,6 +14,7 @@ DropCallback     drop_callback      = nullptr;
 MouseBtnCallback mbtn_callback      = nullptr;
 KeyCallback      text_key_callback  = nullptr;
 TextCallback     text_char_callback = nullptr;
+ScrollCallback   scroll_callback    = nullptr;
 WindowSize       window_size{};
 Locate           mouse_pos{};
 float            xscale = 1.0f;
@@ -50,9 +51,9 @@ initialize(const char* appname, int w, int h)
     return false;
   }
 
-  // バージョン2.1指定
+  // バージョン3.2指定
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 
   // コンテキストの作成
   glfwMakeContextCurrent(window);
@@ -102,6 +103,11 @@ initialize(const char* appname, int w, int h)
     if (text_char_callback)
       text_char_callback(codepoint);
   });
+  glfwSetScrollCallback(window,
+                        [](auto window, double xoffset, double yoffset) {
+                          if (scroll_callback)
+                            scroll_callback(xoffset, yoffset);
+                        });
 
   return true;
 }
@@ -153,6 +159,13 @@ setTextInputCallback(KeyCallback kcb, TextCallback tcb)
 {
   text_key_callback  = kcb;
   text_char_callback = tcb;
+}
+
+//
+void
+setScrollCallback(ScrollCallback scb)
+{
+  scroll_callback = scb;
 }
 
 //

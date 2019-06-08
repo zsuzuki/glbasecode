@@ -25,6 +25,7 @@ void        setDropCallback(DropCallback);
 void        setMouseButtonCallback(MouseBtnCallback);
 void        setTextInputCallback(KeyCallback, TextCallback); // for text only
 void        setClickCallback(ClickCallback);
+void        setScrollCallback(ScrollCallback);
 WindowSize  getWindowSize();
 Locate      getMousePosition();
 } // namespace Graphics
