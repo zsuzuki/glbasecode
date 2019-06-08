@@ -3,6 +3,7 @@
 #include "gl.h"
 #include <ft2build.h>
 #include <iostream>
+#include <map>
 #include <vector>
 #include FT_FREETYPE_H
 
@@ -138,6 +139,34 @@ terminate()
   glDeleteShader(fragment_shader);
 }
 
+struct MyGlyph
+{
+  using Buffer = std::vector<uint8_t>;
+  Buffer buffer;
+  double width;
+  double height;
+  double left;
+  double top;
+  double ad_x;
+  double ad_y;
+  bool   init = false;
+
+  void setup(const FT_GlyphSlot& g)
+  {
+    size_t sz = g->bitmap.width * g->bitmap.rows;
+    buffer.resize(sz);
+    memcpy(buffer.data(), g->bitmap.buffer, sz);
+    width  = g->bitmap.width;
+    height = g->bitmap.rows;
+    left   = g->bitmap_left;
+    top    = g->bitmap_top;
+    ad_x   = g->advance.x;
+    ad_y   = g->advance.y;
+    init   = true;
+  }
+};
+std::map<int, MyGlyph> glyphs;
+
 //
 //
 //
@@ -154,17 +183,21 @@ render(FT_Face face, const char* text, float x, float y, float sx, float sy)
       break;
 
     p += r;
-    if (FT_Load_Char(face, ch, FT_LOAD_RENDER))
-      continue;
+    auto& mglyph = glyphs[ch];
+    if (mglyph.init == false)
+    {
+      if (FT_Load_Char(face, ch, FT_LOAD_RENDER))
+        continue;
+      mglyph.setup(face->glyph);
+    }
 
-    FT_GlyphSlot g = face->glyph;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, g->bitmap.width, g->bitmap.rows, 0,
-                 GL_RED, GL_UNSIGNED_BYTE, g->bitmap.buffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, mglyph.width, mglyph.height, 0,
+                 GL_RED, GL_UNSIGNED_BYTE, mglyph.buffer.data());
 
-    float x2 = x + g->bitmap_left * sx;
-    float y2 = -y - g->bitmap_top * sy;
-    float w  = g->bitmap.width * sx;
-    float h  = g->bitmap.rows * sy;
+    float x2 = x + mglyph.left * sx;
+    float y2 = -y - mglyph.top * sy;
+    float w  = mglyph.width * sx;
+    float h  = mglyph.height * sy;
 
     GLfloat box[4][4] = {
         {x2, -y2, 0, 0},
@@ -175,8 +208,8 @@ render(FT_Face face, const char* text, float x, float y, float sx, float sy)
     glBufferData(GL_ARRAY_BUFFER, sizeof(box), box, GL_DYNAMIC_DRAW);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    x += (g->advance.x / 64) * sx;
-    y += (g->advance.y / 64) * sy;
+    x += (mglyph.ad_x / 64) * sx;
+    y += (mglyph.ad_y / 64) * sy;
   }
 }
 } // namespace
