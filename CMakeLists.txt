@@ -16,19 +16,19 @@ find_package(PkgConfig REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
 endif()
 
-include_directories(include)
+include_directories(lib)
 include_directories(${GLFW_INCLUDE_DIRS})
 include_directories(${FREETYPE_INCLUDE_DIRS})
 
 set(main_src
     src/main.cpp
-    src/gl.cpp
-    src/font.cpp
-    src/primitive2d.cpp
-    src/text.cpp
-    src/textbox.cpp
-    src/textbutton.cpp
-    src/codeconv.cpp)
+    lib/gl.cpp
+    lib/font.cpp
+    lib/primitive2d.cpp
+    lib/text.cpp
+    lib/textbox.cpp
+    lib/textbutton.cpp
+    lib/codeconv.cpp)
 
 add_executable(${PROJECT_NAME} ${main_src})
 

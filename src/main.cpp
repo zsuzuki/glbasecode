@@ -1,10 +1,9 @@
-#include "gl.h"
+#include <font.h>
+#include <gl.h>
 #include <iostream>
-
-#include "font.h"
-#include "primitive2d.h"
-#include "textbox.h"
-#include "textbutton.h"
+#include <primitive2d.h>
+#include <textbox.h>
+#include <textbutton.h>
 
 namespace
 {
