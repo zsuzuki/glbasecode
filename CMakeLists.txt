@@ -14,11 +14,13 @@ find_package(glfw3 CONFIG REQUIRED)
 else()
 find_package(PkgConfig REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
+find_package(Boost 1.65.0 REQUIRED COMPONENTS iostreams)
 endif()
 
 include_directories(lib)
 include_directories(${GLFW_INCLUDE_DIRS})
 include_directories(${FREETYPE_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIRS})
 
 set(main_src
     src/main.cpp
@@ -28,7 +30,8 @@ set(main_src
     lib/text.cpp
     lib/textbox.cpp
     lib/textbutton.cpp
-    lib/codeconv.cpp)
+    lib/codeconv.cpp
+    lib/exec.cpp)
 
 add_executable(${PROJECT_NAME} ${main_src})
 
@@ -45,6 +48,7 @@ find_library(OpenGL_LIBRARY OpenGL)
 target_link_directories(${PROJECT_NAME} PRIVATE /usr/local/lib)
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
+    ${Boost_LIBRARIES}
     ${GLFW_LIBRARIES}
     ${OpenGL_LIBRARY}
     ${FREETYPE_LIBRARY}

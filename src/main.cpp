@@ -1,3 +1,4 @@
+#include <exec.h>
 #include <font.h>
 #include <gl.h>
 #include <iostream>
@@ -32,6 +33,7 @@ mouse_button(int button, int action, int mods)
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     std::cout << "Left Button" << std::endl;
 }
+
 } // namespace
 
 //
@@ -56,6 +58,17 @@ main(int argc, char** argv)
   TextButton::initialize(font);
   TextBox::initialize(font);
 
+  // put text-boxs
+  TextBox::create("Text", 50, 500, 300, 50);
+  TextBox::create("Sample", 50, 560, 300, 50);
+  auto tb = TextBox::create("", 50, 620, 300, 80);
+  tb->setPlaceHolder("example");
+
+  Exec::IStreamPtr inf;
+  Exec::HandlePtr  handle;
+  Exec::setup();
+  Exec::setCloseFunc([]() { std::cout << "execute done." << std::endl; });
+
   // put text buttons
   TextButton::setButton("Input", 150, 260,
                         []() { TextButton::bindLayer("Submit"); });
@@ -73,15 +86,23 @@ main(int argc, char** argv)
                         },
                         true);
   TextButton::bindLayer("Submit");
-  TextButton::setButton("Submit", 150, 260, []() { TextButton::bindLayer(); },
+  TextButton::setButton("Submit", 150, 260,
+                        [&]() {
+                          if (Exec::now_exec == false)
+                          {
+                            auto cmd = tb->getText();
+                            handle   = Exec::run(cmd.c_str(), ".", nullptr);
+                            if (!handle)
+                            {
+                              std::cout << "execute error" << std::endl;
+                              return;
+                            }
+                            inf = Exec::buildInStream(handle);
+                          }
+                          TextButton::bindLayer();
+                        },
                         true);
   TextButton::bindLayer();
-
-  // put text-boxs
-  TextBox::create("Text", 50, 500, 300, 50);
-  TextBox::create("Sample", 50, 560, 300, 50);
-  auto tb = TextBox::create("", 50, 620, 300, 80);
-  tb->setPlaceHolder("example");
 
   // フレームループ
   while (auto window = Graphics::setupFrame())
@@ -111,6 +132,20 @@ main(int argc, char** argv)
     TextButton::update();
     Primitive2D::cleanup();
     FontDraw::render(window);
+
+    if (inf)
+    {
+      if (inf->eof())
+      {
+        inf.reset();
+      }
+      else
+      {
+        std::string b;
+        (*inf) >> b;
+        std::cout << "in: " << b << std::endl;
+      }
+    }
 
     Graphics::cleanupFrame();
   }
