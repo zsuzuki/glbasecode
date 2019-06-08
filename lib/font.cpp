@@ -19,7 +19,7 @@ namespace
 {
 FT_Library ft;
 GLuint     vbo;
-GLuint     vertex_shader, fragment_shader, program, tex;
+GLuint     vertex_shader, fragment_shader, program;
 GLint      attribute_coord, uniform_color, uniform_tex;
 
 static const char* vertex_shader_text =
@@ -76,6 +76,51 @@ public:
   void print(const char* msg, float x, float y) override;
 };
 
+// 文字テクスチャキャッシュ
+struct MyGlyph
+{
+  using Buffer = std::vector<uint8_t>;
+  Buffer buffer;
+  double width;
+  double height;
+  double left;
+  double top;
+  double ad_x;
+  double ad_y;
+  bool   init = false;
+  GLuint tex;
+
+  ~MyGlyph() { clear(); }
+
+  void setup(const FT_GlyphSlot& g)
+  {
+    size_t sz = g->bitmap.width * g->bitmap.rows;
+    buffer.resize(sz);
+    memcpy(buffer.data(), g->bitmap.buffer, sz);
+    width  = g->bitmap.width;
+    height = g->bitmap.rows;
+    left   = g->bitmap_left;
+    top    = g->bitmap_top;
+    ad_x   = g->advance.x;
+    ad_y   = g->advance.y;
+    init   = true;
+
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED,
+                 GL_UNSIGNED_BYTE, buffer.data());
+  }
+
+  void bind() { glBindTexture(GL_TEXTURE_2D, tex); }
+
+  void clear() { glDeleteTextures(1, &tex); }
+};
+std::map<int, MyGlyph> glyphs;
 } // namespace
 
 //
@@ -115,7 +160,6 @@ initialize()
   attribute_coord = glGetAttribLocation(program, "coord");
 
   glActiveTexture(GL_TEXTURE0);
-  glGenTextures(1, &tex);
   glUniform1i(uniform_tex, 0);
 
   message_buffer.reserve(10 * 1024);
@@ -134,38 +178,10 @@ terminate()
 {
   glDeleteBuffers(1, &vbo);
   glDeleteProgram(program);
-  glDeleteTextures(1, &tex);
   glDeleteShader(vertex_shader);
   glDeleteShader(fragment_shader);
+  glyphs.clear();
 }
-
-struct MyGlyph
-{
-  using Buffer = std::vector<uint8_t>;
-  Buffer buffer;
-  double width;
-  double height;
-  double left;
-  double top;
-  double ad_x;
-  double ad_y;
-  bool   init = false;
-
-  void setup(const FT_GlyphSlot& g)
-  {
-    size_t sz = g->bitmap.width * g->bitmap.rows;
-    buffer.resize(sz);
-    memcpy(buffer.data(), g->bitmap.buffer, sz);
-    width  = g->bitmap.width;
-    height = g->bitmap.rows;
-    left   = g->bitmap_left;
-    top    = g->bitmap_top;
-    ad_x   = g->advance.x;
-    ad_y   = g->advance.y;
-    init   = true;
-  }
-};
-std::map<int, MyGlyph> glyphs;
 
 //
 //
@@ -190,9 +206,8 @@ render(FT_Face face, const char* text, float x, float y, float sx, float sy)
         continue;
       mglyph.setup(face->glyph);
     }
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, mglyph.width, mglyph.height, 0,
-                 GL_RED, GL_UNSIGNED_BYTE, mglyph.buffer.data());
+    else
+      mglyph.bind();
 
     float x2 = x + mglyph.left * sx;
     float y2 = -y - mglyph.top * sy;
@@ -225,12 +240,6 @@ render(GLFWwindow* window)
 
   glEnable(GL_TEXTURE_2D);
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, tex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
