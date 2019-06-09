@@ -27,9 +27,9 @@ std::map<ColorType, Color> color_map = {
 };
 
 //
-struct Button
+struct Button : public IDBase
 {
-
+  ~Button() = default;
   std::string   caption;
   double        lx, rx, ty, by;
   double        x, y;
@@ -128,7 +128,7 @@ initialize(FontDraw::WidgetPtr f)
 }
 
 //
-void
+ID
 setButton(std::string caption, double x, double y, PressCallback cb,
           bool catch_enter)
 {
@@ -153,6 +153,8 @@ setButton(std::string caption, double x, double y, PressCallback cb,
   btn->catch_enter = catch_enter;
 
   layer.push_back(btn);
+
+  return btn;
 }
 
 //
@@ -186,6 +188,21 @@ clearLayer(std::string layer)
   if (current_layer == layer)
   {
     focus_button.reset();
+  }
+}
+
+//
+void
+erase(ID id)
+{
+  auto& target = button_list[current_layer];
+  for (auto p = target.begin(); p != target.end(); p++)
+  {
+    if (*p == id)
+    {
+      target.erase(p);
+      break;
+    }
   }
 }
 
