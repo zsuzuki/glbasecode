@@ -36,6 +36,9 @@ struct Button : public IDBase
   PressCallback cb;
   bool          catch_enter;
   bool          press;
+
+  virtual int getWidth() const override { return rx - lx; }
+  virtual int getHeight() const override { return by - ty; }
 };
 using ButtonPtr  = std::shared_ptr<Button>;
 using ButtonList = std::list<ButtonPtr>;

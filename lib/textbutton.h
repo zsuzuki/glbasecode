@@ -22,7 +22,9 @@ static constexpr const char* DefaultLayer = "default";
 
 struct IDBase
 {
-  virtual ~IDBase() = default;
+  virtual ~IDBase()             = default;
+  virtual int getWidth() const  = 0;
+  virtual int getHeight() const = 0;
 };
 using ID = std::shared_ptr<IDBase>;
 

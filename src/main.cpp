@@ -81,19 +81,22 @@ main(int argc, char** argv)
   // put text buttons
   TextButton::setButton("Input", 150, 260,
                         []() { TextButton::bindLayer("Submit"); });
-  bool newbtn = true;
-  TextButton::setButton("Test1", 150, 330,
-                        [&]() {
-                          std::cout << "Test1" << std::endl;
-                          if (newbtn)
-                          {
-                            TextButton::setButton("Test2", 400, 330, []() {
-                              std::cout << "Test2" << std::endl;
-                            });
-                            newbtn = false;
-                          }
-                        },
-                        true);
+  bool           newbtn = true;
+  TextButton::ID tbid;
+  tbid = TextButton::setButton("Test1", 150, 330,
+                               [&]() {
+                                 std::cout << "Test1" << std::endl;
+                                 if (newbtn)
+                                 {
+                                   int x = tbid->getWidth() + 150;
+                                   int y = tbid->getHeight() + 330;
+                                   TextButton::setButton("Test2", x, y, []() {
+                                     std::cout << "Test2" << std::endl;
+                                   });
+                                   newbtn = false;
+                                 }
+                               },
+                               true);
   TextButton::bindLayer("Submit");
   TextButton::setButton("Submit", 150, 260,
                         [&]() {
