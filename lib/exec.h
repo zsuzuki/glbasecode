@@ -48,6 +48,8 @@ public:
   virtual void closeWrite()       = 0;
   virtual bool validRead() const  = 0;
   virtual bool validWrite() const = 0;
+
+  virtual IStreamPtr getIStream() const = 0;
 };
 using HandlePtr = std::shared_ptr<Handle>;
 
@@ -59,8 +61,6 @@ void setup();
 void setCloseFunc(CloseFunc);
 //
 bool check();
-//
-IStreamPtr buildInStream(HandlePtr);
 //
 #if defined(_MSC_VER)
 namespace

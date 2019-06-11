@@ -109,7 +109,7 @@ main(int argc, char** argv)
                               std::cout << "execute error" << std::endl;
                               return;
                             }
-                            inf = Exec::buildInStream(handle);
+                            inf = handle->getIStream();
                           }
                           TextButton::bindLayer();
                         },

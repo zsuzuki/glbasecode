@@ -82,6 +82,17 @@ public:
   Type getWrite() const override { return write; }
   bool validRead() const override { return read != Null; }
   bool validWrite() const override { return write != Null; }
+
+  IStreamPtr getIStream() const override
+  {
+#if defined(_MSC_VER)
+    auto  fid = _open_osfhandle((intptr_t)getRead(), _O_RDONLY);
+    auto* fd  = _fdopen(fid, "r");
+    return std::make_shared<std::ifstream>(fd);
+#else
+    return std::make_shared<IStream>(getRead(), io::close_handle);
+#endif
+  }
 };
 
 #if defined(_MSC_VER)
@@ -300,19 +311,6 @@ createPipe()
   }
 #endif
   return std::make_shared<HandleImpl>(p[0], p[1]);
-}
-
-//
-std::shared_ptr<IStream>
-buildInStream(HandlePtr h)
-{
-#if defined(_MSC_VER)
-  auto  fid = _open_osfhandle((intptr_t)h->getRead(), _O_RDONLY);
-  auto* fd  = _fdopen(fid, "r");
-  return std::make_shared<std::ifstream>(fd);
-#else
-  return std::make_shared<IStream>(h->getRead(), io::close_handle);
-#endif
 }
 
 } // namespace Exec
