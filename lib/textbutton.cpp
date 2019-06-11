@@ -137,9 +137,9 @@ setButton(std::string caption, double x, double y, PressCallback cb,
 {
   auto& layer = button_list[current_layer];
 
-  int  l  = caption.length() * 24;
-  auto lx = x - 20;
-  auto rx = x + l + 10;
+  int  l  = caption.length() * 21;
+  auto lx = x - 40;
+  auto rx = x + l + 40;
   auto ty = y - 32 - 10;
   auto by = y + 20;
 
