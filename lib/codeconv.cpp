@@ -135,4 +135,35 @@ U32ToU8(const char32_t u32Ch, char* u8Ch)
 
   return 4;
 }
+
+int
+U8Length(const char* msg)
+{
+  int      len = 0;
+  char32_t ch;
+  while (int r = CodeConv::U8ToU32(msg, ch))
+  {
+    if (ch == '\0')
+      break;
+    msg += r;
+    len++;
+  }
+  return len;
+}
+
+double
+U8Length2(const char* msg)
+{
+  double   len = 0;
+  char32_t ch;
+  while (int r = CodeConv::U8ToU32(msg, ch))
+  {
+    if (ch == '\0')
+      break;
+    msg += r;
+    len += ch < 256 ? 1 : 1.5;
+  }
+  return len;
+}
+
 } // namespace CodeConv
