@@ -227,4 +227,11 @@ getMousePosition()
   return mouse_pos;
 }
 
+//
+void
+setClipboardString(const char* buff)
+{
+  glfwSetClipboardString(window, buff);
+}
+
 } // namespace Graphics

@@ -28,4 +28,5 @@ void        setClickCallback(ClickCallback);
 void        setScrollCallback(ScrollCallback);
 WindowSize  getWindowSize();
 Locate      getMousePosition();
+void        setClipboardString(const char*);
 } // namespace Graphics
