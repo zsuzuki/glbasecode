@@ -128,9 +128,10 @@ template <typename Func>
 bool
 input(HandlePtr h, Func func)
 {
-  if (now_exec)
+  if (h)
   {
 #if defined(_MSC_VER)
+    // if (now_exec)
     auto r = WaitForSingleObject(h->getRead(), 0);
     if (r == WAIT_OBJECT_0)
     {
