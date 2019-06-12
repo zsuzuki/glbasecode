@@ -92,6 +92,7 @@ on_click(int action, bool enter)
   {
     if (focus_input != edit_input)
     {
+      std::cout << "input" << std::endl;
       if (edit_input)
         edit_input->on_edit = false;
       if (TextInput::onInput())

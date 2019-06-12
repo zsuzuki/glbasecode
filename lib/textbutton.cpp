@@ -1,4 +1,5 @@
 #include "textbutton.h"
+#include "codeconv.h"
 #include "font.h"
 #include "gl.h"
 #include "primitive2d.h"
@@ -37,8 +38,10 @@ struct Button : public IDBase
   bool          catch_enter;
   bool          press;
 
-  virtual int getWidth() const override { return rx - lx; }
-  virtual int getHeight() const override { return by - ty; }
+  double getX() const override { return x; }
+  double getY() const override { return y; }
+  int    getWidth() const override { return rx - lx; }
+  int    getHeight() const override { return by - ty; }
 };
 using ButtonPtr  = std::shared_ptr<Button>;
 using ButtonList = std::list<ButtonPtr>;
@@ -137,11 +140,12 @@ setButton(std::string caption, double x, double y, PressCallback cb,
 {
   auto& layer = button_list[current_layer];
 
-  int  l  = caption.length() * 21;
-  auto lx = x - 40;
-  auto rx = x + l + 40;
-  auto ty = y - 32 - 10;
-  auto by = y + 20;
+  // int  l  = caption.length() * 21;
+  double l  = CodeConv::U8Length2(caption.c_str()) * 21.0;
+  auto   lx = x - 20;
+  auto   rx = x + l + 20;
+  auto   ty = y - 32 - 10;
+  auto   by = y + 20;
 
   auto btn         = std::make_shared<Button>();
   btn->caption     = caption;

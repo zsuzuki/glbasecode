@@ -23,6 +23,8 @@ static constexpr const char* DefaultLayer = "default";
 struct IDBase
 {
   virtual ~IDBase()             = default;
+  virtual double getX() const = 0;
+  virtual double getY() const = 0;
   virtual int getWidth() const  = 0;
   virtual int getHeight() const = 0;
 };
