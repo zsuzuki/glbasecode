@@ -19,6 +19,10 @@ WindowSize       window_size{};
 Locate           mouse_pos{};
 float            xscale = 1.0f;
 float            yscale = 1.0f;
+WindowSize       max_size{};
+Locate           base_pos{};
+WindowSize       base_size{};
+bool             now_fullscreen = false;
 
 std::list<ClickCallback> click_callback;
 
@@ -63,6 +67,24 @@ initialize(const char* appname, int w, int h)
     (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3)
   glfwGetWindowContentScale(window, &xscale, &yscale);
 #endif
+
+  // モニタの最大解像度を取得
+  int   count;
+  auto  monitor   = glfwGetPrimaryMonitor();
+  auto* modes     = glfwGetVideoModes(monitor, &count);
+  max_size.width  = 0;
+  max_size.height = 0;
+  for (int i = 0; i < count; i++)
+  {
+    auto& md = modes[i];
+    if (max_size.width <= md.width)
+    {
+      max_size.width = md.width;
+      if (max_size.height < md.height)
+        max_size.height = md.height;
+    }
+  }
+  // std::cout << max_size.width << "x" << max_size.height << std::endl;
 
 #if defined(_MSC_VER)
   if (glewInit() != GLEW_OK)
@@ -117,6 +139,32 @@ void
 terminate()
 {
   glfwTerminate();
+}
+
+// フルスクリーン
+void
+switchFullScreen()
+{
+  auto  monitor = glfwGetPrimaryMonitor();
+  auto* mode    = glfwGetVideoMode(monitor);
+  if (now_fullscreen)
+  {
+    glfwSetWindowMonitor(window, nullptr, 0, 0, base_size.width / xscale,
+                         base_size.height / yscale, mode->refreshRate);
+    glfwSetWindowPos(window, base_pos.x, base_pos.y);
+    window_size = base_size;
+  }
+  else
+  {
+    int xpos, ypos;
+    glfwGetWindowPos(window, &xpos, &ypos);
+    base_pos.x = xpos;
+    base_pos.y = ypos;
+    base_size  = window_size;
+    glfwSetWindowMonitor(window, monitor, 0, 0, max_size.width, max_size.height,
+                         mode->refreshRate);
+  }
+  now_fullscreen = !now_fullscreen;
 }
 
 // 終了
@@ -200,7 +248,8 @@ setupFrame()
 
   glViewport(0, 0, w, h);
   glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_DEPTH_TEST);
   return window;
 }
 

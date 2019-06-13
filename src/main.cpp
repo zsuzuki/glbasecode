@@ -15,6 +15,9 @@ key_callback(int key, int scancode, int action, int mods)
 {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     Graphics::finish();
+  else if (key == GLFW_KEY_F && action == GLFW_PRESS &&
+           mods == GLFW_MOD_CONTROL)
+    Graphics::switchFullScreen();
   // else if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
 }
 // file drag&drop
@@ -127,7 +130,7 @@ main(int argc, char** argv)
           {0.4f, 0.4f, 0.0f, 0.0f, 1.0f},
           {-0.4f, 0.4f, 1.0f, 1.0f, 1.0f},
       };
-      Primitive2D::drawLine(vl, 4.0f);
+      Primitive2D::drawQuads(vl);
       static const Primitive2D::Vertex v = {0.0f, 0.0f, 0.5f, 1.0f, 1.0f};
       Primitive2D::drawCircle(v, 0.5f, 5, 8.0f);
       Primitive2D::drawCircle(v, 0.52f, 6, 4.0f);
