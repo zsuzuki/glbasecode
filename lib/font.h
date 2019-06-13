@@ -17,6 +17,7 @@ public:
   virtual void setSize(float w, float h)                = 0;
   virtual void setColor(const Graphics::Color)          = 0;
   virtual void print(const char* msg, float x, float y) = 0;
+  virtual void setDepth(float d)                        = 0;
 };
 using WidgetPtr = std::shared_ptr<Widget>;
 WidgetPtr create(const char* fontname);

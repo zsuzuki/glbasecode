@@ -15,9 +15,10 @@ const char* vt_sh = "#version 110\n"
                     "uniform mat4 MVP;\n"
                     "attribute vec3 vCol;\n"
                     "attribute vec2 vPos;\n"
+                    "uniform float Depth;\n"
                     "varying vec3 color;\n"
                     "void main() {\n"
-                    "    gl_Position = MVP * vec4(vPos, 0.0, 1.0);\n"
+                    "    gl_Position = MVP * vec4(vPos, Depth, 1.0);\n"
                     "    color = vCol;\n"
                     "}\n";
 const char* fg_sh = "#version 110\n"
@@ -28,7 +29,8 @@ const char* fg_sh = "#version 110\n"
 
 GLuint vertex_shader, fragment_shader, program;
 GLuint vertex_buffer[1];
-GLint  MVP, vpos, vcol;
+GLint  MVP, vpos, vcol, DEPTH;
+float  DrawDepth = 0.01f;
 
 } // namespace
 
@@ -49,9 +51,10 @@ initialize()
   glAttachShader(program, vertex_shader);
   glAttachShader(program, fragment_shader);
   glLinkProgram(program);
-  MVP  = glGetUniformLocation(program, "MVP");
-  vpos = glGetAttribLocation(program, "vPos");
-  vcol = glGetAttribLocation(program, "vCol");
+  MVP   = glGetUniformLocation(program, "MVP");
+  vpos  = glGetAttribLocation(program, "vPos");
+  vcol  = glGetAttribLocation(program, "vCol");
+  DEPTH = glGetUniformLocation(program, "Depth");
 
   // 頂点生成
   glGenBuffers(1, vertex_buffer);
@@ -83,6 +86,7 @@ setup(GLFWwindow* window)
 
   glUseProgram(program);
   glUniformMatrix4fv(MVP, 1, GL_FALSE, (const GLfloat*)mvp);
+  glUniform1f(DEPTH, DrawDepth);
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer[0]);
   glEnableVertexAttribArray(vpos);
   glVertexAttribPointer(vpos, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
@@ -103,6 +107,17 @@ cleanup()
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glDisableVertexAttribArray(vpos);
   glDisableVertexAttribArray(vcol);
+}
+
+//
+void
+setDepth(float d)
+{
+  if (d != DrawDepth)
+  {
+    DrawDepth = d;
+    glUniform1f(DEPTH, DrawDepth);
+  }
 }
 
 //

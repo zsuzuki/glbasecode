@@ -26,5 +26,6 @@ void drawLine(const VertexList&, float w = 1.0f);
 void drawCircle(const Vertex&, float rad, int num, float w = 1.0f);
 void drawQuads(const VertexList&);
 void drawTriangles(const VertexList&);
+void setDepth(float d);
 
 } // namespace Primitive2D

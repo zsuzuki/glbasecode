@@ -20,14 +20,16 @@ namespace
 FT_Library ft;
 GLuint     vbo;
 GLuint     vertex_shader, fragment_shader, program;
-GLint      attribute_coord, uniform_color, uniform_tex;
+GLint      attribute_coord, uniform_color, uniform_tex, DEPTH;
+float      DrawDepth = 0.0f;
 
 static const char* vertex_shader_text =
     "#version 120\n"
     "attribute vec4 coord;\n"
     "varying vec2 texcoord;\n"
+    "uniform float Depth;\n"
     "void main(void) {\n"
-    "  gl_Position = vec4(coord.xy, 0, 1);\n"
+    "  gl_Position = vec4(coord.xy, Depth, 1);\n"
     "  texcoord    = coord.zw;\n"
     "}";
 static const char* fragment_shader_text =
@@ -52,6 +54,7 @@ struct DrawSet
   float       height = DefaultSize;
   float       x      = 0.0f;
   float       y      = 0.0f;
+  float       depth  = 0.0f;
   Color       color{};
   const char* msg = nullptr;
 };
@@ -66,6 +69,7 @@ class WidgetImpl : public Widget
   FT_Face face;
   DrawSet current;
   bool    valid;
+  float   depth;
 
 public:
   WidgetImpl(const char* fontname);
@@ -74,6 +78,7 @@ public:
   void setSize(float w, float h) override;
   void setColor(Graphics::Color c) override;
   void print(const char* msg, float x, float y) override;
+  void setDepth(float d) override { depth = d; }
 };
 
 // 文字テクスチャキャッシュ
@@ -158,6 +163,7 @@ initialize()
   uniform_tex     = glGetUniformLocation(program, "tex");
   uniform_color   = glGetUniformLocation(program, "color");
   attribute_coord = glGetAttribLocation(program, "coord");
+  DEPTH           = glGetUniformLocation(program, "Depth");
 
   glActiveTexture(GL_TEXTURE0);
   glUniform1i(uniform_tex, 0);
@@ -243,6 +249,7 @@ render(GLFWwindow* window)
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glUniform1f(DEPTH, DrawDepth);
 
   // render
   auto ws  = Graphics::getWindowSize();
@@ -251,6 +258,7 @@ render(GLFWwindow* window)
   for (auto& ds : draw_set)
   {
     glUniform4fv(uniform_color, 1, (GLfloat*)&ds.color);
+    glUniform1f(DEPTH, ds.depth);
     render(ds.face, ds.msg, (float)ds.x, (float)ds.y, (float)bsx, (float)bsy);
   }
 
@@ -307,10 +315,11 @@ WidgetImpl::print(const char* msg, float x, float y)
   message_buffer.resize(p + l + 1);
   memcpy(&message_buffer[p], msg, l + 1);
 
-  auto nds = current;
-  nds.x    = x;
-  nds.y    = y;
-  nds.msg  = &message_buffer[p];
+  auto nds  = current;
+  nds.x     = x;
+  nds.y     = y;
+  nds.depth = depth;
+  nds.msg   = &message_buffer[p];
   draw_set.emplace_back(nds);
 }
 
