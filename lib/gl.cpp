@@ -283,4 +283,11 @@ setClipboardString(const char* buff)
   glfwSetClipboardString(window, buff);
 }
 
+//
+const char*
+getClipboardString()
+{
+  return glfwGetClipboardString(window);
+}
+
 } // namespace Graphics

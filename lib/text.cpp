@@ -22,6 +22,24 @@ std::shared_ptr<Manage> manage;
 
 //
 void
+addu8str(const char* text)
+{
+  auto&    buffer = manage->buffer;
+  auto&    index  = manage->index;
+  char32_t ch;
+  while (int r = CodeConv::U8ToU32(text, ch))
+  {
+    if (ch == '\0')
+      break;
+
+    index = buffer.insert(index, ch);
+    index++;
+    text += r;
+  }
+}
+
+//
+void
 key_input(int num, int scancode, int action, int mods)
 {
   if (action != GLFW_PRESS)
@@ -47,6 +65,15 @@ key_input(int num, int scancode, int action, int mods)
     if (index != buffer.end())
       index = buffer.erase(index, buffer.end());
   };
+  auto paste = [&]() { addu8str(Graphics::getClipboardString()); };
+  auto copy  = [&](bool cut) {
+    Graphics::setClipboardString(get().c_str());
+    if (cut)
+    {
+      buffer.clear();
+      index = buffer.begin();
+    }
+  };
 
   if (num == GLFW_KEY_LEFT)
     backward();
@@ -67,7 +94,7 @@ key_input(int num, int scancode, int action, int mods)
       else
         index = buffer.erase(--index);
     }
-    }
+  }
   else if (mods == GLFW_MOD_CONTROL)
   {
     if (num == GLFW_KEY_A)
@@ -82,6 +109,25 @@ key_input(int num, int scancode, int action, int mods)
       del();
     else if (num == GLFW_KEY_K)
       linedel();
+#if defined(_MSC_VER)
+    else if (num == GLFW_KEY_V)
+      paste();
+    else if (num == GLFW_KEY_X)
+      copy(true);
+    else if (num == GLFW_KEY_C)
+      copy(false);
+#endif
+  }
+  else if (mods == GLFW_MOD_SUPER)
+  {
+#if !defined(_MSC_VER)
+    if (num == GLFW_KEY_V)
+      paste();
+    else if (num == GLFW_KEY_X)
+      copy(true);
+    else if (num == GLFW_KEY_C)
+      copy(false);
+#endif
   }
 }
 

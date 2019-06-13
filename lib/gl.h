@@ -29,5 +29,6 @@ void        setScrollCallback(ScrollCallback);
 WindowSize  getWindowSize();
 Locate      getMousePosition();
 void        setClipboardString(const char*);
+const char* getClipboardString();
 void        switchFullScreen();
 } // namespace Graphics
