@@ -30,7 +30,7 @@ const char* fg_sh = "#version 110\n"
 GLuint vertex_shader, fragment_shader, program;
 GLuint vertex_buffer[1];
 GLint  MVP, vpos, vcol, DEPTH;
-float  DrawDepth = 0.01f;
+float  DrawDepth = 0.1f;
 
 } // namespace
 
