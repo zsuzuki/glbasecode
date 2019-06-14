@@ -249,7 +249,6 @@ render(GLFWwindow* window)
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glUniform1f(DEPTH, DrawDepth);
 
   // render
   auto ws  = Graphics::getWindowSize();
@@ -290,6 +289,7 @@ WidgetImpl::WidgetImpl(const char* fontname)
 
   valid        = true;
   current.face = face;
+  depth        = DrawDepth;
   setSize(32, 32);
 }
 
