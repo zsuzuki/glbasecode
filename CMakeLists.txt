@@ -31,6 +31,7 @@ set(main_src
     lib/textbox.cpp
     lib/textbutton.cpp
     lib/codeconv.cpp
+    lib/scrollbox.cpp
     lib/exec.cpp)
 
 add_executable(${PROJECT_NAME} ${main_src})

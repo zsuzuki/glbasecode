@@ -1,6 +1,7 @@
 #pragma once
 
 #include "font.h"
+#include "parts.h"
 #include <functional>
 #include <memory>
 #include <string>
@@ -20,15 +21,7 @@ enum class ColorType : int
 };
 static constexpr const char* DefaultLayer = "default";
 
-struct IDBase
-{
-  virtual ~IDBase()             = default;
-  virtual double getX() const = 0;
-  virtual double getY() const = 0;
-  virtual int getWidth() const  = 0;
-  virtual int getHeight() const = 0;
-};
-using ID = std::shared_ptr<IDBase>;
+using ID = Parts::IDPtr;
 
 //
 void initialize(FontDraw::WidgetPtr font);

@@ -27,10 +27,11 @@ const char* fg_sh = "#version 110\n"
                     "    gl_FragColor = vec4(color, 1.0);\n"
                     "}\n";
 
-GLuint vertex_shader, fragment_shader, program;
-GLuint vertex_buffer[1];
-GLint  MVP, vpos, vcol, DEPTH;
-float  DrawDepth = 0.1f;
+GLuint     vertex_shader, fragment_shader, program;
+GLuint     vertex_buffer[1];
+GLint      MVP, vpos, vcol, DEPTH;
+float      DrawDepth = 0.05f;
+VertexList box_vertex;
 
 } // namespace
 
@@ -58,6 +59,8 @@ initialize()
 
   // 頂点生成
   glGenBuffers(1, vertex_buffer);
+
+  box_vertex.resize(5);
 }
 
 //
@@ -171,6 +174,41 @@ drawCircle(const Vertex& vtx, float rad, int num, float w)
   }
   glLineWidth(w);
   draw(vlist, GL_LINE_LOOP);
+}
+
+void
+drawBox(double lx, double ty, double rx, double by, const Color& col, bool fill)
+{
+  auto loc = Graphics::calcLocate(lx, ty, true);
+  auto sz  = Graphics::calcLocate(rx, by, true);
+
+  auto& vl = box_vertex;
+  vl[0].x  = loc.x;
+  vl[0].y  = loc.y;
+  vl[1].x  = sz.x;
+  vl[1].y  = loc.y;
+  vl[2].x  = sz.x;
+  vl[2].y  = sz.y;
+  vl[3].x  = loc.x;
+  vl[3].y  = sz.y;
+
+  for (auto& v : vl)
+  {
+    v.r = col.r;
+    v.g = col.g;
+    v.b = col.b;
+  }
+  if (fill)
+  {
+    vl.resize(4);
+    drawQuads(vl);
+  }
+  else
+  {
+    vl.resize(5);
+    vl[4] = vl[0];
+    drawLine(vl);
+  }
 }
 
 } // namespace Primitive2D

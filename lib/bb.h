@@ -41,6 +41,7 @@ public:
     CenterBottom,
   };
 
+  Rect() {}
   Rect(double x, double y, double w, double h, Align al = Align::LeftTop)
   {
     switch (al)

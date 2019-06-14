@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gl_def.h"
 #include <vector>
 
 struct GLFWwindow;
@@ -17,6 +18,7 @@ struct Vertex
   float a = 1.0f;
 };
 using VertexList = std::vector<Vertex>;
+using Color      = Graphics::Color;
 
 void initialize();
 void setup(GLFWwindow*);
@@ -26,6 +28,8 @@ void drawLine(const VertexList&, float w = 1.0f);
 void drawCircle(const Vertex&, float rad, int num, float w = 1.0f);
 void drawQuads(const VertexList&);
 void drawTriangles(const VertexList&);
+void drawBox(double lx, double ty, double rx, double by, const Color& col,
+             bool fill);
 void setDepth(float d);
 
 } // namespace Primitive2D

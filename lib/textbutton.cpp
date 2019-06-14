@@ -28,7 +28,7 @@ std::map<ColorType, Color> color_map = {
 };
 
 //
-struct Button : public IDBase
+struct Button : public Parts::ID
 {
   ~Button() = default;
   std::string   caption;
@@ -140,7 +140,6 @@ setButton(std::string caption, double x, double y, PressCallback cb,
 {
   auto& layer = button_list[current_layer];
 
-  // int  l  = caption.length() * 21;
   double l  = CodeConv::U8Length2(caption.c_str()) * 21.0;
   auto   lx = x - 20;
   auto   rx = x + l + 20;

@@ -3,6 +3,7 @@
 #include <gl.h>
 #include <iostream>
 #include <primitive2d.h>
+#include <scrollbox.h>
 #include <textbox.h>
 #include <textbutton.h>
 
@@ -119,6 +120,9 @@ main(int argc, char** argv)
                         true);
   TextButton::bindLayer();
 
+  auto SBox = ScrollBox::create();
+  SBox->set(400, 400, 500, 500);
+
   // フレームループ
   while (auto window = Graphics::setupFrame())
   {
@@ -146,6 +150,7 @@ main(int argc, char** argv)
     font->print("Title: Top", -0.98f, 1.0f - (32.0f / 480.0f));
     TextBox::update();
     TextButton::update();
+    ScrollBox::update();
     Primitive2D::cleanup();
     FontDraw::render(window);
 
