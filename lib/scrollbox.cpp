@@ -126,6 +126,10 @@ void
 Box::clear()
 {
   items.clear();
+  xofs  = 0.0;
+  yofs  = 0.0;
+  max_x = 0.0;
+  max_y = 0.0;
 }
 //
 void
@@ -155,16 +159,16 @@ key_callback(int key, int scancode, int action, int mods)
   if (box->ysc_const == false)
   {
     if (key == GLFW_KEY_UP)
-      box->yofs += 10;
+      box->yofs += 40;
     else if (key == GLFW_KEY_DOWN)
-      box->yofs -= 10;
+      box->yofs -= 40;
   }
   if (box->xsc_const == false)
   {
     if (key == GLFW_KEY_RIGHT)
-      box->xofs += 10;
+      box->xofs += 40;
     else if (key == GLFW_KEY_LEFT)
-      box->xofs -= 10;
+      box->xofs -= 40;
   }
   box->scroll_clip();
 }
@@ -177,9 +181,9 @@ scroll_callback(double xofs, double yofs)
   if (box->focus == false)
     return;
   if (box->xsc_const == false)
-    box->xofs += xofs;
+    box->xofs += xofs * 6.0;
   if (box->ysc_const == false)
-    box->yofs += yofs;
+    box->yofs += yofs * 6.0;
   box->scroll_clip();
 }
 
