@@ -15,6 +15,8 @@ MouseBtnCallback mbtn_callback      = nullptr;
 KeyCallback      text_key_callback  = nullptr;
 TextCallback     text_char_callback = nullptr;
 ScrollCallback   scroll_callback    = nullptr;
+ScrollCallback   sbox_scr_callback  = nullptr;
+KeyCallback      sbox_key_callback  = nullptr;
 WindowSize       window_size{};
 Locate           mouse_pos{};
 float            xscale = 1.0f;
@@ -100,6 +102,8 @@ initialize(const char* appname, int w, int h)
           key_callback(key, scancode, action, mods);
         if (text_key_callback)
           text_key_callback(key, scancode, action, mods);
+        if (sbox_key_callback)
+          sbox_key_callback(key, scancode, action, mods);
         if (key == GLFW_KEY_ENTER)
         {
           for (auto& fn : click_callback)
@@ -129,6 +133,8 @@ initialize(const char* appname, int w, int h)
                         [](auto window, double xoffset, double yoffset) {
                           if (scroll_callback)
                             scroll_callback(xoffset, yoffset);
+                          if (sbox_scr_callback)
+                            sbox_scr_callback(xoffset, yoffset);
                         });
 
   return true;
@@ -214,6 +220,14 @@ void
 setScrollCallback(ScrollCallback scb)
 {
   scroll_callback = scb;
+}
+
+//
+void
+setScrollBoxFunction(ScrollCallback scb, KeyCallback kcb)
+{
+  sbox_scr_callback = scb;
+  sbox_key_callback = kcb;
 }
 
 //

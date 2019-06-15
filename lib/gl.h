@@ -26,6 +26,7 @@ void        setMouseButtonCallback(MouseBtnCallback);
 void        setTextInputCallback(KeyCallback, TextCallback); // for text only
 void        setClickCallback(ClickCallback);
 void        setScrollCallback(ScrollCallback);
+void        setScrollBoxFunction(ScrollCallback, KeyCallback);
 WindowSize  getWindowSize();
 Locate      getMousePosition();
 void        setClipboardString(const char*);

@@ -46,6 +46,9 @@ struct Box : public Base
 using BoxPtr = std::weak_ptr<Box>;
 std::list<BoxPtr> box_list;
 
+BoxPtr focus_box;
+bool   initialized = false;
+
 //
 void
 Box::drawSheet(bool s, Graphics::Color scol)
@@ -94,6 +97,32 @@ Box::clear()
   items.clear();
 }
 
+//
+void
+key_callback(int key, int scancode, int action, int mods)
+{
+  if (focus_box.expired())
+    return;
+  auto box = focus_box.lock();
+  if (box->focus == false)
+    return;
+  if (key == GLFW_KEY_UP)
+    box->yofs += 10;
+  else if (key == GLFW_KEY_DOWN)
+    box->yofs -= 10;
+}
+void
+scroll_callback(double xofs, double yofs)
+{
+  if (focus_box.expired())
+    return;
+  auto box = focus_box.lock();
+  if (box->focus == false)
+    return;
+  box->xofs += xofs;
+  box->yofs += yofs;
+}
+
 } // namespace
 
 //
@@ -102,6 +131,11 @@ create()
 {
   auto box = std::make_shared<Box>();
   box_list.push_back(box);
+  if (initialized == false)
+  {
+    Graphics::setScrollBoxFunction(scroll_callback, key_callback);
+    initialized = true;
+  }
   return box;
 }
 
@@ -111,6 +145,7 @@ update()
 {
   auto mpos = Graphics::getMousePosition();
 
+  std::shared_ptr<Box> new_focus;
   for (auto bi = box_list.begin(); bi != box_list.end(); bi++)
   {
     auto& bp = *bi;
@@ -124,9 +159,15 @@ update()
       auto& bb  = box->bbox;
 
       Graphics::Color col = Graphics::White;
-      box->focus          = bb.check(mpos.x, mpos.y);
-      if (box->focus)
-        col = Graphics::Green;
+      if (!new_focus)
+      {
+        box->focus = bb.check(mpos.x, mpos.y);
+        if (box->focus)
+          col = Graphics::Green;
+        new_focus = box;
+      }
+      else
+        box->focus = false;
       auto loc = bb.getLocate();
       auto btm = bb.getBottom();
       Primitive2D::pushDepth(box->depth);
@@ -140,6 +181,7 @@ update()
       Primitive2D::popDepth();
     }
   }
+  focus_box = new_focus;
 }
 
 } // namespace ScrollBox
