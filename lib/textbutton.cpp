@@ -3,6 +3,7 @@
 #include "codeconv.h"
 #include "font.h"
 #include "gl.h"
+#include "layer.h"
 #include "primitive2d.h"
 #include <iostream>
 #include <list>
@@ -14,7 +15,6 @@ namespace TextButton
 namespace
 {
 //
-std::string         current_layer = DefaultLayer;
 FontDraw::WidgetPtr font;
 
 //
@@ -75,10 +75,9 @@ struct Button : public Parts::ID
     return std::make_pair(inrect, en_focus);
   }
 };
-using ButtonPtr  = std::shared_ptr<Button>;
-using ButtonList = std::list<ButtonPtr>;
-std::map<std::string, ButtonList> button_list;
-ButtonPtr                         focus_button;
+using ButtonPtr = std::shared_ptr<Button>;
+ButtonPtr     focus_button;
+Layer<Button> layer;
 
 //
 void
@@ -87,8 +86,8 @@ text_button(int action, bool enter)
   if (enter && action == GLFW_PRESS && !focus_button)
   {
     // カーソルが乗っていない場合でもenterで実行するか
-    auto& layer = button_list[current_layer];
-    for (auto& btn : layer)
+    auto& button_list = layer.getCurrent();
+    for (auto& btn : button_list)
     {
       if (btn->catch_enter)
       {
@@ -167,8 +166,6 @@ ID
 setButton(std::string caption, double x, double y, PressCallback cb,
           bool catch_enter)
 {
-  auto& layer = button_list[current_layer];
-
   double l  = CodeConv::U8Length2(caption.c_str()) * 21.0;
   auto   rx = x + l + 20 + 20;
   auto   by = y + 20 + 32 + 10;
@@ -188,7 +185,8 @@ setButton(std::string caption, double x, double y, PressCallback cb,
   btn->parent      = nullptr;
   btn->catch_enter = catch_enter;
 
-  layer.push_back(btn);
+  auto& button_list = layer.getCurrent();
+  button_list.push_back(btn);
 
   return btn;
 }
@@ -206,53 +204,40 @@ setColor(ColorType ct, float r, float g, float b, float a)
 
 // レイヤー切り替え
 void
-bindLayer(std::string layer)
+bindLayer(std::string l)
 {
-  if (current_layer != layer)
-  {
+  if (layer.bind(l))
     focus_button.reset();
-    current_layer = layer;
-  }
 }
 
 //
 void
-clearLayer(std::string layer)
+clearLayer(std::string l)
 {
-  auto& target = button_list[layer];
-  target.clear();
-  if (current_layer == layer)
-  {
-    focus_button.reset();
-  }
+  layer.clear(l);
+  focus_button.reset();
 }
 
 //
 void
 erase(ID id)
 {
-  auto& target = button_list[current_layer];
-  for (auto p = target.begin(); p != target.end(); p++)
-  {
-    if (*p == id)
-    {
-      target.erase(p);
-      break;
-    }
-  }
+  auto ip = std::dynamic_pointer_cast<Button>(id);
+  if (ip)
+    layer.erase(ip);
 }
 
 //
 void
 update()
 {
-  auto& layer = button_list[current_layer];
-  auto  mpos  = Graphics::getMousePosition();
+  auto& button_list = layer.getCurrent();
+  auto  mpos        = Graphics::getMousePosition();
 
   Primitive2D::pushDepth(0.01f);
   font->pushDepth(0.0f);
   bool focus = false;
-  for (auto& btn : layer)
+  for (auto& btn : button_list)
   {
     auto ef = btn->update();
     if (!ef.first)

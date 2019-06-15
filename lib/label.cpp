@@ -2,6 +2,7 @@
 #include "bb.h"
 #include "codeconv.h"
 #include "gl.h"
+#include "layer.h"
 #include "primitive2d.h"
 #include <iostream>
 #include <list>
@@ -13,7 +14,6 @@ namespace
 {
 //
 FontDraw::WidgetPtr font;
-std::string         current_layer;
 
 //
 struct Item : public Parts::ID
@@ -41,9 +41,8 @@ struct Item : public Parts::ID
   bool update();
 };
 
-using ItemPtr  = std::shared_ptr<Item>;
-using ItemList = std::list<ItemPtr>;
-std::map<std::string, ItemList> item_list;
+using ItemPtr = std::shared_ptr<Item>;
+Layer<Item> layer;
 
 //
 bool
@@ -105,40 +104,30 @@ create(std::string str, double x, double y, Color fg, Color bg)
   item->bgcol  = bg;
   item->bbox   = BoundingBox::Rect{x, y, item->w, item->h};
 
-  auto& layer = item_list[current_layer];
-  layer.push_back(item);
+  auto& item_list = layer.getCurrent();
+  item_list.push_back(item);
 
   return item;
 }
 //
 void
-bindLayer(std::string layer)
+bindLayer(std::string l)
 {
-  if (current_layer != layer)
-  {
-    current_layer = layer;
-  }
+  layer.bind(l);
 }
 //
 void
-clearLayer(std::string layer)
+clearLayer(std::string l)
 {
-  auto& target = item_list[layer];
-  target.clear();
+  layer.clear(l);
 }
 //
 void
 erase(ID i)
 {
-  auto& target = item_list[current_layer];
-  for (auto p = target.begin(); p != target.end(); p++)
-  {
-    if (*p == i)
-    {
-      target.erase(p);
-      break;
-    }
-  }
+  auto ip = std::dynamic_pointer_cast<Item>(i);
+  if (ip)
+    layer.erase(ip);
 }
 
 //
@@ -147,8 +136,8 @@ update()
 {
   Primitive2D::pushDepth(0);
   font->pushDepth(0);
-  auto& layer = item_list[current_layer];
-  for (auto& item : layer)
+  auto& item_list = layer.getCurrent();
+  for (auto& item : item_list)
   {
     if (item->update() == false)
       continue;

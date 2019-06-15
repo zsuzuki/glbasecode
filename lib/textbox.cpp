@@ -1,6 +1,7 @@
 #include "textbox.h"
 #include "bb.h"
 #include "gl.h"
+#include "layer.h"
 #include "primitive2d.h"
 #include "text.h"
 #include <iostream>
@@ -21,7 +22,6 @@ class ItemImpl : public Item
 public:
   std::string       text;
   std::string       place_holder;
-  std::string       layer;
   BoundingBox::Rect bbox;
   size_t            max_length;
   Graphics::Color   font_color;
@@ -46,18 +46,16 @@ public:
   void setPlaceHolderColor(Graphics::Color pc) override { ph_color = pc; }
   void setMaxLength(size_t ml) override { max_length = ml; }
 
-  void setLayer(std::string l) { layer = l; }
   void drawBG();
   void drawCursor();
 };
 using ItemImplPtr = std::shared_ptr<ItemImpl>;
 
-TextInput::Buffer      text_buffer;
-std::list<ItemImplPtr> item_list;
-ItemImplPtr            focus_input;
-ItemImplPtr            edit_input;
-std::string            current_layer = DefaultLayer;
-FontDraw::WidgetPtr    font;
+TextInput::Buffer   text_buffer;
+ItemImplPtr         focus_input;
+ItemImplPtr         edit_input;
+FontDraw::WidgetPtr font;
+Layer<ItemImpl>     layer;
 
 //
 void
@@ -139,11 +137,10 @@ set_focus(ItemImplPtr item)
 
 //
 void
-bindLayer(std::string layer)
+bindLayer(std::string l)
 {
-  if (layer != current_layer)
+  if (layer.bind(l))
   {
-    current_layer = layer;
     focus_input.reset();
     if (edit_input)
     {
@@ -156,28 +153,18 @@ bindLayer(std::string layer)
 }
 //
 void
-clearLayer(std::string layer)
+clearLayer(std::string l)
 {
-  for (auto i = item_list.begin(); i != item_list.end();)
-  {
-    if ((*i)->layer == layer)
-      i = item_list.erase(i);
-    else
-      i++;
-  }
+  layer.clear(l);
 }
+
 //
 void
 eraseItem(ItemPtr item)
 {
-  for (auto it = item_list.begin(); it != item_list.end(); it++)
-  {
-    if (*it == item)
-    {
-      item_list.erase(it);
-      break;
-    }
-  }
+  auto ip = std::dynamic_pointer_cast<ItemImpl>(item);
+  if (ip)
+    layer.erase(ip);
 }
 
 //
@@ -198,7 +185,8 @@ create(std::string t, double x, double y, double w, double h)
   auto o    = (h - BaseY) * 0.5;
   if (o >= 0.0)
     item->ofs_y = BaseY + o;
-  item->setLayer(current_layer);
+
+  auto& item_list = layer.getCurrent();
   item_list.push_back(item);
   return item;
 }
@@ -215,11 +203,9 @@ initialize(FontDraw::WidgetPtr f)
 void
 update()
 {
+  auto& item_list = layer.getCurrent();
   for (auto& item : item_list)
   {
-    if (item->layer != current_layer)
-      continue;
-
     auto mpos = Graphics::getMousePosition();
     if (item->bbox.check(mpos.x, mpos.y))
       set_focus(item);

@@ -7,12 +7,8 @@
 template <class Item>
 class Layer
 {
-public:
-  //
-  static constexpr const char* DefaultLayer = "default";
-
 protected:
-  std::string current_layer = DefaultLayer;
+  std::string current_layer = "default";
   using Ptr                 = std::shared_ptr<Item>;
   using ItemList            = std::list<Ptr>;
   std::map<std::string, ItemList> item_list;
