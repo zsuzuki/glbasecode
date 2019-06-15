@@ -2,6 +2,7 @@
 #include "bb.h"
 #include "gl.h"
 #include "primitive2d.h"
+#include <iostream>
 #include <list>
 
 namespace ScrollBox
@@ -19,6 +20,8 @@ struct Box : public Base
   double            xofs        = 0.0;
   double            yofs        = 0.0;
   double            depth       = 0.0;
+  double            max_x       = 0.0;
+  double            max_y       = 0.0;
   bool              focus       = false;
   bool              xsc_const   = false;
   bool              ysc_const   = false;
@@ -49,6 +52,8 @@ struct Box : public Base
   {
     return bbox.checkHit(r);
   }
+
+  void scroll_clip();
 };
 using BoxPtr = std::weak_ptr<Box>;
 std::list<BoxPtr> box_list;
@@ -74,7 +79,9 @@ Box::setDepth(float d)
 void
 Box::set(double x, double y, double w, double h)
 {
-  bbox = BoundingBox::Rect{x, y, w, h};
+  bbox  = BoundingBox::Rect{x, y, w, h};
+  max_x = 0.0;
+  max_y = 0.0;
 }
 //
 void
@@ -82,6 +89,22 @@ Box::append(Parts::IDPtr i)
 {
   i->setParent(this);
   items.push_back(i);
+
+  auto width  = getWidth() - i->getWidth() - 20;
+  auto height = getHeight() - i->getHeight() - 20;
+  auto x      = i->getX() - width;
+  auto y      = i->getY() - height;
+
+  if (x > 0.0)
+  {
+    if (max_x < x)
+      max_x = x;
+  }
+  if (y > 0.0)
+  {
+    if (max_y < y)
+      max_y = y;
+  }
 }
 //
 void
@@ -102,6 +125,19 @@ void
 Box::clear()
 {
   items.clear();
+}
+//
+void
+Box::scroll_clip()
+{
+  if (xofs > 0.0)
+    xofs = 0.0;
+  else if (xofs < -max_x)
+    xofs = -max_x;
+  if (yofs > 0.0)
+    yofs = 0.0;
+  else if (yofs < -max_y)
+    yofs = -max_y;
 }
 
 //
@@ -127,6 +163,7 @@ key_callback(int key, int scancode, int action, int mods)
     else if (key == GLFW_KEY_LEFT)
       box->xofs -= 10;
   }
+  box->scroll_clip();
 }
 void
 scroll_callback(double xofs, double yofs)
@@ -140,6 +177,7 @@ scroll_callback(double xofs, double yofs)
     box->xofs += xofs;
   if (box->ysc_const == false)
     box->yofs += yofs;
+  box->scroll_clip();
 }
 
 } // namespace
