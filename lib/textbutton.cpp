@@ -13,7 +13,11 @@ namespace TextButton
 {
 namespace
 {
+//
+std::string         current_layer = DefaultLayer;
+FontDraw::WidgetPtr font;
 
+//
 struct Color
 {
   float r, g, b, a;
@@ -43,7 +47,6 @@ struct Button : public Parts::ID
   PressCallback cb;
   bool          catch_enter;
   bool          press;
-  float         depth;
   Parent*       parent;
 
   double getX() const override { return x + ox; }
@@ -53,13 +56,17 @@ struct Button : public Parts::ID
   void   setParent(const Parts::ID* p) override { parent = p; }
   bool   update()
   {
-    bool en_focus = true;
+    float depth    = 0.0f;
+    bool  en_focus = true;
     if (parent)
     {
       ox       = parent->getPlacementX();
       oy       = parent->getPlacementY();
       en_focus = parent->getFocus();
+      depth    = parent->getDepth() - 0.1f;
     }
+    Primitive2D::setDepth(depth);
+    font->setDepth(depth - 0.05f);
     bbox = BBox{x + ox, y + oy, w, h};
     return en_focus;
   }
@@ -67,11 +74,7 @@ struct Button : public Parts::ID
 using ButtonPtr  = std::shared_ptr<Button>;
 using ButtonList = std::list<ButtonPtr>;
 std::map<std::string, ButtonList> button_list;
-
-//
-std::string         current_layer = DefaultLayer;
-ButtonPtr           focus_button;
-FontDraw::WidgetPtr font;
+ButtonPtr                         focus_button;
 
 //
 void
@@ -241,6 +244,8 @@ update()
   auto& layer = button_list[current_layer];
   auto  mpos  = Graphics::getMousePosition();
 
+  Primitive2D::pushDepth(0.01f);
+  font->pushDepth(0.0f);
   bool focus = false;
   for (auto& btn : layer)
   {
@@ -283,6 +288,8 @@ update()
   // どこにもフォーカスしていない(enterによるホールドもされていない)
   if (!focus && focus_button && focus_button->press == false)
     focus_button.reset();
+  Primitive2D::popDepth();
+  font->popDepth();
 }
 
 } // namespace TextButton

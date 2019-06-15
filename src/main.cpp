@@ -126,13 +126,14 @@ main(int argc, char** argv)
   SBox->drawSheet(true, {0.1f, 0.4f, 0.5f, 0.4f});
   SBox->setDepth(-0.1f);
   std::list<TextButton::ID> btn_holder;
-  double                    by = 0;
+
+  double by = 20.0;
   for (int i = 0; i < 10; i++)
   {
     std::string l = "Item";
     l += std::to_string(i + 1);
     auto p = TextButton::setButton(
-        l, 0, by, [i]() { std::cout << "button" << i << std::endl; });
+        l, 50.0, by, [i]() { std::cout << "button" << i << std::endl; });
     by += p->getHeight() + 10;
     SBox->append(p);
     btn_holder.push_back(p);

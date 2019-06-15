@@ -70,6 +70,7 @@ class WidgetImpl : public Widget
   DrawSet current;
   bool    valid;
   float   depth;
+  float   sdepth;
 
 public:
   WidgetImpl(const char* fontname);
@@ -79,6 +80,12 @@ public:
   void setColor(Graphics::Color c) override;
   void print(const char* msg, float x, float y) override;
   void setDepth(float d) override { depth = d; }
+  void pushDepth(float d) override
+  {
+    sdepth = depth;
+    depth  = d;
+  }
+  void popDepth() override { depth = sdepth; }
 };
 
 // 文字テクスチャキャッシュ
