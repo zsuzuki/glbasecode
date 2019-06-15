@@ -17,19 +17,16 @@ namespace
 //
 FontDraw::WidgetPtr font;
 
-//
-struct Color
-{
-  float r, g, b, a;
-};
-constexpr Color white    = {1.0f, 1.0f, 1.0f, 1.0f};
-constexpr Color darkgray = {0.3f, 0.3f, 0.3f, 1.0f};
-constexpr Color gray     = {0.5f, 0.5f, 0.5f, 1.0f};
+using Color = Graphics::Color;
+const Color DarkGray{0.3f, 0.3f, 0.3f, 1.0f};
 
 std::map<ColorType, Color> color_map = {
-    {ColorType::UnFocusBG, darkgray}, {ColorType::FocusBG, gray},
-    {ColorType::PressBG, white},      {ColorType::UnFocusFont, white},
-    {ColorType::FocusFont, white},    {ColorType::PressFont, darkgray},
+    {ColorType::UnFocusBG, DarkGray},
+    {ColorType::FocusBG, Graphics::Gray},
+    {ColorType::PressBG, Graphics::White},
+    {ColorType::UnFocusFont, Graphics::White},
+    {ColorType::FocusFont, Graphics::White},
+    {ColorType::PressFont, DarkGray},
 };
 
 //
@@ -117,30 +114,12 @@ text_button(int action, bool enter)
 
 //
 void
-draw_box(const Button& btn, const Color& col)
+draw_box(const Button& btn, const Color col)
 {
-  auto bl  = btn.bbox.getLocate();
-  auto loc = Graphics::calcLocate(bl.x, bl.y, true);
-  auto sz  = Graphics::calcLocate(bl.x + btn.w, bl.y + btn.h, true);
-
-  Primitive2D::VertexList vl;
-  vl.resize(4);
-  vl[0].x = loc.x;
-  vl[0].y = loc.y;
-  vl[1].x = sz.x;
-  vl[1].y = loc.y;
-  vl[2].x = sz.x;
-  vl[2].y = sz.y;
-  vl[3].x = loc.x;
-  vl[3].y = sz.y;
-
-  for (auto& v : vl)
-  {
-    v.r = col.r;
-    v.g = col.g;
-    v.b = col.b;
-  }
-  Primitive2D::drawQuads(vl);
+  auto& bbox = btn.bbox;
+  auto  loc  = bbox.getLocate();
+  auto  btm  = bbox.getBottom();
+  Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, col, true);
 }
 
 //
@@ -274,7 +253,7 @@ update()
     draw_box(*btn, color_map[bg]);
     // キャプション
     auto fcol = color_map[fg];
-    font->setColor({fcol.r, fcol.g, fcol.b, fcol.a});
+    font->setColor(fcol);
     print(btn->caption, btn->getX() + 20, btn->getY() + 42);
   }
   // どこにもフォーカスしていない(enterによるホールドもされていない)
