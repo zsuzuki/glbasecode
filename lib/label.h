@@ -9,7 +9,15 @@ namespace Label
 {
 static constexpr const char* DefaultLayer = "default";
 
-using ID    = Parts::IDPtr;
+//
+struct Base : public Parts::ID
+{
+  virtual void setText(std::string)          = 0;
+  virtual void setFontColor(Graphics::Color) = 0;
+  virtual void setBGColor(Graphics::Color)   = 0;
+};
+
+using ID    = std::shared_ptr<Base>;
 using Color = Graphics::Color;
 
 //

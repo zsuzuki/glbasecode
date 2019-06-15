@@ -16,7 +16,7 @@ namespace
 FontDraw::WidgetPtr font;
 
 //
-struct Item : public Parts::ID
+struct Item : public Base
 {
   using BBox   = BoundingBox::Rect;
   using Parent = const Parts::ID;
@@ -36,6 +36,10 @@ struct Item : public Parts::ID
   int    getWidth() const override { return w; }
   int    getHeight() const override { return h; }
   void   setParent(const Parts::ID* p) override { parent = p; }
+
+  void setText(std::string l) override;
+  void setFontColor(Graphics::Color col) override { fgcol = col; }
+  void setBGColor(Graphics::Color col) override { bgcol = col; }
 
   void draw();
   bool update();
@@ -74,6 +78,21 @@ Item::draw()
   font->print(label.c_str(), pos.x, pos.y);
 }
 
+//
+void
+Item::setText(std::string str)
+{
+  double l  = CodeConv::U8Length2(str.c_str()) * 21.0;
+  auto   rx = x + l + 20 + 20;
+  auto   by = y + 20 + 32 + 10;
+
+  label  = str;
+  length = l;
+  w      = rx - x;
+  h      = by - y;
+  bbox   = BoundingBox::Rect{x, y, w, h};
+}
+
 } // namespace
 
 //
@@ -86,23 +105,16 @@ initialize(FontDraw::WidgetPtr f)
 ID
 create(std::string str, double x, double y, Color fg, Color bg)
 {
-  double l    = CodeConv::U8Length2(str.c_str()) * 21.0;
-  auto   rx   = x + l + 20 + 20;
-  auto   by   = y + 20 + 32 + 10;
-  auto   item = std::make_shared<Item>();
+  auto item = std::make_shared<Item>();
 
-  item->label  = str;
-  item->length = l;
   item->x      = x;
   item->y      = y;
-  item->w      = rx - x;
-  item->h      = by - y;
   item->ox     = 0.0;
   item->oy     = 0.0;
   item->parent = nullptr;
   item->fgcol  = fg;
   item->bgcol  = bg;
-  item->bbox   = BoundingBox::Rect{x, y, item->w, item->h};
+  item->setText(str);
 
   auto& item_list = layer.getCurrent();
   item_list.push_back(item);
