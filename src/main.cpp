@@ -15,10 +15,14 @@ namespace
 void
 key_callback(int key, int scancode, int action, int mods)
 {
+#if defined(_MSC_VER)
+  auto chmod = GLFW_MOD_CONTROL;
+#else
+  auto chmod = GLFW_MOD_SUPER;
+#endif
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     Graphics::finish();
-  else if (key == GLFW_KEY_F && action == GLFW_PRESS &&
-           mods == GLFW_MOD_CONTROL)
+  else if (key == GLFW_KEY_F && action == GLFW_PRESS && mods == chmod)
     Graphics::switchFullScreen();
   // else if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
 }
