@@ -1,4 +1,5 @@
 #include "textbutton.h"
+#include "bb.h"
 #include "codeconv.h"
 #include "font.h"
 #include "gl.h"
@@ -30,18 +31,38 @@ std::map<ColorType, Color> color_map = {
 //
 struct Button : public Parts::ID
 {
-  ~Button() = default;
+  using BBox   = BoundingBox::Rect;
+  using Parent = const Parts::ID;
+  ~Button()    = default;
   std::string   caption;
-  double        lx, rx, ty, by;
+  BBox          bbox;
   double        x, y;
+  double        w, h;
+  double        ox, oy;
+  double        length;
   PressCallback cb;
   bool          catch_enter;
   bool          press;
+  float         depth;
+  Parent*       parent;
 
-  double getX() const override { return x; }
-  double getY() const override { return y; }
-  int    getWidth() const override { return rx - lx; }
-  int    getHeight() const override { return by - ty; }
+  double getX() const override { return x + ox; }
+  double getY() const override { return y + oy; }
+  int    getWidth() const override { return w; }
+  int    getHeight() const override { return h; }
+  void   setParent(const Parts::ID* p) override { parent = p; }
+  bool   update()
+  {
+    bool en_focus = true;
+    if (parent)
+    {
+      ox       = parent->getPlacementX();
+      oy       = parent->getPlacementY();
+      en_focus = parent->getFocus();
+    }
+    bbox = BBox{x + ox, y + oy, w, h};
+    return en_focus;
+  }
 };
 using ButtonPtr  = std::shared_ptr<Button>;
 using ButtonList = std::list<ButtonPtr>;
@@ -90,10 +111,11 @@ text_button(int action, bool enter)
 
 //
 void
-draw_box(double lx, double ty, double rx, double by, const Color& col)
+draw_box(const Button& btn, const Color& col)
 {
-  auto loc = Graphics::calcLocate(lx, ty, true);
-  auto sz  = Graphics::calcLocate(rx, by, true);
+  auto bl  = btn.bbox.getLocate();
+  auto loc = Graphics::calcLocate(bl.x, bl.y, true);
+  auto sz  = Graphics::calcLocate(bl.x + btn.w, bl.y + btn.h, true);
 
   Primitive2D::VertexList vl;
   vl.resize(4);
@@ -141,19 +163,19 @@ setButton(std::string caption, double x, double y, PressCallback cb,
   auto& layer = button_list[current_layer];
 
   double l  = CodeConv::U8Length2(caption.c_str()) * 21.0;
-  auto   lx = x - 20;
-  auto   rx = x + l + 20;
-  auto   ty = y - 32 - 10;
-  auto   by = y + 20;
+  auto   rx = x + l + 20 + 20;
+  auto   by = y + 20 + 32 + 10;
 
   auto btn         = std::make_shared<Button>();
   btn->caption     = caption;
+  btn->length      = l;
   btn->x           = x;
   btn->y           = y;
-  btn->lx          = lx;
-  btn->rx          = rx;
-  btn->ty          = ty;
-  btn->by          = by;
+  btn->w           = rx - x;
+  btn->h           = by - y;
+  btn->ox          = 0.0;
+  btn->oy          = 0.0;
+  btn->bbox        = BoundingBox::Rect{x, y, btn->w, btn->h};
   btn->cb          = cb;
   btn->press       = false;
   btn->catch_enter = catch_enter;
@@ -222,22 +244,22 @@ update()
   bool focus = false;
   for (auto& btn : layer)
   {
+    bool ef       = btn->update();
     bool my_focus = focus_button == btn;
     if (!focus)
     {
-      if (btn->lx < mpos.x && btn->rx > mpos.x)
-        if (btn->ty < mpos.y && btn->by > mpos.y)
+      if (ef && btn->bbox.check(mpos.x, mpos.y))
+      {
+        // カーソルが乗っている場合のみ
+        my_focus = true;
+        focus    = true;
+        if (focus_button != btn)
         {
-          // カーソルが乗っている場合のみ
-          my_focus = true;
-          focus    = true;
-          if (focus_button != btn)
-          {
-            // フォーカスが切り替わった
-            focus_button = btn;
-            btn->press   = false;
-          }
+          // フォーカスが切り替わった
+          focus_button = btn;
+          btn->press   = false;
         }
+      }
     }
     // フォーカルによる色選択
     ColorType bg, fg;
@@ -252,11 +274,11 @@ update()
       fg = ColorType::UnFocusFont;
     }
     // 下敷きを描画
-    draw_box(btn->lx, btn->ty, btn->rx, btn->by, color_map[bg]);
+    draw_box(*btn, color_map[bg]);
     // キャプション
     auto fcol = color_map[fg];
     font->setColor({fcol.r, fcol.g, fcol.b, fcol.a});
-    print(btn->caption, btn->x, btn->y);
+    print(btn->caption, btn->getX() + 20, btn->getY() + 42);
   }
   // どこにもフォーカスしていない(enterによるホールドもされていない)
   if (!focus && focus_button && focus_button->press == false)

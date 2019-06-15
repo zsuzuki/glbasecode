@@ -111,6 +111,11 @@ public:
     l.y = bottom;
     return l;
   }
+
+  double getLeftX() const { return left; }
+  double getTopY() const { return top; }
+  double getWidth() const { return right - left; }
+  double getHeight() const { return bottom - top; }
 };
 
 }; // namespace BoundingBox

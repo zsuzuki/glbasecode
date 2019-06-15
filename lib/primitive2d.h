@@ -31,5 +31,7 @@ void drawTriangles(const VertexList&);
 void drawBox(double lx, double ty, double rx, double by, const Color& col,
              bool fill);
 void setDepth(float d);
+void pushDepth(float d);
+void popDepth();
 
 } // namespace Primitive2D

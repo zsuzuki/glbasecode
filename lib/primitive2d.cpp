@@ -30,7 +30,7 @@ const char* fg_sh = "#version 110\n"
 GLuint     vertex_shader, fragment_shader, program;
 GLuint     vertex_buffer[1];
 GLint      MVP, vpos, vcol, DEPTH;
-float      DrawDepth = 0.05f;
+float      DrawDepth = 0.05f, SaveDepth = 0.0f;
 VertexList box_vertex;
 
 } // namespace
@@ -99,6 +99,8 @@ setup(GLFWwindow* window)
                         &((Vertex*)0)->r);
 
   glDisable(GL_BLEND);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 //
@@ -121,6 +123,19 @@ setDepth(float d)
     DrawDepth = d;
     glUniform1f(DEPTH, DrawDepth);
   }
+}
+
+//
+void
+pushDepth(float d)
+{
+  SaveDepth = DrawDepth;
+  setDepth(d);
+}
+void
+popDepth()
+{
+  setDepth(SaveDepth);
 }
 
 //

@@ -2,6 +2,7 @@
 #include <font.h>
 #include <gl.h>
 #include <iostream>
+#include <list>
 #include <primitive2d.h>
 #include <scrollbox.h>
 #include <textbox.h>
@@ -34,8 +35,8 @@ drop_file(int num, const char** paths)
 void
 mouse_button(int button, int action, int mods)
 {
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-    std::cout << "Left Button" << std::endl;
+  // if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+  //   std::cout << "Left Button" << std::endl;
 }
 // scroll
 double scr_x, scr_y;
@@ -122,6 +123,20 @@ main(int argc, char** argv)
 
   auto SBox = ScrollBox::create();
   SBox->set(400, 400, 500, 500);
+  SBox->drawSheet(true, {0.1f, 0.4f, 0.5f, 0.4f});
+  SBox->setDepth(-0.1f);
+  std::list<TextButton::ID> btn_holder;
+  double                    by = 0;
+  for (int i = 0; i < 10; i++)
+  {
+    std::string l = "Item";
+    l += std::to_string(i + 1);
+    auto p = TextButton::setButton(
+        l, 0, by, [i]() { std::cout << "button" << i << std::endl; });
+    by += p->getHeight() + 10;
+    SBox->append(p);
+    btn_holder.push_back(p);
+  }
 
   // フレームループ
   while (auto window = Graphics::setupFrame())
