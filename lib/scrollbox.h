@@ -14,6 +14,7 @@ struct Base : public Parts::ID
   virtual void clear()                                     = 0;
   virtual void drawSheet(bool s, Graphics::Color scol)     = 0;
   virtual void setDepth(float d)                           = 0;
+  virtual void setScrollConstraint(bool sx, bool sy)       = 0;
 };
 
 std::shared_ptr<Base> create();

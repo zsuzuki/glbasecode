@@ -125,6 +125,7 @@ main(int argc, char** argv)
   SBox->set(400, 400, 500, 500);
   SBox->drawSheet(true, {0.1f, 0.4f, 0.5f, 0.4f});
   SBox->setDepth(-0.1f);
+  SBox->setScrollConstraint(true, false);
   std::list<TextButton::ID> btn_holder;
 
   double by = 20.0;

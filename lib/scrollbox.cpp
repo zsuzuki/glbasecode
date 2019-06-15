@@ -14,14 +14,16 @@ struct Box : public Base
   using ItemPtr  = std::weak_ptr<Parts::ID>;
   using ItemList = std::list<ItemPtr>;
 
-  ItemList          items;
-  double            xofs;
-  double            yofs;
-  double            depth;
-  bool              focus;
-  bool              draw_sheet;
-  BoundingBox::Rect bbox;
-  Graphics::Color   sheet_color;
+  ItemList          items{};
+  BoundingBox::Rect bbox{};
+  double            xofs        = 0.0;
+  double            yofs        = 0.0;
+  double            depth       = 0.0;
+  bool              focus       = false;
+  bool              xsc_const   = false;
+  bool              ysc_const   = false;
+  bool              draw_sheet  = false;
+  Graphics::Color   sheet_color = Graphics::Gray;
 
   void set(double x, double y, double w, double h) override;
   void append(Parts::IDPtr) override;
@@ -29,6 +31,11 @@ struct Box : public Base
   void clear() override;
   void drawSheet(bool s, Graphics::Color scol) override;
   void setDepth(float d) override;
+  void setScrollConstraint(bool sx, bool sy) override
+  {
+    xsc_const = sx;
+    ysc_const = sy;
+  }
 
   double getX() const override { return bbox.getLeftX(); }
   double getY() const override { return bbox.getTopY(); }
@@ -106,10 +113,20 @@ key_callback(int key, int scancode, int action, int mods)
   auto box = focus_box.lock();
   if (box->focus == false)
     return;
-  if (key == GLFW_KEY_UP)
-    box->yofs += 10;
-  else if (key == GLFW_KEY_DOWN)
-    box->yofs -= 10;
+  if (box->ysc_const == false)
+  {
+    if (key == GLFW_KEY_UP)
+      box->yofs += 10;
+    else if (key == GLFW_KEY_DOWN)
+      box->yofs -= 10;
+  }
+  if (box->xsc_const == false)
+  {
+    if (key == GLFW_KEY_RIGHT)
+      box->xofs += 10;
+    else if (key == GLFW_KEY_LEFT)
+      box->xofs -= 10;
+  }
 }
 void
 scroll_callback(double xofs, double yofs)
@@ -119,8 +136,10 @@ scroll_callback(double xofs, double yofs)
   auto box = focus_box.lock();
   if (box->focus == false)
     return;
-  box->xofs += xofs;
-  box->yofs += yofs;
+  if (box->xsc_const == false)
+    box->xofs += xofs;
+  if (box->ysc_const == false)
+    box->yofs += yofs;
 }
 
 } // namespace
