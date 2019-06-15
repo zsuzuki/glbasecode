@@ -1,6 +1,7 @@
 #include "scrollbox.h"
 #include "bb.h"
 #include "gl.h"
+#include "layer.h"
 #include "primitive2d.h"
 #include <iostream>
 #include <list>
@@ -56,7 +57,7 @@ struct Box : public Base
   void scroll_clip();
 };
 using BoxPtr = std::weak_ptr<Box>;
-std::list<BoxPtr> box_list;
+Layer<Box> layer;
 
 BoxPtr focus_box;
 bool   initialized = false;
@@ -186,7 +187,8 @@ scroll_callback(double xofs, double yofs)
 std::shared_ptr<Base>
 create()
 {
-  auto box = std::make_shared<Box>();
+  auto  box      = std::make_shared<Box>();
+  auto& box_list = layer.getCurrent();
   box_list.push_back(box);
   if (initialized == false)
   {
@@ -200,45 +202,57 @@ create()
 void
 update()
 {
-  auto mpos = Graphics::getMousePosition();
+  auto  mpos     = Graphics::getMousePosition();
+  auto& box_list = layer.getCurrent();
 
   std::shared_ptr<Box> new_focus;
-  for (auto bi = box_list.begin(); bi != box_list.end(); bi++)
+  for (auto box : box_list)
   {
-    auto& bp = *bi;
-    if (bp.expired())
+    auto& bb = box->bbox;
+
+    Graphics::Color col = Graphics::White;
+    if (!new_focus)
     {
-      bi = box_list.erase(bi);
+      box->focus = bb.check(mpos.x, mpos.y);
+      if (box->focus)
+        col = Graphics::Green;
+      new_focus = box;
     }
     else
+      box->focus = false;
+    auto loc = bb.getLocate();
+    auto btm = bb.getBottom();
+    Primitive2D::pushDepth(box->depth);
+    if (box->draw_sheet)
     {
-      auto  box = bp.lock();
-      auto& bb  = box->bbox;
-
-      Graphics::Color col = Graphics::White;
-      if (!new_focus)
-      {
-        box->focus = bb.check(mpos.x, mpos.y);
-        if (box->focus)
-          col = Graphics::Green;
-        new_focus = box;
-      }
-      else
-        box->focus = false;
-      auto loc = bb.getLocate();
-      auto btm = bb.getBottom();
-      Primitive2D::pushDepth(box->depth);
-      if (box->draw_sheet)
-      {
-        Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, box->sheet_color,
-                             true);
-      }
-      Primitive2D::setDepth(box->depth - 0.01f);
-      Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, col, false);
-      Primitive2D::popDepth();
+      Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, box->sheet_color, true);
     }
+    Primitive2D::setDepth(box->depth - 0.01f);
+    Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, col, false);
+    Primitive2D::popDepth();
   }
   focus_box = new_focus;
+}
+
+//
+void
+bindLayer(std::string l)
+{
+  layer.bind(l);
+}
+//
+void
+clearLayer(std::string l)
+{
+  layer.clear(l);
+}
+//
+void
+erase(SBoxPtr box)
+{
+  auto bp = std::dynamic_pointer_cast<Box>(box);
+  if (bp)
+    layer.erase(bp);
 }
 
 } // namespace ScrollBox

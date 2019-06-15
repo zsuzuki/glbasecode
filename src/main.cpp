@@ -102,7 +102,12 @@ main(int argc, char** argv)
                                    int x = tbid->getWidth() + 150;
                                    int y = tbid->getHeight() + 330;
                                    TextButton::setButton("Test2", x, y, []() {
-                                     std::cout << "Test2" << std::endl;
+                                     static bool sb_l = true;
+                                     if (sb_l)
+                                       ScrollBox::bindLayer("After");
+                                     else
+                                       ScrollBox::bindLayer();
+                                     sb_l = !sb_l;
                                    });
                                    newbtn = false;
                                  }
@@ -129,12 +134,14 @@ main(int argc, char** argv)
 
   Label::create("LABEL", 600, 150, Graphics::Red, Graphics::Gray);
 
+  ScrollBox::bindLayer("After");
   auto SBox = ScrollBox::create();
   SBox->set(400, 400, 500, 500);
   SBox->drawSheet(true, {0.1f, 0.4f, 0.5f, 0.4f});
   SBox->setDepth(-0.1f);
   SBox->setScrollConstraint(true, false);
   std::list<TextButton::ID> btn_holder;
+  ScrollBox::bindLayer();
 
   double by = 20.0;
   for (int i = 0; i < 10; i++)

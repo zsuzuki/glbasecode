@@ -2,6 +2,7 @@
 
 #include "gl_def.h"
 #include "parts.h"
+#include <string>
 
 namespace ScrollBox
 {
@@ -17,7 +18,19 @@ struct Base : public Parts::ID
   virtual void setScrollConstraint(bool sx, bool sy)       = 0;
 };
 
-std::shared_ptr<Base> create();
+using SBoxPtr = std::shared_ptr<Base>;
+
+static constexpr const char* DefaultLayer = "default";
+
+//
+void bindLayer(std::string layer = DefaultLayer);
+//
+void clearLayer(std::string layer = DefaultLayer);
+//
+void erase(SBoxPtr);
+
+//
+SBoxPtr create();
 
 //
 void update();
