@@ -145,6 +145,8 @@ Box::scroll_clip()
 void
 key_callback(int key, int scancode, int action, int mods)
 {
+  if (action != GLFW_PRESS && action != GLFW_REPEAT)
+    return;
   if (focus_box.expired())
     return;
   auto box = focus_box.lock();
