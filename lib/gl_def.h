@@ -49,6 +49,7 @@ static const Color Red{1.0f, 0.0f, 0.0f, 1.0f};
 static const Color Green{0.0f, 1.0f, 0.0f, 1.0f};
 static const Color Blue{0.0f, 0.0f, 1.0f, 1.0f};
 static const Color Gray{0.5f, 0.5f, 0.5f, 1.0f};
+static const Color DarkGray{0.3f, 0.3f, 0.3f, 1.0f};
 static const Color Yellow{1.0f, 1.0f, 0.0f, 1.0f};
 static const Color Magenta{1.0f, 0.0f, 1.0f, 1.0f};
 static const Color Cyan{0.0f, 1.0f, 1.0f, 1.0f};
