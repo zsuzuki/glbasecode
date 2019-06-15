@@ -2,6 +2,7 @@
 #include <font.h>
 #include <gl.h>
 #include <iostream>
+#include <label.h>
 #include <list>
 #include <primitive2d.h>
 #include <scrollbox.h>
@@ -75,6 +76,7 @@ main(int argc, char** argv)
   auto font = FontDraw::create("font/SourceHanCodeJP-Normal.otf");
   TextButton::initialize(font);
   TextBox::initialize(font);
+  Label::initialize(font);
 
   // put text-boxs
   TextBox::create("Text", 50, 500, 300, 50);
@@ -125,6 +127,8 @@ main(int argc, char** argv)
                         true);
   TextButton::bindLayer();
 
+  Label::create("LABEL", 600, 150, Graphics::Red, Graphics::Gray);
+
   auto SBox = ScrollBox::create();
   SBox->set(400, 400, 500, 500);
   SBox->drawSheet(true, {0.1f, 0.4f, 0.5f, 0.4f});
@@ -143,6 +147,8 @@ main(int argc, char** argv)
     SBox->append(p);
     btn_holder.push_back(p);
   }
+  SBox->append(
+      Label::create("InBox", 300, 100, Graphics::Yellow, Graphics::Blue));
 
   // フレームループ
   while (auto window = Graphics::setupFrame())
@@ -171,6 +177,7 @@ main(int argc, char** argv)
     font->print("Title: Top", -0.98f, 1.0f - (32.0f / 480.0f));
     TextBox::update();
     TextButton::update();
+    Label::update();
     ScrollBox::update();
     Primitive2D::cleanup();
     FontDraw::render(window);

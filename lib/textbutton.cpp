@@ -185,6 +185,7 @@ setButton(std::string caption, double x, double y, PressCallback cb,
   btn->bbox        = BoundingBox::Rect{x, y, btn->w, btn->h};
   btn->cb          = cb;
   btn->press       = false;
+  btn->parent      = nullptr;
   btn->catch_enter = catch_enter;
 
   layer.push_back(btn);
