@@ -42,7 +42,7 @@ addu8str(const char* text)
 void
 key_input(int num, int scancode, int action, int mods)
 {
-  if (action != GLFW_PRESS)
+  if (action != GLFW_PRESS && action != GLFW_REPEAT)
     return;
 
   auto& buffer  = manage->buffer;
