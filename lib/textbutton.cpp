@@ -54,9 +54,11 @@ struct Button : public Parts::ID
   int    getWidth() const override { return w; }
   int    getHeight() const override { return h; }
   void   setParent(const Parts::ID* p) override { parent = p; }
-  bool   update()
+
+  std::pair<bool, bool> update()
   {
     float depth    = 0.0f;
+    float inrect   = true;
     bool  en_focus = true;
     if (parent)
     {
@@ -68,7 +70,9 @@ struct Button : public Parts::ID
     Primitive2D::setDepth(depth);
     font->setDepth(depth - 0.05f);
     bbox = BBox{x + ox, y + oy, w, h};
-    return en_focus;
+    if (parent)
+      inrect = parent->inRect(bbox);
+    return std::make_pair(inrect, en_focus);
   }
 };
 using ButtonPtr  = std::shared_ptr<Button>;
@@ -249,11 +253,13 @@ update()
   bool focus = false;
   for (auto& btn : layer)
   {
-    bool ef       = btn->update();
+    auto ef = btn->update();
+    if (!ef.first)
+      continue;
     bool my_focus = focus_button == btn;
     if (!focus)
     {
-      if (ef && btn->bbox.check(mpos.x, mpos.y))
+      if (ef.second && btn->bbox.check(mpos.x, mpos.y))
       {
         // カーソルが乗っている場合のみ
         my_focus = true;

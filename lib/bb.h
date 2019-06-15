@@ -116,6 +116,15 @@ public:
   double getTopY() const { return top; }
   double getWidth() const { return right - left; }
   double getHeight() const { return bottom - top; }
+
+  bool checkHit(const Rect& r) const
+  {
+    if (left > r.right || right < r.left)
+      return false;
+    if (top > r.bottom || bottom < r.top)
+      return false;
+    return true;
+  }
 };
 
 }; // namespace BoundingBox

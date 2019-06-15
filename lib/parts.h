@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bb.h"
 #include <memory>
 
 namespace Parts
@@ -18,6 +19,7 @@ struct ID
   virtual void   setParent(const ID*) {}
   virtual double getPlacementX() const { return getX(); }
   virtual double getPlacementY() const { return getY(); }
+  virtual bool   inRect(const BoundingBox::Rect&) const { return true; }
 };
 
 using IDPtr = std::shared_ptr<ID>;

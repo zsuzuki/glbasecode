@@ -38,6 +38,10 @@ struct Box : public Base
   bool   getFocus() const override { return focus; }
   double getPlacementX() const override { return getX() + xofs; }
   double getPlacementY() const override { return getY() + yofs; }
+  bool   inRect(const BoundingBox::Rect& r) const override
+  {
+    return bbox.checkHit(r);
+  }
 };
 using BoxPtr = std::weak_ptr<Box>;
 std::list<BoxPtr> box_list;
