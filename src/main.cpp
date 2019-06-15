@@ -90,8 +90,11 @@ main(int argc, char** argv)
   Exec::setCloseFunc([]() { std::cout << "execute done." << std::endl; });
 
   // put text buttons
-  TextButton::setButton("Input", 150, 260,
-                        []() { TextButton::bindLayer("Submit"); });
+  TextButton::setButton("Input", 150, 260, []() {
+    TextButton::bindLayer("Submit");
+    ScrollBox::bindLayer("Submit");
+    Label::bindLayer("Submit");
+  });
   bool           newbtn = true;
   TextButton::ID tbid;
   tbid = TextButton::setButton("Test1", 150, 330,
@@ -102,12 +105,7 @@ main(int argc, char** argv)
                                    int x = tbid->getWidth() + 150;
                                    int y = tbid->getHeight() + 330;
                                    TextButton::setButton("Test2", x, y, []() {
-                                     static bool sb_l = true;
-                                     if (sb_l)
-                                       ScrollBox::bindLayer("After");
-                                     else
-                                       ScrollBox::bindLayer();
-                                     sb_l = !sb_l;
+                                     std::cout << "Test2" << std::endl;
                                    });
                                    newbtn = false;
                                  }
@@ -116,10 +114,10 @@ main(int argc, char** argv)
   TextButton::bindLayer("Submit");
   TextButton::setButton("Submit", 150, 260,
                         [&]() {
-                          if (Exec::now_exec == false)
+                          auto cmd = tb->getText();
+                          if (cmd.empty() == false && Exec::now_exec == false)
                           {
-                            auto cmd = tb->getText();
-                            handle   = Exec::run(cmd.c_str(), ".", nullptr);
+                            handle = Exec::run(cmd.c_str(), ".", nullptr);
                             if (!handle)
                             {
                               std::cout << "execute error" << std::endl;
@@ -128,20 +126,22 @@ main(int argc, char** argv)
                             inf = handle->getIStream();
                           }
                           TextButton::bindLayer();
+                          ScrollBox::bindLayer();
+                          Label::bindLayer();
                         },
                         true);
-  TextButton::bindLayer();
 
   Label::create("LABEL", 600, 150, Graphics::Red, Graphics::Gray);
 
-  ScrollBox::bindLayer("After");
+  ScrollBox::bindLayer("Submit");
+  TextButton::bindLayer("Submit");
+  Label::bindLayer("Submit");
   auto SBox = ScrollBox::create();
   SBox->set(400, 400, 500, 500);
   SBox->drawSheet(true, {0.1f, 0.4f, 0.5f, 0.4f});
   SBox->setDepth(-0.1f);
   SBox->setScrollConstraint(true, false);
   std::list<TextButton::ID> btn_holder;
-  ScrollBox::bindLayer();
 
   double by = 20.0;
   for (int i = 0; i < 10; i++)
@@ -156,6 +156,10 @@ main(int argc, char** argv)
   }
   SBox->append(
       Label::create("InBox", 300, 100, Graphics::Yellow, Graphics::Blue));
+
+  ScrollBox::bindLayer();
+  TextButton::bindLayer();
+  Label::bindLayer();
 
   // フレームループ
   while (auto window = Graphics::setupFrame())
