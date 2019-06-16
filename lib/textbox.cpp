@@ -12,31 +12,39 @@ namespace TextBox
 {
 namespace
 {
+using BBox   = BoundingBox::Rect;
+using Parent = const Parts::ID;
+using Color  = Graphics::Color;
 
 constexpr double BaseX = 12.0;
 constexpr double BaseY = 24.0;
 
 //
-class ItemImpl : public Item
+struct ItemImpl : public Item
 {
-public:
-  std::string       text;
-  std::string       place_holder;
-  BoundingBox::Rect bbox;
-  size_t            max_length;
-  Graphics::Color   font_color;
-  Graphics::Color   bg_color;
-  Graphics::Color   ph_color;
-  double            ofs_y;
-  bool              draw_border;
-  bool              on_edit;
+  std::string text;
+  std::string place_holder;
+  BBox        bbox{};
+  double      x, y;
+  double      w, h;
+  double      ox, oy;
+  size_t      max_length  = 99;
+  Color       font_color  = Graphics::White;
+  Color       bg_color    = Graphics::Black;
+  Color       ph_color    = Graphics::Gray;
+  double      ofs_y       = 0.0;
+  bool        draw_border = true;
+  bool        on_edit     = false;
+  Parent*     parent      = nullptr;
 
-  ItemImpl(std::string t, double x, double y, double w, double h)
-      : Item(), text(t), bbox(x, y, w, h), max_length(99),
-        font_color(Graphics::White), ph_color(Graphics::Gray),
-        bg_color(Graphics::Black), ofs_y(0.0), draw_border(true),
-        on_edit(false){};
+  ItemImpl()  = default;
   ~ItemImpl() = default;
+
+  double getX() const override { return bbox.getLeftX(); }
+  double getY() const override { return bbox.getTopY(); }
+  int    getWidth() const override { return w; }
+  int    getHeight() const override { return h; }
+  void   setParent(const Parts::ID* p) override { parent = p; }
 
   void        setPlaceHolder(std::string ph) override { place_holder = ph; }
   void        drawBorder(bool draw) override { draw_border = draw; }
@@ -46,8 +54,9 @@ public:
   void setPlaceHolderColor(Graphics::Color pc) override { ph_color = pc; }
   void setMaxLength(size_t ml) override { max_length = ml; }
 
-  void drawBG();
-  void drawCursor();
+  std::pair<bool, bool> update();
+  void                  draw();
+  void                  drawCursor();
 };
 using ItemImplPtr = std::shared_ptr<ItemImpl>;
 
@@ -56,31 +65,6 @@ ItemImplPtr         focus_input;
 ItemImplPtr         edit_input;
 FontDraw::WidgetPtr font;
 Layer<ItemImpl>     layer;
-
-//
-void
-ItemImpl::drawBG()
-{
-  auto lt = bbox.getLocate();
-  auto rb = bbox.getBottom();
-  auto l1 = Graphics::calcLocate(lt.x, lt.y, true);
-  auto l2 = Graphics::calcLocate(rb.x, rb.y, true);
-
-  static Primitive2D::VertexList ul;
-  ul.resize(5);
-  for (auto& v : ul)
-  {
-    v.r = 1.0f;
-    v.g = 1.0f;
-    v.b = 1.0f;
-    v.a = 1.0f;
-  }
-  ul[0].x = ul[3].x = ul[4].x = l1.x;
-  ul[0].y = ul[1].y = ul[4].y = l1.y;
-  ul[1].x = ul[2].x = l2.x;
-  ul[2].y = ul[3].y = l2.y;
-  Primitive2D::drawLine(ul, 2.0f);
-}
 
 //
 void
@@ -103,6 +87,25 @@ on_click(int action, bool enter)
 }
 
 //
+std::pair<bool, bool>
+ItemImpl::update()
+{
+  float depth = 0.0f;
+  bool  en    = true;
+  if (parent)
+  {
+    ox    = parent->getPlacementX();
+    oy    = parent->getPlacementY();
+    en    = parent->getFocus();
+    depth = parent->getDepth() - 0.1f;
+  }
+  Primitive2D::setDepth(depth);
+  font->setDepth(depth - 0.05f);
+  bbox = BBox{x + ox, y + oy, w, h};
+  return std::make_pair(parent ? parent->inRect(bbox) : true, en);
+}
+
+//
 void
 ItemImpl::drawCursor()
 {
@@ -121,6 +124,46 @@ ItemImpl::drawCursor()
   ul[1].x = l2.x;
   ul[1].y = l2.y;
   Primitive2D::drawLine(ul, 4.0f);
+}
+
+//
+void
+ItemImpl::draw()
+{
+  if (parent)
+  {
+    auto px = parent->getX();
+    auto py = parent->getY();
+    auto pw = parent->getWidth();
+    auto ph = parent->getHeight();
+    Graphics::enableScissor(px, py, pw, ph);
+    font->setDrawArea(px, py, pw, ph);
+  }
+  auto loc = bbox.getLocate();
+  auto btm = bbox.getBottom();
+  if (draw_border)
+    Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, Graphics::White, false);
+  if (on_edit)
+  {
+    drawCursor();
+    if (TextInput::onInput())
+      text = TextInput::get();
+  }
+
+  auto pos = Graphics::calcLocate(loc.x + BaseX, loc.y + ofs_y);
+  if (text.empty())
+  {
+    font->setColor(ph_color);
+    font->print(place_holder.c_str(), pos.x, pos.y);
+  }
+  else
+  {
+    font->setColor(font_color);
+    font->print(text.c_str(), pos.x, pos.y);
+  }
+
+  Graphics::disableScissor();
+  font->clearDrawArea();
 }
 
 //
@@ -173,18 +216,28 @@ create(std::string t, double x, double y, double w, double h)
 {
   if (w == 0.0)
   {
-    w = t.length() * BaseY + 30;
+    w = t.length() * 21;
+    if (w == 0.0)
+      w = 16 * 21;
+    w += 40;
     x -= 20.0;
   }
   if (h == 0.0)
   {
-    y -= 40;
-    h = 40;
+    y -= 48;
+    h = 48;
   }
-  auto item = std::make_shared<ItemImpl>(t, x, y, w, h);
+  auto item = std::make_shared<ItemImpl>();
   auto o    = (h - BaseY) * 0.5;
   if (o >= 0.0)
     item->ofs_y = BaseY + o;
+  item->text = t;
+  item->x    = x;
+  item->y    = y;
+  item->w    = w;
+  item->h    = h;
+  item->ox   = 0.0;
+  item->oy   = 0.0;
 
   auto& item_list = layer.getCurrent();
   item_list.push_back(item);
@@ -203,35 +256,32 @@ initialize(FontDraw::WidgetPtr f)
 void
 update()
 {
+  Primitive2D::pushDepth(0.01f);
+  font->pushDepth(0.0f);
+  auto  mpos      = Graphics::getMousePosition();
   auto& item_list = layer.getCurrent();
   for (auto& item : item_list)
   {
-    auto mpos = Graphics::getMousePosition();
-    if (item->bbox.check(mpos.x, mpos.y))
+    auto r = item->update();
+    if (r.first == false)
+    {
+      if (edit_input == item)
+      {
+        std::cout << "fnish edit" << std::endl;
+        edit_input->on_edit = false;
+        edit_input.reset();
+        if (TextInput::onInput())
+          TextInput::finish();
+      }
+      continue;
+    }
+    if (r.second && item->bbox.check(mpos.x, mpos.y))
       set_focus(item);
 
-    auto sloc = item->bbox.getLocate();
-    if (item->draw_border)
-      item->drawBG();
-    if (item->on_edit)
-    {
-      item->drawCursor();
-      if (TextInput::onInput())
-        item->text = TextInput::get();
-    }
-
-    auto gloc = Graphics::calcLocate(sloc.x + BaseX, sloc.y + item->ofs_y);
-    if (item->text.empty())
-    {
-      font->setColor(item->ph_color);
-      font->print(item->place_holder.c_str(), gloc.x, gloc.y);
-    }
-    else
-    {
-      font->setColor(item->font_color);
-      font->print(item->text.c_str(), gloc.x, gloc.y);
-    }
+    item->draw();
   }
+  Primitive2D::popDepth();
+  font->popDepth();
 }
 
 } // namespace TextBox

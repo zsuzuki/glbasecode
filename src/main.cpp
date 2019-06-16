@@ -102,8 +102,9 @@ main(int argc, char** argv)
                                  std::cout << "Test1" << std::endl;
                                  if (newbtn)
                                  {
-                                   int x = tbid->getWidth() + 150;
-                                   int y = tbid->getHeight() + 330;
+                                   int x = tbid->getX();
+                                   int y =
+                                       tbid->getY() + tbid->getHeight() + 20;
                                    TextButton::setButton("Test2", x, y, []() {
                                      std::cout << "Test2" << std::endl;
                                    });
@@ -143,19 +144,25 @@ main(int argc, char** argv)
   SBox->setScrollConstraint(true, false);
   std::list<TextButton::ID> btn_holder;
 
-  double by = 20.0;
+  auto   sct = TextBox::create("Scroll Box", 300, 170, 300, 50);
+  double by  = 20.0;
   for (int i = 0; i < 20; i++)
   {
     std::string l = "Item";
     l += std::to_string(i + 1);
-    auto p = TextButton::setButton(
-        l, 50.0, by, [i]() { std::cout << "button" << i << std::endl; });
+    auto p = TextButton::setButton(l, 50.0, by, [i, sct]() {
+      if (i != 3)
+        std::cout << "button" << (i + 1) << std::endl;
+      else
+        std::cout << "Text:" << sct->getText() << std::endl;
+    });
     by += p->getHeight() + 10;
     SBox->append(p);
     btn_holder.push_back(p);
   }
   SBox->append(
       Label::create("InBox", 300, 100, Graphics::Yellow, Graphics::Blue));
+  SBox->append(sct);
 
   ScrollBox::bindLayer();
   TextButton::bindLayer();

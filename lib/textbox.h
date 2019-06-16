@@ -2,18 +2,15 @@
 
 #include "font.h"
 #include "gl_def.h"
+#include "parts.h"
 #include <memory>
 #include <string>
 
 namespace TextBox
 {
 //
-class Item
+struct Item : public Parts::ID
 {
-public:
-  Item()          = default;
-  virtual ~Item() = default;
-
   virtual void        setPlaceHolder(std::string)          = 0;
   virtual void        drawBorder(bool draw)                = 0;
   virtual std::string getText() const                      = 0;
