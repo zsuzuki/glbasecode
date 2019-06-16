@@ -44,6 +44,28 @@ static const char* fragment_shader_text =
 // 色
 using Color = Graphics::Color;
 
+//
+struct DrawArea
+{
+  double x = 0.0;
+  double y = 0.0;
+  double w = 0.0;
+  double h = 0.0;
+  bool   e = false;
+
+  void set(const DrawArea& old)
+  {
+    if (e)
+    {
+      if (old.e == false || x != old.x || y != old.y || w != old.w ||
+          h != old.h)
+        Graphics::enableScissor(x, y, w, h);
+    }
+    else if (old.e)
+      Graphics::disableScissor();
+  }
+};
+
 // フォント描画1つ分
 struct DrawSet
 {
@@ -55,6 +77,7 @@ struct DrawSet
   float       x      = 0.0f;
   float       y      = 0.0f;
   float       depth  = 0.0f;
+  DrawArea    da{};
   Color       color{};
   const char* msg = nullptr;
 };
@@ -66,11 +89,12 @@ std::vector<DrawSet> draw_set;
 //
 class WidgetImpl : public Widget
 {
-  FT_Face face;
-  DrawSet current;
-  bool    valid;
-  float   depth;
-  float   sdepth;
+  FT_Face  face;
+  DrawSet  current;
+  bool     valid;
+  float    depth;
+  float    sdepth;
+  DrawArea da;
 
 public:
   WidgetImpl(const char* fontname);
@@ -86,6 +110,15 @@ public:
     depth  = d;
   }
   void popDepth() override { depth = sdepth; }
+  void setDrawArea(double x, double y, double w, double h) override
+  {
+    da.x = x;
+    da.y = y;
+    da.w = w;
+    da.h = h;
+    da.e = true;
+  }
+  void clearDrawArea() override { da.e = false; }
 };
 
 // 文字テクスチャキャッシュ
@@ -261,12 +294,16 @@ render(GLFWwindow* window)
   auto ws  = Graphics::getWindowSize();
   auto bsx = 2.0 / ws.width;
   auto bsy = 2.0 / ws.height;
+  auto da  = DrawArea{};
   for (auto& ds : draw_set)
   {
     glUniform4fv(uniform_color, 1, (GLfloat*)&ds.color);
     glUniform1f(DEPTH, ds.depth);
+    ds.da.set(da);
+    da = ds.da;
     render(ds.face, ds.msg, (float)ds.x, (float)ds.y, (float)bsx, (float)bsy);
   }
+  Graphics::disableScissor();
 
   // cleanup
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -327,6 +364,7 @@ WidgetImpl::print(const char* msg, float x, float y)
   nds.y     = y;
   nds.depth = depth;
   nds.msg   = &message_buffer[p];
+  nds.da    = da;
   draw_set.emplace_back(nds);
 }
 

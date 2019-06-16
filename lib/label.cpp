@@ -69,6 +69,15 @@ Item::update()
 void
 Item::draw()
 {
+  if (parent)
+  {
+    auto px = parent->getX();
+    auto py = parent->getY();
+    auto pw = parent->getWidth();
+    auto ph = parent->getHeight();
+    Graphics::enableScissor(px, py, pw, ph);
+    font->setDrawArea(px, py, pw, ph);
+  }
   auto loc = bbox.getLocate();
   auto btm = bbox.getBottom();
   if (bgcol.a > 0.0)
@@ -76,6 +85,8 @@ Item::draw()
   font->setColor(fgcol);
   auto pos = Graphics::calcLocate(loc.x + 20, loc.y + 42);
   font->print(label.c_str(), pos.x, pos.y);
+  Graphics::disableScissor();
+  font->clearDrawArea();
 }
 
 //

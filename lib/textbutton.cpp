@@ -71,6 +71,8 @@ struct Button : public Parts::ID
       inrect = parent->inRect(bbox);
     return std::make_pair(inrect, en_focus);
   }
+
+  void draw(ColorType fg, ColorType bg);
 };
 using ButtonPtr = std::shared_ptr<Button>;
 ButtonPtr     focus_button;
@@ -116,10 +118,6 @@ text_button(int action, bool enter)
 void
 draw_box(const Button& btn, const Color col)
 {
-  auto& bbox = btn.bbox;
-  auto  loc  = bbox.getLocate();
-  auto  btm  = bbox.getBottom();
-  Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, col, true);
 }
 
 //
@@ -128,6 +126,35 @@ print(const std::string msg, double x, double y)
 {
   auto loc = Graphics::calcLocate(x, y);
   font->print(msg.c_str(), (float)loc.x, (float)loc.y);
+}
+
+//
+void
+Button::draw(ColorType fg, ColorType bg)
+{
+  if (parent)
+  {
+    auto px = parent->getX();
+    auto py = parent->getY();
+    auto pw = parent->getWidth();
+    auto ph = parent->getHeight();
+    Graphics::enableScissor(px, py, pw, ph);
+    font->setDrawArea(px, py, pw, ph);
+  }
+
+  // 下敷きを描画
+  auto bcol = color_map[bg];
+  auto loc  = bbox.getLocate();
+  auto btm  = bbox.getBottom();
+  Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, bcol, true);
+
+  // キャプション
+  auto fcol = color_map[fg];
+  font->setColor(fcol);
+  print(caption, getX() + 20, getY() + 42);
+
+  Graphics::disableScissor();
+  font->clearDrawArea();
 }
 
 } // namespace
@@ -249,12 +276,7 @@ update()
       bg = ColorType::UnFocusBG;
       fg = ColorType::UnFocusFont;
     }
-    // 下敷きを描画
-    draw_box(*btn, color_map[bg]);
-    // キャプション
-    auto fcol = color_map[fg];
-    font->setColor(fcol);
-    print(btn->caption, btn->getX() + 20, btn->getY() + 42);
+    btn->draw(fg, bg);
   }
   // どこにもフォーカスしていない(enterによるホールドもされていない)
   if (!focus && focus_button && focus_button->press == false)

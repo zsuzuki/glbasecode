@@ -32,4 +32,6 @@ Locate      getMousePosition();
 void        setClipboardString(const char*);
 const char* getClipboardString();
 void        switchFullScreen();
+void        enableScissor(double x, double y, double w, double h);
+void        disableScissor();
 } // namespace Graphics

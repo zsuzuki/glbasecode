@@ -304,4 +304,17 @@ getClipboardString()
   return glfwGetClipboardString(window);
 }
 
+//
+void
+enableScissor(double x, double y, double w, double h)
+{
+  glEnable(GL_SCISSOR_TEST);
+  glScissor(x + 1, window_size.height - y - h + 1, w - 1, h - 1);
+}
+void
+disableScissor()
+{
+  glDisable(GL_SCISSOR_TEST);
+}
+
 } // namespace Graphics
