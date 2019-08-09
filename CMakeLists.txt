@@ -33,6 +33,7 @@ set(main_src
     lib/codeconv.cpp
     lib/scrollbox.cpp
     lib/label.cpp
+    lib/checkbox.cpp
     lib/exec.cpp)
 
 add_executable(${PROJECT_NAME} ${main_src})

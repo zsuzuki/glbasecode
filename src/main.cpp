@@ -1,3 +1,4 @@
+#include <checkbox.h>
 #include <exec.h>
 #include <font.h>
 #include <gl.h>
@@ -36,13 +37,6 @@ drop_file(int num, const char** paths)
     std::cout << paths[i] << std::endl;
   }
 }
-// mouse push
-void
-mouse_button(int button, int action, int mods)
-{
-  // if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-  //   std::cout << "Left Button" << std::endl;
-}
 // scroll
 double scr_x, scr_y;
 void
@@ -65,9 +59,7 @@ main(int argc, char** argv)
   if (!Graphics::initialize("Sample", w, h))
     return 1;
 
-  Graphics::setKeyCallback(key_callback);
   Graphics::setDropCallback(drop_file);
-  Graphics::setMouseButtonCallback(mouse_button);
   Graphics::setScrollCallback(scroll);
 
   Primitive2D::initialize();
@@ -77,6 +69,7 @@ main(int argc, char** argv)
   TextButton::initialize(font);
   TextBox::initialize(font);
   Label::initialize(font);
+  CheckBox::initialize(font);
 
   // put text-boxs
   TextBox::create("Text", 50, 500, 300, 50);
@@ -164,9 +157,12 @@ main(int argc, char** argv)
       Label::create("InBox", 300, 100, Graphics::Yellow, Graphics::Blue));
   SBox->append(sct);
 
+  CheckBox::create("CheckBox", 100, 100, false);
+
   ScrollBox::bindLayer();
   TextButton::bindLayer();
   Label::bindLayer();
+  CheckBox::bindLayer();
 
   // フレームループ
   while (auto window = Graphics::setupFrame())
@@ -196,6 +192,7 @@ main(int argc, char** argv)
     TextBox::update();
     TextButton::update();
     Label::update();
+    CheckBox::update();
     ScrollBox::update();
     Primitive2D::cleanup();
     FontDraw::render(window);

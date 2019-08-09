@@ -8,23 +8,21 @@ namespace Graphics
 namespace
 {
 //
-GLFWwindow*      window             = nullptr;
-KeyCallback      key_callback       = nullptr;
-DropCallback     drop_callback      = nullptr;
-MouseBtnCallback mbtn_callback      = nullptr;
-KeyCallback      text_key_callback  = nullptr;
-TextCallback     text_char_callback = nullptr;
-ScrollCallback   scroll_callback    = nullptr;
-ScrollCallback   sbox_scr_callback  = nullptr;
-KeyCallback      sbox_key_callback  = nullptr;
-WindowSize       window_size{};
-Locate           mouse_pos{};
-float            xscale = 1.0f;
-float            yscale = 1.0f;
-WindowSize       max_size{};
-Locate           base_pos{};
-WindowSize       base_size{};
-bool             now_fullscreen = false;
+GLFWwindow*    window             = nullptr;
+DropCallback   drop_callback      = nullptr;
+KeyCallback    text_key_callback  = nullptr;
+TextCallback   text_char_callback = nullptr;
+ScrollCallback scroll_callback    = nullptr;
+ScrollCallback sbox_scr_callback  = nullptr;
+KeyCallback    sbox_key_callback  = nullptr;
+WindowSize     window_size{};
+Locate         mouse_pos{};
+float          xscale = 1.0f;
+float          yscale = 1.0f;
+WindowSize     max_size{};
+Locate         base_pos{};
+WindowSize     base_size{};
+bool           now_fullscreen = false;
 
 std::list<ClickCallback> click_callback;
 
@@ -98,8 +96,6 @@ initialize(const char* appname, int w, int h)
 
   glfwSetKeyCallback(
       window, [](auto window, int key, int scancode, int action, int mods) {
-        if (key_callback)
-          key_callback(key, scancode, action, mods);
         if (text_key_callback)
           text_key_callback(key, scancode, action, mods);
         if (sbox_key_callback)
@@ -117,8 +113,6 @@ initialize(const char* appname, int w, int h)
   });
   glfwSetMouseButtonCallback(window,
                              [](auto window, int btn, int action, int mods) {
-                               if (mbtn_callback)
-                                 mbtn_callback(btn, action, mods);
                                if (btn == GLFW_MOUSE_BUTTON_LEFT)
                                {
                                  for (auto& fn : click_callback)
@@ -182,22 +176,9 @@ finish()
 
 //
 void
-setKeyCallback(KeyCallback cb)
-{
-  key_callback = cb;
-}
-//
-void
 setDropCallback(DropCallback cb)
 {
   drop_callback = cb;
-}
-
-//
-void
-setMouseButtonCallback(MouseBtnCallback cb)
-{
-  mbtn_callback = cb;
 }
 
 //

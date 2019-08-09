@@ -20,10 +20,8 @@ void        cleanupFrame();
 void        terminate();
 void        finish();
 Locate      calcLocate(double x, double y, bool asp = false);
-void        setKeyCallback(KeyCallback);
 void        setDropCallback(DropCallback);
-void        setMouseButtonCallback(MouseBtnCallback);
-void        setTextInputCallback(KeyCallback, TextCallback); // for text only
+void        setTextInputCallback(KeyCallback, TextCallback);
 void        setClickCallback(ClickCallback);
 void        setScrollCallback(ScrollCallback);
 void        setScrollBoxFunction(ScrollCallback, KeyCallback);
