@@ -156,7 +156,9 @@ main(int argc, char** argv)
       Label::create("InBox", 300, 100, Graphics::Yellow, Graphics::Blue));
   SBox->append(sct);
 
-  CheckBox::create("CheckBox", 100, 100, false);
+  auto cb = CheckBox::create("✓", 100, 100, false);
+  cb->setOnColor(Graphics::Green);
+  cb->setOffText("Off");
 
   ScrollBox::bindLayer();
   TextButton::bindLayer();

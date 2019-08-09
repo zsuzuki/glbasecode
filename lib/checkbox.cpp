@@ -21,15 +21,23 @@ struct Item : public Base
 {
   using BBox   = BoundingBox::Rect;
   using Parent = const Parts::ID;
-  ~Item()      = default;
-  std::string label;
-  BBox        bbox;
-  double      x, y;
-  double      w, h;
-  double      ox, oy;
-  double      length;
-  bool        value;
-  Parent*     parent;
+  using Color  = Graphics::Color;
+  struct Info
+  {
+    std::string label;
+    double      length;
+    Color       color;
+  };
+  ~Item() = default;
+  Info    on_info;
+  Info    off_info;
+  BBox    bbox;
+  double  x, y;
+  double  w, h;
+  double  ox, oy;
+  double  length;
+  bool    value;
+  Parent* parent;
 
   double getX() const override { return x + ox; }
   double getY() const override { return y + oy; }
@@ -38,13 +46,18 @@ struct Item : public Base
   void   setParent(const Parts::ID* p) override { parent = p; }
 
   void setText(std::string) override;
+  void setOffText(std::string) override;
   void setValue(bool v) override { value = v; }
   bool getValue() const override { return value; }
 
+  void setOnColor(Graphics::Color c) override { on_info.color = c; }
+  void setOffColor(Graphics::Color c) override { off_info.color = c; }
+
   operator bool() const override { return getValue(); }
 
-  void draw(bool);
-  bool update();
+  double setBBox(const std::string& s);
+  void   draw(bool);
+  bool   update();
 };
 
 using ItemPtr  = std::shared_ptr<Item>;
@@ -99,27 +112,49 @@ Item::draw(bool focus)
   auto loc = bbox.getLocate();
   auto btm = bbox.getBottom();
   Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, Graphics::Gray, false);
-  auto pos = Graphics::calcLocate(loc.x + 20, loc.y + 42);
-  font->setColor(value ? Graphics::White : Graphics::Gray);
-  font->print(label.c_str(), pos.x, pos.y);
+
+  auto& info   = value ? on_info : off_info;
+  auto  offset = (length - info.length) * 0.5;
+  auto  pos    = Graphics::calcLocate(loc.x + 20 + offset, loc.y + 42);
+  font->setColor(info.color);
+  font->print(info.label.c_str(), pos.x, pos.y);
 
   Graphics::disableScissor();
   font->clearDrawArea();
 }
 
 //
+double
+Item::setBBox(const std::string& s)
+{
+  double l = CodeConv::U8Length2(s.c_str()) * 21.0;
+  if (l > length)
+  {
+    auto rx = x + l + 20 + 20;
+    auto by = y + 20 + 32 + 10;
+
+    length = l;
+    w      = rx - x;
+    h      = by - y;
+    bbox   = BoundingBox::Rect{x, y, w, h};
+  }
+  return l;
+}
+
+//
 void
 Item::setText(std::string str)
 {
-  double l  = CodeConv::U8Length2(str.c_str()) * 21.0;
-  auto   rx = x + l + 20 + 20;
-  auto   by = y + 20 + 32 + 10;
+  on_info.label  = str;
+  on_info.length = setBBox(str);
+}
 
-  label  = str;
-  length = l;
-  w      = rx - x;
-  h      = by - y;
-  bbox   = BoundingBox::Rect{x, y, w, h};
+//
+void
+Item::setOffText(std::string str)
+{
+  off_info.label  = str;
+  off_info.length = setBBox(str);
 }
 
 } // namespace
@@ -143,7 +178,12 @@ create(std::string str, double x, double y, bool sw)
   item->oy     = 0.0;
   item->parent = nullptr;
   item->value  = sw;
+  item->length = 0;
+
+  item->on_info.color  = Graphics::White;
+  item->off_info.color = Graphics::Gray;
   item->setText(str);
+  item->setOffText(str);
 
   layer.append(item);
   return item;
