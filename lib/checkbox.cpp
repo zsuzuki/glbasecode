@@ -43,13 +43,27 @@ struct Item : public Base
 
   operator bool() const override { return getValue(); }
 
-  void draw();
+  void draw(bool);
   bool update();
 };
 
-using ItemPtr = std::shared_ptr<Item>;
+using ItemPtr  = std::shared_ptr<Item>;
+using ClickAct = Graphics::ClickCallback::Action;
 ItemPtr     focus_item;
 Layer<Item> layer;
+
+//
+void
+on_click(ClickAct action, bool enter)
+{
+  if (action == ClickAct::Press)
+  {
+    if (focus_item)
+    {
+      focus_item->value = !focus_item->value;
+    }
+  }
+}
 
 //
 bool
@@ -70,12 +84,13 @@ Item::update()
 
 //
 void
-Item::draw()
+Item::draw(bool focus)
 {
   auto loc = bbox.getLocate();
   auto btm = bbox.getBottom();
-  // font->setColor(fgcol);
+  Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, Graphics::Gray, false);
   auto pos = Graphics::calcLocate(loc.x + 20, loc.y + 42);
+  font->setColor(value ? Graphics::White : Graphics::Gray);
   font->print(label.c_str(), pos.x, pos.y);
 }
 
@@ -101,6 +116,7 @@ void
 initialize(FontDraw::WidgetPtr f)
 {
   font = f;
+  Graphics::setClickCallback({on_click, false});
 }
 //
 ID
@@ -159,9 +175,21 @@ update()
     bool my_focus = focus_item == item;
     if (!focus)
     {
+      if (item->bbox.check(mpos.x, mpos.y))
+      {
+        // on cursor
+        my_focus = true;
+        focus    = true;
+        if (focus_item != item)
+        {
+          focus_item = item;
+        }
+      }
     }
-    item->draw();
+    item->draw(my_focus);
   }
+  if (!focus && focus_item)
+    focus_item.reset();
   font->popDepth();
   Primitive2D::popDepth();
 }
