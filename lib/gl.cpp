@@ -24,6 +24,7 @@ WindowSize     base_size{};
 bool           now_fullscreen = false;
 
 std::list<ClickCallback> click_callback;
+using ClickAct = ClickCallback::Action;
 
 void
 error_callback(int error, const char* description)
@@ -99,25 +100,27 @@ initialize(const char* appname, int w, int h)
           text_key_callback(key, scancode, action, mods);
         if (sbox_key_callback)
           sbox_key_callback(key, scancode, action, mods);
-        if (key == GLFW_KEY_ENTER)
+        if (key == GLFW_KEY_ENTER && action != GLFW_REPEAT)
         {
+          auto act = action == GLFW_PRESS ? ClickAct::Press : ClickAct::Release;
           for (auto& fn : click_callback)
             if (fn.use_enter)
-              fn.func(action, true);
+              fn.func(act, true);
         }
       });
   glfwSetDropCallback(window, [](auto window, int num, const char** paths) {
     if (drop_callback)
       drop_callback(num, paths);
   });
-  glfwSetMouseButtonCallback(window,
-                             [](auto window, int btn, int action, int mods) {
-                               if (btn == GLFW_MOUSE_BUTTON_LEFT)
-                               {
-                                 for (auto& fn : click_callback)
-                                   fn.func(action, false);
-                               }
-                             });
+  glfwSetMouseButtonCallback(
+      window, [](auto window, int btn, int action, int mods) {
+        if (btn == GLFW_MOUSE_BUTTON_LEFT)
+        {
+          auto act = action == GLFW_PRESS ? ClickAct::Press : ClickAct::Release;
+          for (auto& fn : click_callback)
+            fn.func(act, false);
+        }
+      });
   glfwSetCharCallback(window, [](auto window, unsigned int codepoint) {
     if (text_char_callback)
       text_char_callback(codepoint);

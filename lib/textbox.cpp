@@ -59,6 +59,7 @@ struct ItemImpl : public Item
   void                  drawCursor();
 };
 using ItemImplPtr = std::shared_ptr<ItemImpl>;
+using ClickAct    = Graphics::ClickCallback::Action;
 
 TextInput::Buffer   text_buffer;
 ItemImplPtr         focus_input;
@@ -68,9 +69,9 @@ Layer<ItemImpl>     layer;
 
 //
 void
-on_click(int action, bool enter)
+on_click(ClickAct action, bool enter)
 {
-  if (action == GLFW_PRESS)
+  if (action == ClickAct::Press)
   {
     if (focus_input != edit_input)
     {

@@ -9,7 +9,12 @@ using ScrollCallback = void (*)(double, double);
 
 struct ClickCallback
 {
-  using Func     = void (*)(int, bool);
+  enum class Action : int
+  {
+    Press,
+    Release
+  };
+  using Func     = void (*)(Action, bool);
   Func func      = nullptr;
   bool use_enter = false;
 };

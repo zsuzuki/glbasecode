@@ -75,14 +75,15 @@ struct Button : public Parts::ID
   void draw(ColorType fg, ColorType bg);
 };
 using ButtonPtr = std::shared_ptr<Button>;
+using ClickAct  = Graphics::ClickCallback::Action;
 ButtonPtr     focus_button;
 Layer<Button> layer;
 
 //
 void
-text_button(int action, bool enter)
+text_button(ClickAct action, bool enter)
 {
-  if (enter && action == GLFW_PRESS && !focus_button)
+  if (enter && action == ClickAct::Press && !focus_button)
   {
     // カーソルが乗っていない場合でもenterで実行するか
     auto& button_list = layer.getCurrent();
@@ -99,7 +100,7 @@ text_button(int action, bool enter)
   }
   if (focus_button)
   {
-    if (action == GLFW_RELEASE)
+    if (action == ClickAct::Release)
     {
       // ボタンを放したときに実行
       auto btn = focus_button;
@@ -107,7 +108,7 @@ text_button(int action, bool enter)
         btn->cb();
       btn->press = false;
     }
-    else if (action == GLFW_PRESS)
+    else if (action == ClickAct::Press)
     {
       focus_button->press = true;
     }
