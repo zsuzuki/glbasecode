@@ -60,7 +60,6 @@ main(int argc, char** argv)
     return 1;
 
   Graphics::setDropCallback(drop_file);
-  Graphics::setScrollCallback(scroll);
 
   Primitive2D::initialize();
   FontDraw::initialize();

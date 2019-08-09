@@ -12,7 +12,6 @@ GLFWwindow*    window             = nullptr;
 DropCallback   drop_callback      = nullptr;
 KeyCallback    text_key_callback  = nullptr;
 TextCallback   text_char_callback = nullptr;
-ScrollCallback scroll_callback    = nullptr;
 ScrollCallback sbox_scr_callback  = nullptr;
 KeyCallback    sbox_key_callback  = nullptr;
 WindowSize     window_size{};
@@ -125,8 +124,6 @@ initialize(const char* appname, int w, int h)
   });
   glfwSetScrollCallback(window,
                         [](auto window, double xoffset, double yoffset) {
-                          if (scroll_callback)
-                            scroll_callback(xoffset, yoffset);
                           if (sbox_scr_callback)
                             sbox_scr_callback(xoffset, yoffset);
                         });
@@ -194,13 +191,6 @@ setTextInputCallback(KeyCallback kcb, TextCallback tcb)
 {
   text_key_callback  = kcb;
   text_char_callback = tcb;
-}
-
-//
-void
-setScrollCallback(ScrollCallback scb)
-{
-  scroll_callback = scb;
 }
 
 //

@@ -23,7 +23,6 @@ Locate      calcLocate(double x, double y, bool asp = false);
 void        setDropCallback(DropCallback);
 void        setTextInputCallback(KeyCallback, TextCallback);
 void        setClickCallback(ClickCallback);
-void        setScrollCallback(ScrollCallback);
 void        setScrollBoxFunction(ScrollCallback, KeyCallback);
 WindowSize  getWindowSize();
 Locate      getMousePosition();
