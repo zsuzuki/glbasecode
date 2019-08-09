@@ -33,7 +33,7 @@ public:
   }
 
   //
-  void appen(Ptr i)
+  void append(Ptr i)
   {
     auto& target = item_list[current_layer];
     target.push_back(i);
