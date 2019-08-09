@@ -86,12 +86,25 @@ Item::update()
 void
 Item::draw(bool focus)
 {
+  if (parent)
+  {
+    auto px = parent->getX();
+    auto py = parent->getY();
+    auto pw = parent->getWidth();
+    auto ph = parent->getHeight();
+    Graphics::enableScissor(px, py, pw, ph);
+    font->setDrawArea(px, py, pw, ph);
+  }
+
   auto loc = bbox.getLocate();
   auto btm = bbox.getBottom();
   Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, Graphics::Gray, false);
   auto pos = Graphics::calcLocate(loc.x + 20, loc.y + 42);
   font->setColor(value ? Graphics::White : Graphics::Gray);
   font->print(label.c_str(), pos.x, pos.y);
+
+  Graphics::disableScissor();
+  font->clearDrawArea();
 }
 
 //
@@ -132,9 +145,7 @@ create(std::string str, double x, double y, bool sw)
   item->value  = sw;
   item->setText(str);
 
-  auto& item_list = layer.getCurrent();
-  item_list.push_back(item);
-
+  layer.append(item);
   return item;
 }
 //
