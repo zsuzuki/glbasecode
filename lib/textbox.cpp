@@ -80,7 +80,7 @@ on_click(ClickAct action, bool enter)
       if (TextInput::onInput())
         TextInput::finish();
       TextInput::setBuffer(text_buffer, focus_input->text);
-      TextInput::start(text_buffer, 99);
+      TextInput::start(text_buffer, focus_input->max_length);
       focus_input->on_edit = true;
       edit_input           = focus_input;
     }
