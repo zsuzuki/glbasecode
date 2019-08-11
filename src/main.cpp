@@ -1,15 +1,7 @@
-#include <checkbox.h>
 #include <exec.h>
-#include <font.h>
-#include <gl.h>
 #include <gllib.h>
 #include <iostream>
-#include <label.h>
 #include <list>
-#include <primitive2d.h>
-#include <scrollbox.h>
-#include <textbox.h>
-#include <textbutton.h>
 
 namespace
 {
@@ -71,8 +63,9 @@ setupMenu2()
     by += p->getHeight() + 10;
     SBox->append(p);
   }
-  SBox->append(
-      Label::create("MENU", 150, 20, Graphics::Yellow, Graphics::Blue));
+  auto tfg = Graphics::Yellow;
+  auto tbg = Graphics::Blue;
+  SBox->append(Label::create("Scroll Menu", 150, 20, tfg, tbg));
 }
 
 //
