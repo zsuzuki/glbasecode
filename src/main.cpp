@@ -2,6 +2,7 @@
 #include <exec.h>
 #include <font.h>
 #include <gl.h>
+#include <gllib.h>
 #include <iostream>
 #include <label.h>
 #include <list>
@@ -12,22 +13,10 @@
 
 namespace
 {
+int  Width    = 1024;
+int  Height   = 1024;
+bool DispPrim = true;
 
-// key check
-void
-key_callback(int key, int scancode, int action, int mods)
-{
-#if defined(_MSC_VER)
-  auto chmod = GLFW_MOD_CONTROL;
-#else
-  auto chmod = GLFW_MOD_SUPER;
-#endif
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    Graphics::finish();
-  else if (key == GLFW_KEY_F && action == GLFW_PRESS && mods == chmod)
-    Graphics::switchFullScreen();
-  // else if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
-}
 // file drag&drop
 void
 drop_file(int num, const char** paths)
@@ -37,15 +26,121 @@ drop_file(int num, const char** paths)
     std::cout << paths[i] << std::endl;
   }
 }
-// scroll
-double scr_x, scr_y;
+
+//
 void
-scroll(double xofs, double yofs)
+setupMenu1()
 {
-  scr_x = xofs;
-  scr_y = yofs;
+  Label::create("SETTINGS", 100, 80, Graphics::Green, Graphics::Gray);
+  TextButton::setButton("Return", 100, 150, []() { GLLib::bindLayer(); });
+
+  TextButton::setButton("Disp Primitive", 200, 300,
+                        []() { DispPrim = !DispPrim; });
+  auto tb = TextBox::create("", 200, 450, 400);
+  tb->setMaxLength(16);
+  tb->setPlaceHolder("filename");
 }
 
+//
+void
+setupMenu2()
+{
+  Label::create("EDITOR SCREEN", 100, 80, Graphics::Red, Graphics::Gray);
+  TextButton::setButton("Return", 100, 150, []() { GLLib::bindLayer(); });
+
+  auto SBox = ScrollBox::create();
+  SBox->set(300, 300, 700, 700);
+  SBox->drawSheet(true, {0.1f, 0.4f, 0.5f, 0.4f});
+  SBox->setDepth(-0.1f);
+  SBox->setScrollConstraint(true, false);
+
+  double by = 100.0;
+  for (int i = 0; i < 20; i++)
+  {
+    double x = 60.0;
+
+    auto cb = CheckBox::create("✓", x, by, false);
+    cb->setOnColor(Graphics::Green);
+    cb->setOffText("Off");
+    x += cb->getWidth() + 50.0;
+    SBox->append(cb);
+
+    std::string l = "Item";
+    l += std::to_string(i + 1);
+    auto p = TextButton::setButton(l, x, by, []() {});
+    by += p->getHeight() + 10;
+    SBox->append(p);
+  }
+  SBox->append(
+      Label::create("MENU", 150, 20, Graphics::Yellow, Graphics::Blue));
+}
+
+//
+void
+setupMenu3()
+{
+  Label::create("INFORMATION", 100, 80, Graphics::Cyan, Graphics::Gray);
+  TextButton::setButton("Return", 100, 150, []() { GLLib::bindLayer(); });
+}
+
+//
+void
+setup()
+{
+  Graphics::setDropCallback(drop_file);
+
+  // top menu
+  TextButton::setButton("Exit", Width - 150, 50, []() { Graphics::finish(); });
+  for (int i = 0; i < 3; i++)
+  {
+    int  idx = i + 1;
+    auto t   = std::string("MENU") + std::to_string(idx);
+    GLLib::bindLayer();
+    TextButton::setButton(t, 150, 150 + i * 80, [t]() { GLLib::bindLayer(t); });
+    GLLib::bindLayer(t);
+    switch (idx)
+    {
+    case 1:
+      setupMenu1();
+      break;
+    case 2:
+      setupMenu2();
+      break;
+    case 3:
+      setupMenu3();
+      break;
+    default:
+      break;
+    }
+  }
+}
+
+//
+bool
+onUpdate(FontDraw::WidgetPtr font)
+{
+  // プリミティブを描画
+  if (DispPrim)
+  {
+    static const Primitive2D::VertexList vl = {
+        {-0.4f, -0.4f, 1.0f, 0.0f, 0.0f},
+        {0.4f, -0.4f, 0.0f, 1.0f, 0.0f},
+        {0.4f, 0.4f, 0.0f, 0.0f, 1.0f},
+        {-0.4f, 0.4f, 1.0f, 1.0f, 1.0f},
+    };
+    Primitive2D::drawQuads(vl);
+    static const Primitive2D::Vertex v = {0.0f, 0.0f, 0.5f, 1.0f, 1.0f};
+    Primitive2D::drawCircle(v, 0.5f, 32, 8.0f);
+  }
+
+  // グラフィック座標系で毎フレーム描画
+  font->setColor(Graphics::Green);
+  font->print("こんにちは、世界", -0.3f, -0.3f);
+  font->setColor(Graphics::Cyan);
+  font->print("Status: Echo", -0.98f, -1.0f);
+
+  return true;
+}
 } // namespace
 
 //
@@ -54,171 +149,22 @@ scroll(double xofs, double yofs)
 int
 main(int argc, char** argv)
 {
-  int w = 1024;
-  int h = 1024;
-  if (!Graphics::initialize("Sample", w, h))
+  const char* fontname = "font/SourceHanCodeJP-Normal.otf";
+
+  auto font = GLLib::initialize("Sample", fontname, Width, Height);
+  if (!font)
     return 1;
 
-  Graphics::setDropCallback(drop_file);
-
-  Primitive2D::initialize();
-  FontDraw::initialize();
-
-  auto font = FontDraw::create("font/SourceHanCodeJP-Normal.otf");
-  TextButton::initialize(font);
-  TextBox::initialize(font);
-  Label::initialize(font);
-  CheckBox::initialize(font);
-
-  // put text-boxs
-  TextBox::create("Text", 50, 500, 300, 50);
-  TextBox::create("Sample", 50, 560, 300, 50);
-  auto tb = TextBox::create("", 50, 620, 300, 80);
-  tb->setPlaceHolder("example");
-
-  Exec::IStreamPtr inf;
-  Exec::HandlePtr  handle;
-  Exec::setup();
-  Exec::setCloseFunc([]() { std::cout << "execute done." << std::endl; });
-
-  // put text buttons
-  TextButton::setButton("Input", 150, 260, []() {
-    TextButton::bindLayer("Submit");
-    ScrollBox::bindLayer("Submit");
-    Label::bindLayer("Submit");
-  });
-  bool           newbtn = true;
-  TextButton::ID tbid;
-  tbid = TextButton::setButton("Test1", 150, 330,
-                               [&]() {
-                                 std::cout << "Test1" << std::endl;
-                                 if (newbtn)
-                                 {
-                                   int x = tbid->getX();
-                                   int y =
-                                       tbid->getY() + tbid->getHeight() + 20;
-                                   TextButton::setButton("Test2", x, y, []() {
-                                     std::cout << "Test2" << std::endl;
-                                   });
-                                   newbtn = false;
-                                 }
-                               },
-                               true);
-  TextButton::bindLayer("Submit");
-  TextButton::setButton("Submit", 150, 260,
-                        [&]() {
-                          auto cmd = tb->getText();
-                          if (cmd.empty() == false && Exec::now_exec == false)
-                          {
-                            handle = Exec::run(cmd.c_str(), ".", nullptr);
-                            if (!handle)
-                            {
-                              std::cout << "execute error" << std::endl;
-                              return;
-                            }
-                            inf = handle->getIStream();
-                          }
-                          TextButton::bindLayer();
-                          ScrollBox::bindLayer();
-                          Label::bindLayer();
-                        },
-                        true);
-
-  Label::create("LABEL", 600, 150, Graphics::Red, Graphics::Gray);
-
-  ScrollBox::bindLayer("Submit");
-  TextButton::bindLayer("Submit");
-  Label::bindLayer("Submit");
-  auto SBox = ScrollBox::create();
-  SBox->set(400, 400, 500, 500);
-  SBox->drawSheet(true, {0.1f, 0.4f, 0.5f, 0.4f});
-  SBox->setDepth(-0.1f);
-  SBox->setScrollConstraint(true, false);
-  std::list<TextButton::ID> btn_holder;
-
-  auto   sct = TextBox::create("Scroll Box", 300, 170, 300, 50);
-  double by  = 20.0;
-  for (int i = 0; i < 20; i++)
-  {
-    std::string l = "Item";
-    l += std::to_string(i + 1);
-    auto p = TextButton::setButton(l, 50.0, by, [i, sct]() {
-      if (i != 3)
-        std::cout << "button" << (i + 1) << std::endl;
-      else
-        std::cout << "Text:" << sct->getText() << std::endl;
-    });
-    by += p->getHeight() + 10;
-    SBox->append(p);
-    btn_holder.push_back(p);
-  }
-  SBox->append(
-      Label::create("InBox", 300, 100, Graphics::Yellow, Graphics::Blue));
-  SBox->append(sct);
-
-  auto cb = CheckBox::create("✓", 100, 100, false);
-  cb->setOnColor(Graphics::Green);
-  cb->setOffText("Off");
-
-  ScrollBox::bindLayer();
-  TextButton::bindLayer();
-  Label::bindLayer();
-  CheckBox::bindLayer();
+  setup();
+  GLLib::bindLayer();
 
   // フレームループ
-  while (auto window = Graphics::setupFrame())
+  for (;;)
   {
-    Primitive2D::setup(window);
-    {
-      static const Primitive2D::VertexList vl = {
-          {-0.4f, -0.4f, 1.0f, 0.0f, 0.0f},
-          {0.4f, -0.4f, 0.0f, 1.0f, 0.0f},
-          {0.4f, 0.4f, 0.0f, 0.0f, 1.0f},
-          {-0.4f, 0.4f, 1.0f, 1.0f, 1.0f},
-      };
-      Primitive2D::drawQuads(vl);
-      static const Primitive2D::Vertex v = {0.0f, 0.0f, 0.5f, 1.0f, 1.0f};
-      Primitive2D::drawCircle(v, 0.5f, 5, 8.0f);
-      Primitive2D::drawCircle(v, 0.52f, 6, 4.0f);
-      Primitive2D::drawCircle(v, 0.54f, 8, 2.0f);
-      Primitive2D::drawCircle(v, 0.56f, 16);
-    }
-
-    font->setColor({0.0f, 1.0f, 0.0f});
-    font->print("こんにちは、世界", -0.3f + scr_x * 0.01f,
-                -0.3f + scr_y * 0.01f);
-    font->setColor({0.8f, 0.8f, 1.0f});
-    font->print("Status: Echo", -0.98f, -1.0f);
-    font->print("Title: Top", -0.98f, 1.0f - (32.0f / 480.0f));
-    TextBox::update();
-    TextButton::update();
-    Label::update();
-    CheckBox::update();
-    ScrollBox::update();
-    Primitive2D::cleanup();
-    FontDraw::render(window);
-
-    if (inf)
-    {
-      if (inf->eof())
-      {
-        inf.reset();
-      }
-      else
-      {
-        std::string b;
-        (*inf) >> b;
-        std::cout << "in: " << b << std::endl;
-      }
-    }
-
-    Graphics::cleanupFrame();
+    if (GLLib::update([font]() { return onUpdate(font); }) == false)
+      break;
   }
 
-  FontDraw::terminate();
-  Primitive2D::terminate();
-
-  Graphics::terminate();
-
+  GLLib::terminate();
   return 0;
 }
