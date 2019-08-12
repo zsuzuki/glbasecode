@@ -83,7 +83,19 @@ setup()
   Graphics::setDropCallback(drop_file);
 
   // top menu
-  TextButton::setButton("Exit", Width - 150, 50, []() { Graphics::finish(); });
+  {
+    using namespace TextButton;
+    setDefaultColor(ColorType::UnFocusFont, Graphics::Orange);
+    setDefaultColor(ColorType::FocusFont, Graphics::Orange);
+    setDefaultColor(ColorType::FocusBG, Graphics::Gray);
+    setDefaultColor(ColorType::PressFont, Graphics::Green);
+    auto eb = setButton("Exit", Width - 150, 50, []() { Graphics::finish(); });
+    eb->setColor(ColorType::UnFocusFont, Graphics::Red);
+    eb->setColor(ColorType::FocusFont, Graphics::Red);
+    eb->setColor(ColorType::FocusBG, Graphics::Sepia);
+    eb->setColor(ColorType::PressBG, Graphics::Red);
+    eb->setColor(ColorType::PressFont, Graphics::Black);
+  }
   for (int i = 0; i < 3; i++)
   {
     int  idx = i + 1;
