@@ -30,7 +30,7 @@ std::map<ColorType, Color> color_map = {
 };
 
 //
-struct Button : public Parts::ID
+struct Button : public Base
 {
   using BBox   = BoundingBox::Rect;
   using Parent = const Parts::ID;
@@ -45,12 +45,68 @@ struct Button : public Parts::ID
   bool          catch_enter;
   bool          press;
   Parent*       parent;
+  Color         c_ufbg;
+  Color         c_fbg;
+  Color         c_pbg;
+  Color         c_uff;
+  Color         c_ff;
+  Color         c_pf;
 
   double getX() const override { return x + ox; }
   double getY() const override { return y + oy; }
   int    getWidth() const override { return w; }
   int    getHeight() const override { return h; }
   void   setParent(const Parts::ID* p) override { parent = p; }
+  void   setColor(ColorType ct, Graphics::Color col) override
+  {
+    switch (ct)
+    {
+    case ColorType::UnFocusBG:
+      c_ufbg = col;
+      break;
+    case ColorType::FocusBG:
+      c_fbg = col;
+      break;
+    case ColorType::PressBG:
+      c_pbg = col;
+      break;
+    case ColorType::UnFocusFont:
+      c_uff = col;
+      break;
+    case ColorType::FocusFont:
+      c_ff = col;
+      break;
+    case ColorType::PressFont:
+      c_pf = col;
+      break;
+    }
+  }
+  Color getColor(ColorType ct) const
+  {
+    auto col = Color();
+    switch (ct)
+    {
+    case ColorType::UnFocusBG:
+      col = c_ufbg;
+      break;
+    case ColorType::FocusBG:
+      col = c_fbg;
+      break;
+    case ColorType::PressBG:
+      col = c_pbg;
+      break;
+    case ColorType::UnFocusFont:
+      col = c_uff;
+      break;
+    case ColorType::FocusFont:
+      col = c_ff;
+      break;
+    case ColorType::PressFont:
+      col = c_pf;
+      break;
+    }
+    return col;
+  }
 
   std::pair<bool, bool> update()
   {
@@ -117,12 +173,6 @@ text_button(ClickAct action, bool enter)
 
 //
 void
-draw_box(const Button& btn, const Color col)
-{
-}
-
-//
-void
 print(const std::string msg, double x, double y)
 {
   auto loc = Graphics::calcLocate(x, y);
@@ -144,13 +194,13 @@ Button::draw(ColorType fg, ColorType bg)
   }
 
   // 下敷きを描画
-  auto bcol = color_map[bg];
+  auto bcol = getColor(bg);
   auto loc  = bbox.getLocate();
   auto btm  = bbox.getBottom();
   Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, bcol, true);
 
   // キャプション
-  auto fcol = color_map[fg];
+  auto fcol = getColor(fg);
   font->setColor(fcol);
   print(caption, getX() + 20, getY() + 42);
 
@@ -191,6 +241,12 @@ setButton(std::string caption, double x, double y, PressCallback cb,
   btn->press       = false;
   btn->parent      = nullptr;
   btn->catch_enter = catch_enter;
+  btn->c_ufbg      = color_map[ColorType::UnFocusBG];
+  btn->c_fbg       = color_map[ColorType::FocusBG];
+  btn->c_pbg       = color_map[ColorType::PressBG];
+  btn->c_uff       = color_map[ColorType::UnFocusFont];
+  btn->c_ff        = color_map[ColorType::FocusFont];
+  btn->c_pf        = color_map[ColorType::PressFont];
 
   auto& button_list = layer.getCurrent();
   button_list.push_back(btn);
@@ -200,13 +256,9 @@ setButton(std::string caption, double x, double y, PressCallback cb,
 
 //
 void
-setColor(ColorType ct, float r, float g, float b, float a)
+setDefaultColor(ColorType ct, Graphics::Color c)
 {
-  auto& col = color_map[ct];
-  col.r     = r;
-  col.g     = g;
-  col.b     = b;
-  col.a     = a;
+  color_map[ct] = c;
 }
 
 // レイヤー切り替え

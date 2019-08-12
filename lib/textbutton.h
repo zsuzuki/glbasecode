@@ -21,7 +21,13 @@ enum class ColorType : int
 };
 static constexpr const char* DefaultLayer = "default";
 
-using ID = Parts::IDPtr;
+//
+struct Base : public Parts::ID
+{
+  virtual void setColor(ColorType ct, Graphics::Color c) = 0;
+};
+
+using ID = std::shared_ptr<Base>;
 
 //
 void initialize(FontDraw::WidgetPtr font);
@@ -29,7 +35,7 @@ void initialize(FontDraw::WidgetPtr font);
 ID setButton(std::string caption, double x, double y, PressCallback cb,
              bool catch_enter = false);
 //
-void setColor(ColorType ct, float r, float g, float b, float a = 1.0f);
+void setDefaultColor(ColorType ct, Graphics::Color c);
 //
 void bindLayer(std::string layer = DefaultLayer);
 //
