@@ -52,11 +52,15 @@ static const Color Black{0.0f, 0.0f, 0.0f, 1.0f};
 static const Color Red{1.0f, 0.0f, 0.0f, 1.0f};
 static const Color Green{0.0f, 1.0f, 0.0f, 1.0f};
 static const Color Blue{0.0f, 0.0f, 1.0f, 1.0f};
+static const Color Navy{0.0f, 0.0f, 0.5f, 1.0f};
 static const Color Gray{0.5f, 0.5f, 0.5f, 1.0f};
 static const Color DarkGray{0.3f, 0.3f, 0.3f, 1.0f};
+static const Color LightGray{0.7f, 0.7f, 0.7f, 1.0f};
 static const Color Yellow{1.0f, 1.0f, 0.0f, 1.0f};
 static const Color Magenta{1.0f, 0.0f, 1.0f, 1.0f};
 static const Color Cyan{0.0f, 1.0f, 1.0f, 1.0f};
+static const Color Orange{1.0f, 0.6f, 0.0f, 1.0f};
+static const Color Sepia{0.45f, 0.32f, 0.14f, 1.0f};
 static const Color ClearColor{0.0f, 0.0f, 0.0f, 0.0f};
 
 } // namespace Graphics
