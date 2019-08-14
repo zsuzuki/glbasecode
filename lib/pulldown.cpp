@@ -29,6 +29,7 @@ struct Item : public Base
   size_t      nb_disp;
   size_t      disp_top;
   Selected    selected_func;
+  Selected    changed_func;
 
   ~Item() override = default;
   double getX() const override { return x; }
@@ -42,10 +43,12 @@ struct Item : public Base
   void   close() override { opened = false; }
   bool   isOpened() const override { return opened; }
   void   setSelected(Selected sf) override { selected_func = sf; }
+  void   setChanged(Selected sf) override { changed_func = sf; }
 
   operator bool() const { return isOpened(); }
 
   bool updateAndDraw(const Graphics::Locate&);
+  void key_input();
 };
 using ItemPtr  = std::shared_ptr<Item>;
 using ClickAct = Graphics::ClickCallback::Action;
@@ -63,7 +66,7 @@ on_click(ClickAct action, bool enter)
     if (mf != -1)
     {
       if (focus_item->selected_func)
-        focus_item->selected_func(mf + focus_item->disp_top);
+        focus_item->selected_func(focus_item->select_index);
       focus_item->close();
     }
   }
@@ -91,6 +94,41 @@ Item::open()
 }
 
 //
+void
+Item::key_input()
+{
+  auto& key = Graphics::getKeyInput();
+  switch (key.getRepeat())
+  {
+  case Key::Code::Up:
+    select_index -= select_index > 0;
+    break;
+  case Key::Code::Down:
+    select_index += select_index < items.size() - 1;
+    break;
+  case Key::Code::Tab:
+    select_index =
+        (select_index + (key.onShift() ? items.size() - 1 : 1)) % items.size();
+    break;
+  case Key::Code::Esc:
+    close();
+    break;
+  case Key::Code::Enter:
+    if (selected_func)
+      selected_func(select_index);
+    if (parent->getFocus() == false)
+      close();
+    break;
+  default:
+    break;
+  }
+  if (select_index >= nb_disp + disp_top)
+    disp_top = select_index - nb_disp + 1;
+  else if (select_index < disp_top)
+    disp_top = select_index;
+}
+
+//
 bool
 Item::updateAndDraw(const Graphics::Locate& mpos)
 {
@@ -107,7 +145,8 @@ Item::updateAndDraw(const Graphics::Locate& mpos)
   Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, lcol, false);
 
   // フォーカス
-  int mf = -1;
+  int mf  = -1;
+  int sel = select_index;
   if (bbox.check(mpos.x, mpos.y))
   {
     int oy = (int)(mpos.y - loc.y - 8.0) / 42;
@@ -119,6 +158,9 @@ Item::updateAndDraw(const Graphics::Locate& mpos)
     }
   }
   mouse_focus = mf;
+  key_input();
+  if (sel != select_index && changed_func)
+    changed_func(select_index);
 
   // 選択
   {
@@ -138,7 +180,7 @@ Item::updateAndDraw(const Graphics::Locate& mpos)
     print(str, getX() + 20, getY() + i * 42.0 + 42.0);
   }
 
-  return mf != -1;
+  return mf != -1 && opened;
 }
 
 } // namespace

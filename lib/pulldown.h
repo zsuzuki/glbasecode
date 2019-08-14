@@ -20,6 +20,7 @@ struct Base : public Parts::ID
   virtual void   close()                = 0;
   virtual bool   isOpened() const       = 0;
   virtual void   setSelected(Selected)  = 0;
+  virtual void   setChanged(Selected)   = 0;
 };
 using ID = std::shared_ptr<Base>;
 
