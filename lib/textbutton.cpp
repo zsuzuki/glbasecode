@@ -53,6 +53,7 @@ struct Button : public Base
   Color         c_pf;
   Pulldown::ID  pulldown;
 
+  void   setCaption(std::string c) override { caption = c; }
   double getX() const override { return x + ox; }
   double getY() const override { return y + oy; }
   int    getWidth() const override { return w; }

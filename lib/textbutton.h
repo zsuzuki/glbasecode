@@ -27,6 +27,7 @@ struct Base : public Parts::ID
 {
   virtual void setColor(ColorType ct, Graphics::Color c) = 0;
   virtual void setPulldown(Pulldown::ID pd)              = 0;
+  virtual void setCaption(std::string c)                 = 0;
 };
 
 using ID = std::shared_ptr<Base>;
