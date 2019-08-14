@@ -5,6 +5,7 @@
 #include "gl.h"
 #include "label.h"
 #include "primitive2d.h"
+#include "pulldown.h"
 #include "scrollbox.h"
 #include "textbox.h"
 #include "textbutton.h"
@@ -28,6 +29,7 @@ initialize(const char* appname, const char* fontname, int w, int h)
   TextBox::initialize(font);
   Label::initialize(font);
   CheckBox::initialize(font);
+  Pulldown::initialize(font);
 
   return font;
 }
@@ -64,11 +66,13 @@ update(std::function<bool()> func)
 
   auto ret = func();
 
+  ScrollBox::update();
   TextBox::update();
   TextButton::update();
+  Pulldown::update();
   Label::update();
   CheckBox::update();
-  ScrollBox::update();
+
   Primitive2D::cleanup();
   FontDraw::render(window);
   Graphics::cleanupFrame();

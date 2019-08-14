@@ -74,6 +74,13 @@ setupMenu3()
 {
   Label::create("INFORMATION", 100, 80, Graphics::Cyan, Graphics::Gray);
   TextButton::setButton("Return", 100, 150, []() { GLLib::bindLayer(); });
+
+  Pulldown::List pl{"PULLDOWN 1", "PULLDOWN 2", "PULLDOWN 3", "PULLDOWN 4"};
+  auto           pd = Pulldown::create(std::move(pl), 5);
+  auto           tb = TextButton::setButton("Pulldown", 200, 300, []() {});
+  tb->setPulldown(pd);
+  pd->setSelected(
+      [](int idx) { std::cout << "selected: " << idx << std::endl; });
 }
 
 //

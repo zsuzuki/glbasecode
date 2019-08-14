@@ -51,6 +51,7 @@ struct Button : public Base
   Color         c_uff;
   Color         c_ff;
   Color         c_pf;
+  Pulldown::ID  pulldown;
 
   double getX() const override { return x + ox; }
   double getY() const override { return y + oy; }
@@ -107,6 +108,12 @@ struct Button : public Base
     }
     return col;
   }
+  void setPulldown(Pulldown::ID pd) override
+  {
+    pulldown = pd;
+    if (pulldown)
+      pulldown->setParent(this);
+  }
 
   std::pair<bool, bool> update()
   {
@@ -161,7 +168,17 @@ text_button(ClickAct action, bool enter)
       // ボタンを放したときに実行
       auto btn = focus_button;
       if (btn->press)
+      {
+        auto& pd = btn->pulldown;
+        if (pd)
+        {
+          if (pd->isOpened())
+            pd->close();
+          else
+            pd->open();
+        }
         btn->cb();
+      }
       btn->press = false;
     }
     else if (action == ClickAct::Press)
@@ -173,7 +190,7 @@ text_button(ClickAct action, bool enter)
 
 //
 void
-print(const std::string msg, double x, double y)
+print(const std::string& msg, double x, double y)
 {
   auto loc = Graphics::calcLocate(x, y);
   font->print(msg.c_str(), (float)loc.x, (float)loc.y);
@@ -302,9 +319,10 @@ update()
     if (!ef.first)
       continue;
     bool my_focus = focus_button == btn;
+    bool inbox    = btn->bbox.check(mpos.x, mpos.y);
     if (!focus)
     {
-      if (ef.second && btn->bbox.check(mpos.x, mpos.y))
+      if (ef.second && inbox)
       {
         // カーソルが乗っている場合のみ
         my_focus = true;
