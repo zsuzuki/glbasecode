@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __APPLE__
+#define GL_SILENCE_DEPRECATION
+#endif
+
 #if defined(_MSC_VER) // Windows
 #define _USE_MATH_DEFINES
 #include <Windows.h>
@@ -9,10 +13,12 @@
 #include <OpenGL/gl.h>
 #endif
 #include "gl_def.h"
+#include "key.h"
 #include <GLFW/glfw3.h>
 
 namespace Graphics
 {
+using KeyInput = const Key::Input;
 //
 bool        initialize(const char* appname, int w, int h);
 GLFWwindow* setupFrame();
@@ -31,4 +37,5 @@ const char* getClipboardString();
 void        switchFullScreen();
 void        enableScissor(double x, double y, double w, double h);
 void        disableScissor();
+KeyInput&   getKeyInput();
 } // namespace Graphics

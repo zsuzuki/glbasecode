@@ -1,7 +1,9 @@
 #include "gl.h"
+#include <bitset>
 #include <iomanip>
 #include <iostream>
 #include <list>
+#include <map>
 
 namespace Graphics
 {
@@ -23,6 +25,99 @@ Locate         base_pos{};
 WindowSize     base_size{};
 bool           now_fullscreen = false;
 
+// キーコードからintへの変換
+int
+chgCode2Num(Key::Code c)
+{
+  return static_cast<int>(c);
+}
+// サポートキーコード変換マップ
+std::map<int, Key::Code> keycode_map = {
+    {GLFW_KEY_UP, Key::Code::Up},
+    {GLFW_KEY_DOWN, Key::Code::Down},
+    {GLFW_KEY_RIGHT, Key::Code::Right},
+    {GLFW_KEY_LEFT, Key::Code::Left},
+    {GLFW_KEY_ENTER, Key::Code::Enter},
+    {GLFW_KEY_TAB, Key::Code::Tab},
+    {GLFW_KEY_BACKSPACE, Key::Code::BackSpace},
+    {GLFW_KEY_DELETE, Key::Code::Delete},
+    {GLFW_KEY_PAGE_UP, Key::Code::PageUp},
+    {GLFW_KEY_PAGE_DOWN, Key::Code::PageDown},
+    {GLFW_KEY_HOME, Key::Code::Home},
+    {GLFW_KEY_END, Key::Code::End},
+    {GLFW_KEY_ESCAPE, Key::Code::Esc},
+    {GLFW_KEY_INSERT, Key::Code::Insert},
+    {GLFW_KEY_SPACE, Key::Code::Space},
+};
+
+// メタキー入力管理クラス:実装
+class KeyInputImpl : public Key::Input
+{
+  std::bitset<32> code;
+  Key::Code       repeat;
+  bool            repeat_on;
+  bool            on_shift;
+  bool            on_ctrl;
+  bool            on_alt;
+
+public:
+  ~KeyInputImpl() override = default;
+
+  bool      onKey(Key::Code c) const override { return code[chgCode2Num(c)]; }
+  Key::Code getRepeat() const override
+  {
+    return repeat_on ? repeat : Key::Code::None;
+  }
+  bool onShift() const override { return on_shift; }
+  bool onCtrl() const override { return on_ctrl; }
+  bool onAlt() const override { return on_alt; }
+
+  void clear()
+  {
+    code     = 0;
+    repeat   = Key::Code::None;
+    on_shift = false;
+    on_ctrl  = false;
+    on_alt   = false;
+  }
+
+  void update() { repeat_on = false; }
+
+  // キー設定(サポートしている物のみ)
+  void set(Key::Code c, int action)
+  {
+    switch (action)
+    {
+    case GLFW_REPEAT:
+      repeat    = c;
+      repeat_on = true;
+      break;
+    case GLFW_PRESS:
+      code[chgCode2Num(c)] = true;
+      repeat               = c;
+      repeat_on            = true;
+      break;
+    case GLFW_RELEASE:
+      code[chgCode2Num(c)] = false;
+      if (repeat == c)
+        repeat = Key::Code::None;
+      break;
+    default:
+      break;
+    }
+  }
+  // コールバックでの更新
+  void update(int key, int scancode, int action, int mods)
+  {
+    auto k = keycode_map.find(key);
+    if (k != keycode_map.end())
+    {
+      set(k->second, action);
+    }
+  }
+};
+KeyInputImpl keyinput;
+
 std::list<ClickCallback> click_callback;
 using ClickAct = ClickCallback::Action;
 
@@ -33,6 +128,13 @@ error_callback(int error, const char* description)
 }
 
 } // namespace
+
+//
+KeyInput&
+getKeyInput()
+{
+  return keyinput;
+}
 
 //
 bool
@@ -107,6 +209,7 @@ initialize(const char* appname, int w, int h)
             if (fn.use_enter)
               fn.func(act, true);
         }
+        keyinput.update(key, scancode, action, mods);
       });
   glfwSetDropCallback(window, [](auto window, int num, const char** paths) {
     if (drop_callback)
@@ -238,6 +341,7 @@ setupFrame()
   glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_DEPTH_TEST);
+
   return window;
 }
 
@@ -245,6 +349,8 @@ setupFrame()
 void
 cleanupFrame()
 {
+  keyinput.update();
+
   // ダブルバッファのスワップ
   glfwSwapBuffers(window);
   glfwPollEvents();
