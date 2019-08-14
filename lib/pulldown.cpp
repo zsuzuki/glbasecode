@@ -2,6 +2,7 @@
 #include "bb.h"
 #include "codeconv.h"
 #include "gl.h"
+#include "layer.h"
 #include "primitive2d.h"
 #include <list>
 
@@ -48,7 +49,7 @@ struct Item : public Base
 };
 using ItemPtr  = std::shared_ptr<Item>;
 using ClickAct = Graphics::ClickCallback::Action;
-std::list<ItemPtr> item_list;
+Layer<Item> layer;
 
 ItemPtr focus_item;
 
@@ -152,19 +153,14 @@ initialize(FontDraw::WidgetPtr f)
 
 //
 void
-clear()
-{
-  item_list.clear();
-}
-
-//
-void
 update()
 {
   Primitive2D::pushDepth(0.01f);
   font->pushDepth(0.0f);
-  auto mpos  = Graphics::getMousePosition();
-  focus_item = ItemPtr{};
+
+  auto& item_list = layer.getCurrent();
+  auto  mpos      = Graphics::getMousePosition();
+  focus_item      = ItemPtr{};
   for (auto& i : item_list)
   {
     if (*i && i->updateAndDraw(mpos))
@@ -205,6 +201,7 @@ create(List&& l, size_t nb_disp)
   item->disp_top = 0;
   item->items    = l;
 
+  auto& item_list = layer.getCurrent();
   item_list.push_back(item);
 
   return item;
@@ -214,14 +211,25 @@ create(List&& l, size_t nb_disp)
 void
 erase(ID i)
 {
-  for (auto p = item_list.begin(); p != item_list.end(); p++)
-  {
-    if (*p == i)
-    {
-      item_list.erase(p);
-      break;
-    }
-  }
+  auto ip = std::dynamic_pointer_cast<Item>(i);
+  if (ip)
+    layer.erase(ip);
+}
+
+// レイヤー切り替え
+void
+bindLayer(std::string l)
+{
+  if (layer.bind(l))
+    focus_item.reset();
+}
+
+//
+void
+clearLayer(std::string l)
+{
+  layer.clear(l);
+  focus_item.reset();
 }
 
 } // namespace Pulldown

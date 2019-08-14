@@ -8,6 +8,8 @@
 
 namespace Pulldown
 {
+static constexpr const char* DefaultLayer = "default";
+
 using Selected = std::function<void(int)>;
 //
 struct Base : public Parts::ID
@@ -26,13 +28,15 @@ using List = std::vector<std::string>;
 //
 void initialize(FontDraw::WidgetPtr font);
 //
-void clear();
-//
 void update();
 // 要素作成
 // l リスト
 // nb_disp 画面に表示する個数
 ID create(List&& l, size_t nb_disp);
+//
+void bindLayer(std::string layer = DefaultLayer);
+//
+void clearLayer(std::string layer = DefaultLayer);
 //
 void erase(ID);
 

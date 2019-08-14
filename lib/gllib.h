@@ -52,6 +52,7 @@ bindLayer(std::string name = "default")
   Label::bindLayer(name);
   CheckBox::bindLayer(name);
   TextBox::bindLayer(name);
+  Pulldown::bindLayer(name);
 }
 
 // フレーム内実行
