@@ -59,6 +59,7 @@ struct Button : public Base
   int    getWidth() const override { return w; }
   int    getHeight() const override { return h; }
   void   setParent(const Parts::ID* p) override { parent = p; }
+  bool   getFocus() const override;
   void   setColor(ColorType ct, Graphics::Color col) override
   {
     switch (ct)
@@ -195,6 +196,13 @@ print(const std::string& msg, double x, double y)
 {
   auto loc = Graphics::calcLocate(x, y);
   font->print(msg.c_str(), (float)loc.x, (float)loc.y);
+}
+
+//
+bool
+Button::getFocus() const
+{
+  return focus_button.get() == this;
 }
 
 //
