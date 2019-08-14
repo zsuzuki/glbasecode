@@ -114,6 +114,9 @@ public:
     {
       set(k->second, action);
     }
+    on_shift = mods == GLFW_MOD_SHIFT;
+    on_alt   = mods == GLFW_MOD_ALT;
+    on_ctrl  = mods == GLFW_MOD_CONTROL;
   }
 };
 KeyInputImpl keyinput;
