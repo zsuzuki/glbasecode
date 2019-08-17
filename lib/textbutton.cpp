@@ -171,15 +171,20 @@ text_button(ClickAct action, bool enter)
       auto btn = focus_button;
       if (btn->press)
       {
-        auto& pd = btn->pulldown;
+        bool  called = true;
+        auto& pd     = btn->pulldown;
         if (pd)
         {
           if (pd->isOpened())
+          {
             pd->close();
+            called = false;
+          }
           else
             pd->open();
         }
-        btn->cb();
+        if (called)
+          btn->cb();
       }
       btn->press = false;
     }

@@ -75,15 +75,32 @@ setupMenu3()
   Label::create("INFORMATION", 100, 80, Graphics::Cyan, Graphics::Gray);
   TextButton::setButton("Return", 100, 150, []() { GLLib::bindLayer(); });
 
+  double y = 300;
+
   Pulldown::List pl{"PULLDOWN 1", "PULLDOWN 2", "PULLDOWN 3", "PULLDOWN 4",
                     "TEST 5",     "TEST 6",     "SAMPLE 7",   "SAMPLE 8"};
   auto           pd = Pulldown::create(std::move(pl), 5);
-  auto           tb = TextButton::setButton("Pulldown", 200, 300, []() {});
+  auto           tb = TextButton::setButton("Pulldown", 200, y, []() {});
   tb->setPulldown(pd);
   pd->setSelected(
       [tb](int idx) { tb->setCaption("Select " + std::to_string(idx)); });
   pd->setChanged(
       [tb](int idx) { tb->setCaption("Change " + std::to_string(idx)); });
+
+  Pulldown::List tp{"first", "second", "third", "forth", "fifth"};
+  pd = Pulldown::create(std::move(tp), 5);
+
+  y += tb->getHeight() + 50;
+  auto tt = TextBox::create("", 200, y, 400, 70);
+  tt->setMaxLength(16);
+  tt->setPlaceHolder("complete field");
+  tt->setPulldown(pd);
+  pd->setSelected([tt](int idx) {});
+
+  y += tt->getHeight() + 50;
+  tt = TextBox::create("", 200, y, 400, 70);
+  tt->setMaxLength(16);
+  tt->setPlaceHolder("normal text");
 }
 
 //

@@ -3,6 +3,7 @@
 #include "font.h"
 #include "gl_def.h"
 #include "parts.h"
+#include "pulldown.h"
 #include <memory>
 #include <string>
 
@@ -18,6 +19,7 @@ struct Item : public Parts::ID
   virtual void        setBGColor(Graphics::Color)          = 0;
   virtual void        setPlaceHolderColor(Graphics::Color) = 0;
   virtual void        setMaxLength(size_t)                 = 0;
+  virtual void        setPulldown(Pulldown::ID)            = 0;
 };
 using ItemPtr = std::shared_ptr<Item>;
 

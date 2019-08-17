@@ -4,6 +4,7 @@
 #include "gl.h"
 #include "layer.h"
 #include "primitive2d.h"
+#include <iostream>
 #include <list>
 
 namespace Pulldown
@@ -24,6 +25,8 @@ struct Item : public Base
   int         select_index;
   int         mouse_focus;
   bool        opened;
+  bool        open_request;
+  bool        close_request;
   BBox        bbox;
   List        items;
   size_t      nb_disp;
@@ -40,8 +43,8 @@ struct Item : public Base
   void   setFilter(std::string f) override { filter = f; }
   size_t getIndex() const override { return select_index; }
   void   open() override;
-  void   close() override { opened = false; }
-  bool   isOpened() const override { return opened; }
+  void   close() override;
+  bool   isOpened() const override { return opened || open_request; }
   void   setSelected(Selected sf) override { selected_func = sf; }
   void   setChanged(Selected sf) override { changed_func = sf; }
 
@@ -49,26 +52,34 @@ struct Item : public Base
 
   bool updateAndDraw(const Graphics::Locate&);
   void key_input();
+  bool do_open();
+  bool do_close();
 };
 using ItemPtr  = std::shared_ptr<Item>;
 using ClickAct = Graphics::ClickCallback::Action;
 Layer<Item> layer;
 
-ItemPtr focus_item;
+ItemPtr focus_item; // マウスがフォーカスしているプルダウン
+ItemPtr open_item;  // 現在オープンしているプルダウン
 
 //
 void
 on_click(ClickAct action, bool enter)
 {
-  if (action == ClickAct::Press && focus_item)
+  if (action == ClickAct::Press)
   {
-    int mf = focus_item->mouse_focus;
-    if (mf != -1)
+    if (focus_item)
     {
-      if (focus_item->selected_func)
-        focus_item->selected_func(focus_item->select_index);
-      focus_item->close();
+      int mf = focus_item->mouse_focus;
+      if (mf != -1)
+      {
+        if (focus_item->selected_func)
+          focus_item->selected_func(focus_item->select_index);
+        focus_item->close();
+      }
     }
+    else if (open_item && open_item->parent->getFocus() == false)
+      open_item->close();
   }
 }
 
@@ -80,17 +91,62 @@ print(const std::string& msg, double x, double y)
   font->print(msg.c_str(), (float)loc.x, (float)loc.y);
 }
 
-//
-void
-Item::open()
+// 実際のオープン処理
+bool
+Item::do_open()
 {
-  opened = true;
+  if (!open_request)
+    return false;
+
+  if (open_item)
+  {
+    auto p = open_item;
+    p->close();
+  }
+
+  opened       = true;
+  open_request = false;
   if (parent)
   {
     x = parent->getX() + 20;
     y = parent->getY() + parent->getHeight();
   }
   bbox = BoundingBox::Rect{x, y, width, height};
+
+  return true;
+}
+
+//
+bool
+Item::do_close()
+{
+  if (!close_request)
+    return false;
+
+  open_item     = ItemPtr();
+  opened        = false;
+  open_request  = false;
+  close_request = false;
+
+  return true;
+}
+
+//
+void
+Item::close()
+{
+  // リクエストのみ
+  open_request  = false;
+  close_request = true;
+}
+
+//
+void
+Item::open()
+{
+  // リクエストのみ
+  open_request  = true;
+  close_request = false;
 }
 
 //
@@ -132,6 +188,9 @@ Item::key_input()
 bool
 Item::updateAndDraw(const Graphics::Locate& mpos)
 {
+  if (opened == false)
+    return false;
+
   auto depth = parent->getDepth() - 0.1f;
 
   // 下敷きを描画
@@ -180,7 +239,7 @@ Item::updateAndDraw(const Graphics::Locate& mpos)
     print(str, getX() + 20, getY() + i * 42.0 + 42.0);
   }
 
-  return mf != -1 && opened;
+  return mf != -1;
 }
 
 } // namespace
@@ -200,16 +259,36 @@ update()
   Primitive2D::pushDepth(0.01f);
   font->pushDepth(0.0f);
 
+  // オープンリクエスト受付
   auto& item_list = layer.getCurrent();
-  auto  mpos      = Graphics::getMousePosition();
-  focus_item      = ItemPtr{};
+  bool  exist     = false;
   for (auto& i : item_list)
   {
-    if (*i && i->updateAndDraw(mpos))
+    if (i->do_open())
     {
-      focus_item = i;
+      open_item = i;
+      exist     = true;
+      break;
     }
+    if (open_item == i)
+      exist = true;
+    i->do_close();
   }
+
+  // オープンしているプルダウンの処理(画面上に１つだけ)
+  focus_item = ItemPtr{};
+  if (open_item)
+  {
+    if (exist)
+    {
+      auto mpos = Graphics::getMousePosition();
+      if (open_item->updateAndDraw(mpos))
+        focus_item = open_item;
+    }
+    else
+      open_item->close();
+  }
+
   Primitive2D::popDepth();
   font->popDepth();
 }

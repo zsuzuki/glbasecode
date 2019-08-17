@@ -22,20 +22,21 @@ constexpr double BaseY = 24.0;
 //
 struct ItemImpl : public Item
 {
-  std::string text;
-  std::string place_holder;
-  BBox        bbox{};
-  double      x, y;
-  double      w, h;
-  double      ox, oy;
-  size_t      max_length  = 99;
-  Color       font_color  = Graphics::White;
-  Color       bg_color    = Graphics::Black;
-  Color       ph_color    = Graphics::Gray;
-  double      ofs_y       = 0.0;
-  bool        draw_border = true;
-  bool        on_edit     = false;
-  Parent*     parent      = nullptr;
+  std::string  text;
+  std::string  place_holder;
+  BBox         bbox{};
+  double       x, y;
+  double       w, h;
+  double       ox, oy;
+  size_t       max_length  = 99;
+  Color        font_color  = Graphics::White;
+  Color        bg_color    = Graphics::Black;
+  Color        ph_color    = Graphics::Gray;
+  double       ofs_y       = 0.0;
+  bool         draw_border = true;
+  bool         on_edit     = false;
+  Parent*      parent      = nullptr;
+  Pulldown::ID pulldown;
 
   ItemImpl()  = default;
   ~ItemImpl() = default;
@@ -45,6 +46,12 @@ struct ItemImpl : public Item
   int    getWidth() const override { return w; }
   int    getHeight() const override { return h; }
   void   setParent(const Parts::ID* p) override { parent = p; }
+  void   setPulldown(Pulldown::ID pd) override
+  {
+    pulldown = pd;
+    if (pulldown)
+      pulldown->setParent(this);
+  }
 
   void        setPlaceHolder(std::string ph) override { place_holder = ph; }
   void        drawBorder(bool draw) override { draw_border = draw; }
@@ -69,18 +76,34 @@ Layer<ItemImpl>     layer;
 
 //
 void
+input_finish(ItemImplPtr& item)
+{
+  if (TextInput::onInput())
+    TextInput::finish();
+  if (item)
+  {
+    auto& pd = item->pulldown;
+    if (pd && pd->isOpened())
+      pd->close();
+    item->on_edit = false;
+    item.reset();
+  }
+}
+
+//
+void
 on_click(ClickAct action, bool enter)
 {
   if (action == ClickAct::Press)
   {
     if (focus_input != edit_input)
     {
-      if (edit_input)
-        edit_input->on_edit = false;
-      if (TextInput::onInput())
-        TextInput::finish();
+      input_finish(edit_input);
       TextInput::setBuffer(text_buffer, focus_input->text);
       TextInput::start(text_buffer, focus_input->max_length);
+      auto& pd = focus_input->pulldown;
+      if (pd && pd->isOpened() == false)
+        pd->open();
       focus_input->on_edit = true;
       edit_input           = focus_input;
     }
@@ -186,13 +209,7 @@ bindLayer(std::string l)
   if (layer.bind(l))
   {
     focus_input.reset();
-    if (edit_input)
-    {
-      edit_input->on_edit = false;
-      edit_input.reset();
-      if (TextInput::onInput())
-        TextInput::finish();
-    }
+    input_finish(edit_input);
   }
 }
 //
@@ -268,11 +285,7 @@ update()
     {
       if (edit_input == item)
       {
-        std::cout << "fnish edit" << std::endl;
-        edit_input->on_edit = false;
-        edit_input.reset();
-        if (TextInput::onInput())
-          TextInput::finish();
+        input_finish(edit_input);
       }
       continue;
     }
