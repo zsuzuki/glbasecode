@@ -187,6 +187,18 @@ getIndex()
 }
 
 //
+void
+setIndex(size_t p)
+{
+  auto& buffer = manage->buffer;
+  auto  sz     = buffer.size();
+  if (p >= sz)
+    manage->index = buffer.end();
+  else
+    manage->index = std::next(manage->buffer.begin(), p);
+}
+
+//
 CursorOffset
 getIndexPos()
 {

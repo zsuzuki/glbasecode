@@ -22,6 +22,8 @@ bool onInput();
 //
 size_t getIndex();
 //
+void setIndex(size_t);
+//
 CursorOffset getIndexPos();
 //
 std::string get();

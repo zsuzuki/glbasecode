@@ -96,16 +96,25 @@ on_click(ClickAct action, bool enter)
 {
   if (action == ClickAct::Press)
   {
-    if (focus_input != edit_input)
+    if (focus_input)
     {
-      input_finish(edit_input);
-      TextInput::setBuffer(text_buffer, focus_input->text);
-      TextInput::start(text_buffer, focus_input->max_length);
-      auto& pd = focus_input->pulldown;
-      if (pd && pd->isOpened() == false)
-        pd->open();
-      focus_input->on_edit = true;
-      edit_input           = focus_input;
+      if (focus_input != edit_input)
+      {
+        // フォーカスの違う所をクリックしたら、編集し直し
+        input_finish(edit_input);
+        TextInput::setBuffer(text_buffer, focus_input->text);
+        TextInput::start(text_buffer, focus_input->max_length);
+        auto& pd = focus_input->pulldown;
+        if (pd && pd->isOpened() == false)
+          pd->open();
+        focus_input->on_edit = true;
+        edit_input           = focus_input;
+      }
+      // クリックした位置にカーソルを設定する
+      auto mpos = Graphics::getMousePosition();
+      auto xp   = (mpos.x - focus_input->getX() - 10.0) / 21.0;
+      if (xp >= 0)
+        TextInput::setIndex(xp);
     }
   }
 }
@@ -190,16 +199,6 @@ ItemImpl::draw()
   font->clearDrawArea();
 }
 
-//
-void
-set_focus(ItemImplPtr item)
-{
-  if (focus_input != item)
-  {
-    focus_input = item;
-  }
-}
-
 } // namespace
 
 //
@@ -209,6 +208,7 @@ bindLayer(std::string l)
   if (layer.bind(l))
   {
     focus_input.reset();
+    edit_input.reset();
     input_finish(edit_input);
   }
 }
@@ -278,19 +278,21 @@ update()
   font->pushDepth(0.0f);
   auto  mpos      = Graphics::getMousePosition();
   auto& item_list = layer.getCurrent();
+  focus_input     = ItemImplPtr{};
   for (auto& item : item_list)
   {
     auto r = item->update();
     if (r.first == false)
     {
       if (edit_input == item)
-      {
         input_finish(edit_input);
-      }
       continue;
     }
     if (r.second && item->bbox.check(mpos.x, mpos.y))
-      set_focus(item);
+    {
+      if (focus_input != item)
+        focus_input = item;
+    }
 
     item->draw();
   }
