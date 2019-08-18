@@ -12,11 +12,19 @@ namespace Pulldown
 namespace
 {
 FontDraw::WidgetPtr font;
+// 選択用アイテム
+struct SelItem
+{
+  size_t             index;
+  const std::string* str;
+};
+
 //
 struct Item : public Base
 {
-  using BBox   = BoundingBox::Rect;
-  using Parent = const Parts::ID;
+  using BBox     = BoundingBox::Rect;
+  using Parent   = const Parts::ID;
+  using SelItems = std::vector<SelItem>;
 
   double      x, y;
   double      width, height;
@@ -33,6 +41,7 @@ struct Item : public Base
   size_t      disp_top;
   Selected    selected_func;
   Selected    changed_func;
+  SelItems    sel_items;
 
   ~Item() override = default;
   double getX() const override { return x; }
@@ -40,7 +49,7 @@ struct Item : public Base
   int    getWidth() const override { return width; }
   int    getHeight() const override { return height; }
   void   setParent(const Parts::ID* p) override { parent = p; }
-  void   setFilter(std::string f) override { filter = f; }
+  void   setFilter(std::string f) override;
   size_t getIndex() const override { return select_index; }
   void   open() override;
   void   close() override;
@@ -54,6 +63,7 @@ struct Item : public Base
   void key_input();
   bool do_open();
   bool do_close();
+  void update_list();
 };
 using ItemPtr  = std::shared_ptr<Item>;
 using ClickAct = Graphics::ClickCallback::Action;
@@ -89,6 +99,27 @@ print(const std::string& msg, double x, double y)
 {
   auto loc = Graphics::calcLocate(x, y);
   font->print(msg.c_str(), (float)loc.x, (float)loc.y);
+}
+
+// 表示する候補の絞り込み
+void
+Item::update_list()
+{
+  sel_items.resize(0);
+  for (size_t i = 0; i < items.size(); i++)
+  {
+    const auto& str = items[i];
+    if (filter.empty() || str.find(filter) != std::string::npos)
+      sel_items.push_back({i, &str});
+  }
+}
+
+// フィルター更新
+void
+Item::setFilter(std::string f)
+{
+  filter = f;
+  update_list();
 }
 
 // 実際のオープン処理
@@ -231,9 +262,10 @@ Item::updateAndDraw(const Graphics::Locate& mpos)
 
   // 文字列描画
   font->setDepth(depth - 0.13f);
-  for (int i = 0; i < nb_disp; i++)
+  int nb_d = nb_disp > sel_items.size() ? sel_items.size() : nb_disp;
+  for (int i = 0; i < nb_d; i++)
   {
-    auto& str  = items[i + disp_top];
+    auto& str  = *sel_items[i + disp_top].str;
     auto  fcol = Graphics::White;
     font->setColor(fcol);
     print(str, getX() + 20, getY() + i * 42.0 + 42.0);
@@ -314,6 +346,7 @@ create(List&& l, size_t nb_disp)
       ml = len;
   }
   size_t nd = l.size();
+  item->sel_items.reserve(nd);
   if (nd > nb_disp)
     nd = nb_disp;
   item->width    = ml + 20 + 20;
@@ -321,6 +354,7 @@ create(List&& l, size_t nb_disp)
   item->nb_disp  = nd;
   item->disp_top = 0;
   item->items    = l;
+  item->update_list();
 
   auto& item_list = layer.getCurrent();
   item_list.push_back(item);

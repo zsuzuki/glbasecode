@@ -1,6 +1,7 @@
 #include "text.h"
 #include "codeconv.h"
 #include "gl.h"
+#include "pulldown.h"
 #include <iostream>
 #include <memory>
 
@@ -13,9 +14,33 @@ struct Manage
   Buffer&          buffer;
   Buffer::iterator index;
   size_t           max_length;
+  Pulldown::ID     pulldown;
   Manage(Buffer& b, size_t m) : buffer(b), max_length(m)
   {
     index = buffer.end();
+  }
+
+  // 文字列取得
+  std::string getString() const
+  {
+    std::string r;
+    r.reserve(buffer.size());
+    r.resize(0);
+    for (auto& c : buffer)
+    {
+      char b[4];
+      int  cnt = CodeConv::U32ToU8(c, b);
+      for (int i = 0; i < cnt; i++)
+        r.push_back(b[i]);
+    }
+    return r;
+  }
+
+  // 入力候補更新
+  void updatePulldown()
+  {
+    if (pulldown)
+      pulldown->setFilter(getString());
   }
 };
 std::shared_ptr<Manage> manage;
@@ -75,6 +100,8 @@ key_input(int num, int scancode, int action, int mods)
     }
   };
 
+  //
+  auto sz = buffer.size();
   if (num == GLFW_KEY_LEFT)
     backward();
   else if (num == GLFW_KEY_RIGHT)
@@ -129,6 +156,8 @@ key_input(int num, int scancode, int action, int mods)
       copy(false);
 #endif
   }
+  if (buffer.size() != sz)
+    manage->updatePulldown();
 }
 
 //
@@ -148,6 +177,7 @@ text_input(int code)
   {
     manage->index = buff.insert(manage->index, code) + 1;
   }
+  manage->updatePulldown();
 }
 
 } // namespace
@@ -169,6 +199,9 @@ finish()
   if (!manage)
     return;
   Graphics::setTextInputCallback(nullptr, nullptr);
+  auto& pd = manage->pulldown;
+  if (pd && pd->isOpened())
+    pd->close();
   manage.reset();
 }
 
@@ -213,19 +246,7 @@ getIndexPos()
 std::string
 get()
 {
-  if (!manage)
-    return "";
-  std::string r;
-  r.reserve(manage->buffer.size());
-  r.resize(0);
-  for (auto& c : manage->buffer)
-  {
-    char b[4];
-    int  cnt = CodeConv::U32ToU8(c, b);
-    for (int i = 0; i < cnt; i++)
-      r.push_back(b[i]);
-  }
-  return r;
+  return manage ? manage->getString() : "";
 }
 
 //
@@ -242,6 +263,19 @@ setBuffer(Buffer& buff, std::string initial)
 
     p += r;
     buff.push_back(ch);
+  }
+}
+
+//
+void
+setPulldown(Parts::IDPtr pd)
+{
+  auto new_pd      = std::dynamic_pointer_cast<Pulldown::Base>(pd);
+  manage->pulldown = new_pd;
+  if (new_pd)
+  {
+    if (new_pd->isOpened() == false)
+      new_pd->open();
   }
 }
 

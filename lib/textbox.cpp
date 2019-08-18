@@ -82,9 +82,6 @@ input_finish(ItemImplPtr& item)
     TextInput::finish();
   if (item)
   {
-    auto& pd = item->pulldown;
-    if (pd && pd->isOpened())
-      pd->close();
     item->on_edit = false;
     item.reset();
   }
@@ -104,9 +101,7 @@ on_click(ClickAct action, bool enter)
         input_finish(edit_input);
         TextInput::setBuffer(text_buffer, focus_input->text);
         TextInput::start(text_buffer, focus_input->max_length);
-        auto& pd = focus_input->pulldown;
-        if (pd && pd->isOpened() == false)
-          pd->open();
+        TextInput::setPulldown(focus_input->pulldown);
         focus_input->on_edit = true;
         edit_input           = focus_input;
       }
