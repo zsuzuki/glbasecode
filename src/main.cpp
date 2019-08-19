@@ -82,10 +82,12 @@ setupMenu3()
   auto           pd = Pulldown::create(std::move(pl), 5);
   auto           tb = TextButton::setButton("Pulldown", 200, y, []() {});
   tb->setPulldown(pd);
-  pd->setSelected(
-      [tb](int idx) { tb->setCaption("Select " + std::to_string(idx)); });
-  pd->setChanged(
-      [tb](int idx) { tb->setCaption("Change " + std::to_string(idx)); });
+  pd->setSelected([tb](int idx, auto s) {
+    tb->setCaption("Select " + std::to_string(idx));
+  });
+  pd->setChanged([tb](int idx, auto s) {
+    tb->setCaption("Change " + std::to_string(idx));
+  });
 
   Pulldown::List tp{"first", "second", "third", "forth", "fifth"};
   pd = Pulldown::create(std::move(tp), 5);
@@ -95,7 +97,7 @@ setupMenu3()
   tt->setMaxLength(16);
   tt->setPlaceHolder("complete field");
   tt->setPulldown(pd);
-  pd->setSelected([tt](int idx) {});
+  pd->setSelected([tt](int idx, auto s) {});
 
   y += tt->getHeight() + 50;
   tt = TextBox::create("", 200, y, 400, 70);

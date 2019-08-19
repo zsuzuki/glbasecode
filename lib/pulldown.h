@@ -10,7 +10,7 @@ namespace Pulldown
 {
 static constexpr const char* DefaultLayer = "default";
 
-using Selected = std::function<void(int)>;
+using Selected = std::function<void(int, const std::string&)>;
 //
 struct Base : public Parts::ID
 {

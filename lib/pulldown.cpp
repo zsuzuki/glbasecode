@@ -64,6 +64,8 @@ struct Item : public Base
   bool do_open();
   bool do_close();
   void update_list();
+  void selected();
+  void changed(int);
 };
 using ItemPtr  = std::shared_ptr<Item>;
 using ClickAct = Graphics::ClickCallback::Action;
@@ -83,8 +85,7 @@ on_click(ClickAct action, bool enter)
       int mf = focus_item->mouse_focus;
       if (mf != -1)
       {
-        if (focus_item->selected_func)
-          focus_item->selected_func(focus_item->select_index);
+        focus_item->selected();
         focus_item->close();
       }
     }
@@ -101,6 +102,28 @@ print(const std::string& msg, double x, double y)
   font->print(msg.c_str(), (float)loc.x, (float)loc.y);
 }
 
+// 洗濯したアイテムを決定
+void
+Item::selected()
+{
+  if (selected_func)
+  {
+    auto& item = sel_items[select_index];
+    selected_func(item.index, *item.str);
+  }
+}
+
+// フォーカス変更したアイテムを通知
+void
+Item::changed(int idx)
+{
+  if (idx != select_index && changed_func)
+  {
+    auto& item = sel_items[select_index];
+    changed_func(item.index, *item.str);
+  }
+}
+
 // 表示する候補の絞り込み
 void
 Item::update_list()
@@ -112,14 +135,18 @@ Item::update_list()
     if (filter.empty() || str.find(filter) != std::string::npos)
       sel_items.push_back({i, &str});
   }
+  select_index = disp_top;
 }
 
 // フィルター更新
 void
 Item::setFilter(std::string f)
 {
-  filter = f;
-  update_list();
+  if (filter != f)
+  {
+    filter = f;
+    update_list();
+  }
 }
 
 // 実際のオープン処理
@@ -185,24 +212,23 @@ void
 Item::key_input()
 {
   auto& key = Graphics::getKeyInput();
+  auto  sz  = sel_items.size();
   switch (key.getRepeat())
   {
   case Key::Code::Up:
     select_index -= select_index > 0;
     break;
   case Key::Code::Down:
-    select_index += select_index < items.size() - 1;
+    select_index += select_index < sz - 1;
     break;
   case Key::Code::Tab:
-    select_index =
-        (select_index + (key.onShift() ? items.size() - 1 : 1)) % items.size();
+    select_index = (select_index + (key.onShift() ? sz - 1 : 1)) % sz;
     break;
   case Key::Code::Esc:
     close();
     break;
   case Key::Code::Enter:
-    if (selected_func)
-      selected_func(select_index);
+    selected();
     if (parent->getFocus() == false)
       close();
     break;
@@ -244,13 +270,19 @@ Item::updateAndDraw(const Graphics::Locate& mpos)
     {
       mf = oy;
       if (mouse_focus != mf)
-        select_index = mf + disp_top;
+      {
+        // フォーカスしたところにちゃんとアイテムがあるなら移動
+        int idx = mf + disp_top;
+        if (idx < sel_items.size())
+          select_index = idx;
+        else
+          mf = -1;
+      }
     }
   }
   mouse_focus = mf;
   key_input();
-  if (sel != select_index && changed_func)
-    changed_func(select_index);
+  changed(sel);
 
   // 選択
   {
