@@ -3,6 +3,7 @@
 #include "font.h"
 #include "gl_def.h"
 #include "parts.h"
+#include <functional>
 #include <string>
 #include <vector>
 
