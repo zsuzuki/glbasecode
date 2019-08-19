@@ -202,9 +202,9 @@ bindLayer(std::string l)
 {
   if (layer.bind(l))
   {
+    input_finish(edit_input);
     focus_input.reset();
     edit_input.reset();
-    input_finish(edit_input);
   }
 }
 //
