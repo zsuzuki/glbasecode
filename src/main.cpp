@@ -51,7 +51,7 @@ setupMenu2()
   {
     double x = 60.0;
 
-    auto cb = CheckBox::create("✓", x, by, false);
+    auto cb = CheckBox::create("Chk", x, by, false);
     cb->setOnColor(Graphics::Green);
     cb->setOffText("Off");
     x += cb->getWidth() + 50.0;
