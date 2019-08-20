@@ -95,18 +95,21 @@ on_click(ClickAct action, bool enter)
   {
     if (edit_input)
     {
+      // 編集中の場合
       auto& pd = edit_input->pulldown;
       if (pd)
       {
+        // プルダウンがオープンしているときはそちらの処理しかしない
         if (pd->isOpened())
           return;
-        else
-          pd->open();
+        // else
+        //   pd->open();
       }
     }
 
     if (focus_input)
     {
+      // フォーカスしているアイテムに対して
       if (focus_input != edit_input)
       {
         // フォーカスの違う所をクリックしたら、編集し直し
