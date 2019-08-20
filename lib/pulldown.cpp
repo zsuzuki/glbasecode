@@ -313,7 +313,7 @@ void
 initialize(FontDraw::WidgetPtr f)
 {
   font = f;
-  Graphics::setClickCallback({on_click, true});
+  Graphics::setClickCallback({on_click, false});
 }
 
 //

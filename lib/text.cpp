@@ -274,6 +274,10 @@ setPulldown(Parts::IDPtr pd)
   manage->pulldown = new_pd;
   if (new_pd)
   {
+    new_pd->setSelected([](auto, auto s) {
+      setBuffer(manage->buffer, s);
+      setIndex(manage->max_length);
+    });
     if (new_pd->isOpened() == false)
       new_pd->open();
   }

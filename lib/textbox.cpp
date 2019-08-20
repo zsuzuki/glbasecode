@@ -93,6 +93,18 @@ on_click(ClickAct action, bool enter)
 {
   if (action == ClickAct::Press)
   {
+    if (edit_input)
+    {
+      auto& pd = edit_input->pulldown;
+      if (pd)
+      {
+        if (pd->isOpened())
+          return;
+        else
+          pd->open();
+      }
+    }
+
     if (focus_input)
     {
       if (focus_input != edit_input)

@@ -97,7 +97,6 @@ setupMenu3()
   tt->setMaxLength(16);
   tt->setPlaceHolder("complete field");
   tt->setPulldown(pd);
-  pd->setSelected([tt](int idx, auto s) {});
 
   y += tt->getHeight() + 50;
   tt = TextBox::create("", 200, y, 400, 70);
