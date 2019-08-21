@@ -49,7 +49,7 @@ struct Item : public Base
   int    getWidth() const override { return width; }
   int    getHeight() const override { return height; }
   void   setParent(const Parts::ID* p) override { parent = p; }
-  void   setFilter(std::string f) override;
+  bool   setFilter(std::string f) override;
   size_t getIndex() const override { return select_index; }
   void   open() override;
   void   close() override;
@@ -139,7 +139,7 @@ Item::update_list()
 }
 
 // フィルター更新
-void
+bool
 Item::setFilter(std::string f)
 {
   if (filter != f)
@@ -147,6 +147,11 @@ Item::setFilter(std::string f)
     filter = f;
     update_list();
   }
+  // 選択できる候補が無いなら閉じてしまう
+  bool valid = sel_items.size() > 0;
+  if (valid == false && isOpened())
+    close();
+  return valid;
 }
 
 // 実際のオープン処理
@@ -170,6 +175,9 @@ Item::do_open()
     y = parent->getY() + parent->getHeight();
   }
   bbox = BoundingBox::Rect{x, y, width, height};
+
+  // オープン時に最初の候補の選択を通知
+  changed(-1);
 
   return true;
 }

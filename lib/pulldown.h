@@ -15,7 +15,7 @@ using Selected = std::function<void(int, const std::string&)>;
 //
 struct Base : public Parts::ID
 {
-  virtual void   setFilter(std::string) = 0;
+  virtual bool   setFilter(std::string) = 0;
   virtual size_t getIndex() const       = 0;
   virtual void   open()                 = 0;
   virtual void   close()                = 0;

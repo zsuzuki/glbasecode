@@ -40,7 +40,14 @@ struct Manage
   void updatePulldown()
   {
     if (pulldown)
-      pulldown->setFilter(getString());
+    {
+      if (pulldown->setFilter(getString()) && pulldown->isOpened() == false)
+      {
+        // 入力の結果選択できる候補があるならウィンドウ表示
+        if (buffer.size() > 0)
+          pulldown->open();
+      }
+    }
   }
 };
 std::shared_ptr<Manage> manage;
@@ -274,12 +281,12 @@ setPulldown(Parts::IDPtr pd)
   manage->pulldown = new_pd;
   if (new_pd)
   {
-    new_pd->setSelected([](auto, auto s) {
+    new_pd->setChanged([](auto, auto s) {
       setBuffer(manage->buffer, s);
       setIndex(manage->max_length);
     });
-    if (new_pd->isOpened() == false)
-      new_pd->open();
+    // if (new_pd->isOpened() == false)
+    //   new_pd->open();
   }
 }
 
