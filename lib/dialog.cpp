@@ -70,32 +70,49 @@ struct Body : public Base
 };
 
 using BodyPtr  = std::shared_ptr<Body>;
-using ClickAct = Graphics::ClickCallback::Action;
+using ClickAct = Graphics::OffEventCallback::Action;
 
 BodyPtr current_dialog;
 
 //
-void
-on_click(ClickAct action, bool)
+bool
+on_click(ClickAct action)
 {
-  if (action == ClickAct::Press && current_dialog)
+  if (!current_dialog)
+    return false;
+
+  bool act_ok = false;
+  bool act_cl = false;
+  if (action == ClickAct::Click)
   {
-    switch (current_dialog->sel_state)
-    {
-    case Select::OK:
-      if (current_dialog->df_ok)
-        current_dialog->df_ok(true);
-      current_dialog.reset();
-      break;
-    case Select::Cancel:
-      if (current_dialog->df_cancel)
-        current_dialog->df_cancel(false);
-      current_dialog.reset();
-      break;
-    default:
-      break;
-    }
+    if (current_dialog->sel_state == Select::OK)
+      act_ok = true;
+    else if (current_dialog->sel_state == Select::Cancel)
+      act_cl = true;
   }
+  else if (current_dialog->need_cancel)
+  {
+    act_ok = action == ClickAct::EnterKey;
+    act_cl = action == ClickAct::EscapeKey;
+  }
+  else
+  {
+    if (action == ClickAct::EnterKey || action == ClickAct::EscapeKey)
+      act_ok = true;
+  }
+
+  if (act_ok && current_dialog->df_ok)
+  {
+    current_dialog->df_ok(true);
+    current_dialog.reset();
+  }
+  else if (act_cl && current_dialog->df_cancel)
+  {
+    current_dialog->df_cancel(false);
+    current_dialog.reset();
+  }
+
+  return act_ok || act_cl;
 }
 
 //
@@ -174,7 +191,6 @@ void
 initialize(FontDraw::WidgetPtr f)
 {
   font = f;
-  Graphics::setClickCallback({on_click, true});
 }
 
 //
@@ -201,6 +217,7 @@ open(ID d)
   if (!current_dialog)
     return false;
 
+  Graphics::disableEvent({on_click});
   return true;
 }
 
@@ -214,6 +231,7 @@ close()
   if (current_dialog->df_cancel)
     current_dialog->df_cancel(false);
   current_dialog.reset();
+  Graphics::enableEvent();
 }
 
 //

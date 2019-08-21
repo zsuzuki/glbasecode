@@ -19,6 +19,7 @@
 namespace Graphics
 {
 using KeyInput = const Key::Input;
+
 //
 bool        initialize(const char* appname, int w, int h);
 GLFWwindow* setupFrame();
@@ -38,4 +39,7 @@ void        switchFullScreen();
 void        enableScissor(double x, double y, double w, double h);
 void        disableScissor();
 KeyInput&   getKeyInput();
+void        enableEvent();
+void        disableEvent(OffEventCallback);
+bool        isEnabledEvent();
 } // namespace Graphics

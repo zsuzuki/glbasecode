@@ -24,6 +24,7 @@ WindowSize     max_size{};
 Locate         base_pos{};
 WindowSize     base_size{};
 bool           now_fullscreen = false;
+bool           enable_event   = true;
 
 // キーコードからintへの変換
 int
@@ -124,10 +125,99 @@ KeyInputImpl keyinput;
 std::list<ClickCallback> click_callback;
 using ClickAct = ClickCallback::Action;
 
+OffEventCallback off_event_callback;
+
 void
 error_callback(int error, const char* description)
 {
   std::cerr << "Error: " << description << std::endl;
+}
+
+// キー入力コールバックの大元
+void
+key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+  if (enable_event)
+  {
+    // 通常のキー入力イベント
+    if (text_key_callback)
+      text_key_callback(key, scancode, action, mods);
+    if (sbox_key_callback)
+      sbox_key_callback(key, scancode, action, mods);
+    if (key == GLFW_KEY_ENTER && action != GLFW_REPEAT)
+    {
+      auto act = action == GLFW_PRESS ? ClickAct::Press : ClickAct::Release;
+      for (auto& fn : click_callback)
+        if (fn.use_enter)
+          fn.func(act, true);
+    }
+    keyinput.update(key, scancode, action, mods);
+  }
+  else if (off_event_callback.func)
+  {
+    // イベント発行が禁止されている場合の解除用イベント
+    bool cancel_di = false;
+    if (key == GLFW_KEY_ENTER)
+      cancel_di = off_event_callback.func(OffEventCallback::Action::EnterKey);
+    else if (key == GLFW_KEY_ESCAPE)
+      cancel_di = off_event_callback.func(OffEventCallback::Action::EscapeKey);
+    if (cancel_di)
+      enableEvent();
+  }
+}
+
+// ドラッグ＆ドロップコールバックの大元
+void
+dragdrop_callback(GLFWwindow* window, int num, const char** paths)
+{
+  if (enable_event == false)
+    return;
+  if (drop_callback)
+    drop_callback(num, paths);
+}
+
+// マウスボタン
+void
+mousebutton_callback(GLFWwindow* window, int btn, int action, int mods)
+{
+  if (enable_event)
+  {
+    if (btn == GLFW_MOUSE_BUTTON_LEFT)
+    {
+      auto act = action == GLFW_PRESS ? ClickAct::Press : ClickAct::Release;
+      for (auto& fn : click_callback)
+        fn.func(act, false);
+    }
+  }
+  else if (off_event_callback.func)
+  {
+    // イベント発行が禁止されている場合の解除用イベント
+    if (btn == GLFW_MOUSE_BUTTON_LEFT)
+    {
+      if (off_event_callback.func(OffEventCallback::Action::Click))
+        enableEvent();
+    }
+  }
+}
+
+// 文字入力コールバック
+void
+textinput_callback(GLFWwindow* window, unsigned int codepoint)
+{
+  if (enable_event == false)
+    return;
+  if (text_char_callback)
+    text_char_callback(codepoint);
+}
+
+// スクロール
+void
+scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+  if (enable_event == false)
+    return;
+  if (sbox_scr_callback)
+    sbox_scr_callback(xoffset, yoffset);
 }
 
 } // namespace
@@ -199,43 +289,11 @@ initialize(const char* appname, int w, int h)
   }
 #endif
 
-  glfwSetKeyCallback(
-      window, [](auto window, int key, int scancode, int action, int mods) {
-        if (text_key_callback)
-          text_key_callback(key, scancode, action, mods);
-        if (sbox_key_callback)
-          sbox_key_callback(key, scancode, action, mods);
-        if (key == GLFW_KEY_ENTER && action != GLFW_REPEAT)
-        {
-          auto act = action == GLFW_PRESS ? ClickAct::Press : ClickAct::Release;
-          for (auto& fn : click_callback)
-            if (fn.use_enter)
-              fn.func(act, true);
-        }
-        keyinput.update(key, scancode, action, mods);
-      });
-  glfwSetDropCallback(window, [](auto window, int num, const char** paths) {
-    if (drop_callback)
-      drop_callback(num, paths);
-  });
-  glfwSetMouseButtonCallback(
-      window, [](auto window, int btn, int action, int mods) {
-        if (btn == GLFW_MOUSE_BUTTON_LEFT)
-        {
-          auto act = action == GLFW_PRESS ? ClickAct::Press : ClickAct::Release;
-          for (auto& fn : click_callback)
-            fn.func(act, false);
-        }
-      });
-  glfwSetCharCallback(window, [](auto window, unsigned int codepoint) {
-    if (text_char_callback)
-      text_char_callback(codepoint);
-  });
-  glfwSetScrollCallback(window,
-                        [](auto window, double xoffset, double yoffset) {
-                          if (sbox_scr_callback)
-                            sbox_scr_callback(xoffset, yoffset);
-                        });
+  glfwSetKeyCallback(window, key_callback);
+  glfwSetDropCallback(window, dragdrop_callback);
+  glfwSetMouseButtonCallback(window, mousebutton_callback);
+  glfwSetCharCallback(window, textinput_callback);
+  glfwSetScrollCallback(window, scroll_callback);
 
   return true;
 }
@@ -398,6 +456,27 @@ void
 disableScissor()
 {
   glDisable(GL_SCISSOR_TEST);
+}
+
+//
+void
+enableEvent()
+{
+  off_event_callback = {};
+  enable_event       = true;
+}
+
+void
+disableEvent(OffEventCallback ofc)
+{
+  off_event_callback = ofc;
+  enable_event       = false;
+}
+
+bool
+isEnabledEvent()
+{
+  return enable_event;
 }
 
 } // namespace Graphics

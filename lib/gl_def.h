@@ -7,6 +7,7 @@ using DropCallback   = void (*)(int, const char**);
 using TextCallback   = void (*)(int);
 using ScrollCallback = void (*)(double, double);
 
+// クリックされた時に呼び出す
 struct ClickCallback
 {
   enum class Action : int
@@ -19,6 +20,20 @@ struct ClickCallback
   bool use_enter = false;
 };
 
+// イベントが発行されないときの復帰用イベント
+struct OffEventCallback
+{
+  enum class Action : int
+  {
+    Click,
+    EnterKey,
+    EscapeKey
+  };
+  using Func = bool (*)(Action);
+  Func func  = nullptr;
+};
+
+//
 struct WindowSize
 {
   double width;
