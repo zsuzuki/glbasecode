@@ -1,6 +1,7 @@
 #pragma once
 
 #include "checkbox.h"
+#include "dialog.h"
 #include "font.h"
 #include "gl.h"
 #include "label.h"
@@ -30,6 +31,7 @@ initialize(const char* appname, const char* fontname, int w, int h)
   Label::initialize(font);
   CheckBox::initialize(font);
   Pulldown::initialize(font);
+  Dialog::initialize(font);
 
   return font;
 }
@@ -67,6 +69,7 @@ update(std::function<bool()> func)
 
   auto ret = func();
 
+  Dialog::update();
   ScrollBox::update();
   TextBox::update();
   TextButton::update();

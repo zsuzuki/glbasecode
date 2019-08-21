@@ -123,6 +123,15 @@ setup()
     eb->setColor(ColorType::FocusBG, Graphics::Sepia);
     eb->setColor(ColorType::PressBG, Graphics::Red);
     eb->setColor(ColorType::PressFont, Graphics::Black);
+    auto dlg1 = Dialog::create("Welcome\nHello, World\nDialog");
+    auto dlg2 = Dialog::create("OK or Cancel ?", true);
+    dlg1->setOK([](bool) { std::cout << "OK Dialog1" << std::endl; });
+    dlg2->setOK([](bool) { std::cout << "OK Dialog2" << std::endl; });
+    dlg2->setCancel([](bool) { std::cout << "Cancel Dialog2" << std::endl; });
+    auto db = setButton("OK Dialog", Width - 150, 300,
+                        [dlg1]() { Dialog::open(dlg1); });
+    setButton("With Cancel", Width - 150, 300 + db->getHeight() + 40,
+              [dlg2]() { Dialog::open(dlg2); });
   }
   for (int i = 0; i < 3; i++)
   {

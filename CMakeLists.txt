@@ -35,6 +35,7 @@ set(main_src
     lib/label.cpp
     lib/checkbox.cpp
     lib/pulldown.cpp
+    lib/dialog.cpp
     lib/exec.cpp)
 
 add_executable(${PROJECT_NAME} ${main_src})
