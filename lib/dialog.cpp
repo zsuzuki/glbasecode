@@ -116,11 +116,10 @@ Body::update()
     bb_cancel = BBox{dx, dy, 21 * 6 + 60, 60};
     dx        = x + width * 0.7 - 51;
     bb_ok     = BBox{dx, dy, 102, 60};
-    if (bb_ok.check(mpos.x, mpos.y))
-      sel_state = Select::OK;
+    if (bb_cancel.check(mpos.x, mpos.y))
+      sel_state = Select::Cancel;
     else
-      sel_state =
-          bb_cancel.check(mpos.x, mpos.y) ? Select::Cancel : Select::None;
+      sel_state = bb_ok.check(mpos.x, mpos.y) ? Select::OK : Select::None;
   }
   else
   {
