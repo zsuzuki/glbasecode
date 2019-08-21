@@ -85,6 +85,7 @@ on_click(ClickAct action)
   bool act_cl = false;
   if (action == ClickAct::Click)
   {
+    // クリックの場合、明示的にボタンを押す
     if (current_dialog->sel_state == Select::OK)
       act_ok = true;
     else if (current_dialog->sel_state == Select::Cancel)
@@ -92,23 +93,29 @@ on_click(ClickAct action)
   }
   else if (current_dialog->need_cancel)
   {
+    // キャンセルボタンがある場合、それぞれの役割を判定
     act_ok = action == ClickAct::EnterKey;
     act_cl = action == ClickAct::EscapeKey;
   }
   else
   {
+    // OKボタンのみの場合、なんか押されたらそれで決定
     if (action == ClickAct::EnterKey || action == ClickAct::EscapeKey)
       act_ok = true;
   }
 
-  if (act_ok && current_dialog->df_ok)
+  if (act_ok)
   {
-    current_dialog->df_ok(true);
+    // OKが押された
+    if (current_dialog->df_ok)
+      current_dialog->df_ok(true);
     current_dialog.reset();
   }
-  else if (act_cl && current_dialog->df_cancel)
+  else if (act_cl)
   {
-    current_dialog->df_cancel(false);
+    // Cancelが押された
+    if (current_dialog->df_cancel)
+      current_dialog->df_cancel(false);
     current_dialog.reset();
   }
 

@@ -326,16 +326,16 @@ update()
 
   Primitive2D::pushDepth(0.01f);
   font->pushDepth(0.0f);
-  bool focus = false;
+  bool focus = !Graphics::isEnabledEvent();
   for (auto& btn : button_list)
   {
     auto ef = btn->update();
     if (!ef.first)
       continue;
     bool my_focus = focus_button == btn;
-    bool inbox    = btn->bbox.check(mpos.x, mpos.y);
     if (!focus)
     {
+      bool inbox = btn->bbox.check(mpos.x, mpos.y);
       if (ef.second && inbox)
       {
         // カーソルが乗っている場合のみ

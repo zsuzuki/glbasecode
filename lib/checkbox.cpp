@@ -218,7 +218,7 @@ update()
   font->setColor(Graphics::White);
   auto  mpos      = Graphics::getMousePosition();
   auto& item_list = layer.getCurrent();
-  bool  focus     = false;
+  bool  focus     = !Graphics::isEnabledEvent();
   for (auto& item : item_list)
   {
     if (item->update() == false)
