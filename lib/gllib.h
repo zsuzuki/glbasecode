@@ -16,7 +16,7 @@ namespace GLLib
 {
 
 // 初期化
-FontDraw::WidgetPtr
+inline FontDraw::WidgetPtr
 initialize(const char* appname, const char* fontname, int w, int h)
 {
   if (!Graphics::initialize(appname, w, h))
@@ -37,7 +37,7 @@ initialize(const char* appname, const char* fontname, int w, int h)
 }
 
 // 終了
-void
+inline void
 terminate()
 {
   FontDraw::terminate();
@@ -46,7 +46,7 @@ terminate()
 }
 
 // レイヤー変更
-void
+inline void
 bindLayer(std::string name = "default")
 {
   ScrollBox::bindLayer(name);
@@ -58,7 +58,7 @@ bindLayer(std::string name = "default")
 }
 
 // フレーム内実行
-bool
+inline bool
 update(std::function<bool()> func)
 {
   auto window = Graphics::setupFrame();
