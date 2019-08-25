@@ -102,7 +102,7 @@ print(const std::string& msg, double x, double y)
   font->print(msg.c_str(), (float)loc.x, (float)loc.y);
 }
 
-// 洗濯したアイテムを決定
+// 選択したアイテムを決定
 void
 Item::selected()
 {
@@ -175,6 +175,7 @@ Item::do_open()
     y = parent->getY() + parent->getHeight();
   }
   bbox = BoundingBox::Rect{x, y, width, height};
+  Graphics::openPulldown();
 
   // オープン時に最初の候補の選択を通知
   changed(-1);
@@ -193,6 +194,7 @@ Item::do_close()
   opened        = false;
   open_request  = false;
   close_request = false;
+  Graphics::closePulldown();
 
   return true;
 }
@@ -353,7 +355,7 @@ update()
   {
     if (exist)
     {
-      auto mpos = Graphics::getMousePosition();
+      auto mpos = Graphics::getPulldownCursor();
       if (open_item->updateAndDraw(mpos))
         focus_item = open_item;
     }

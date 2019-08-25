@@ -42,4 +42,7 @@ KeyInput&   getKeyInput();
 void        enableEvent();
 void        disableEvent(OffEventCallback);
 bool        isEnabledEvent();
+void        openPulldown();
+void        closePulldown();
+Locate      getPulldownCursor();
 } // namespace Graphics

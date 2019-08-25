@@ -165,32 +165,29 @@ text_button(ClickAct action, bool enter)
   }
   if (focus_button)
   {
-    if (action == ClickAct::Release)
+    auto  btn = focus_button;
+    auto& pd  = btn->pulldown;
+    if (pd)
+    {
+      // プルダウンを保有している場合
+      if (action == ClickAct::Press)
+      {
+        if (pd->isOpened())
+          pd->close();
+        else
+          pd->open();
+      }
+    }
+    else if (action == ClickAct::Release)
     {
       // ボタンを放したときに実行
-      auto btn = focus_button;
       if (btn->press)
-      {
-        bool  called = true;
-        auto& pd     = btn->pulldown;
-        if (pd)
-        {
-          if (pd->isOpened())
-          {
-            pd->close();
-            called = false;
-          }
-          else
-            pd->open();
-        }
-        if (called)
-          btn->cb();
-      }
+        btn->cb();
       btn->press = false;
     }
     else if (action == ClickAct::Press)
     {
-      focus_button->press = true;
+      btn->press = true;
     }
   }
 }

@@ -18,6 +18,7 @@ ScrollCallback sbox_scr_callback  = nullptr;
 KeyCallback    sbox_key_callback  = nullptr;
 WindowSize     window_size{};
 Locate         mouse_pos{};
+Locate         mouse_pos_pd{};
 float          xscale = 1.0f;
 float          yscale = 1.0f;
 WindowSize     max_size{};
@@ -25,6 +26,7 @@ Locate         base_pos{};
 WindowSize     base_size{};
 bool           now_fullscreen = false;
 bool           enable_event   = true;
+bool           pulldown_mode  = false;
 
 // キーコードからintへの変換
 int
@@ -394,9 +396,18 @@ setupFrame()
   window_size.width  = w;
   window_size.height = h;
 
-  glfwGetCursorPos(window, &mouse_pos.x, &mouse_pos.y);
-  mouse_pos.x *= xscale;
-  mouse_pos.y *= yscale;
+  if (pulldown_mode)
+  {
+    glfwGetCursorPos(window, &mouse_pos_pd.x, &mouse_pos_pd.y);
+    mouse_pos_pd.x *= xscale;
+    mouse_pos_pd.y *= yscale;
+  }
+  else
+  {
+    glfwGetCursorPos(window, &mouse_pos.x, &mouse_pos.y);
+    mouse_pos.x *= xscale;
+    mouse_pos.y *= yscale;
+  }
 
   glViewport(0, 0, w, h);
   glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
@@ -477,6 +488,25 @@ bool
 isEnabledEvent()
 {
   return enable_event;
+}
+
+//
+void
+openPulldown()
+{
+  pulldown_mode = true;
+}
+
+void
+closePulldown()
+{
+  pulldown_mode = false;
+}
+
+Locate
+getPulldownCursor()
+{
+  return mouse_pos_pd;
 }
 
 } // namespace Graphics
