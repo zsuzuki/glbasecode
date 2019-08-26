@@ -19,6 +19,7 @@ KeyCallback    sbox_key_callback  = nullptr;
 WindowSize     window_size{};
 Locate         mouse_pos{};
 Locate         mouse_pos_pd{};
+Vector         mouse_scroll{};
 float          xscale = 1.0f;
 float          yscale = 1.0f;
 WindowSize     max_size{};
@@ -220,6 +221,8 @@ scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     return;
   if (sbox_scr_callback)
     sbox_scr_callback(xoffset, yoffset);
+  mouse_scroll.x = xoffset;
+  mouse_scroll.y = yoffset;
 }
 
 } // namespace
@@ -507,6 +510,13 @@ Locate
 getPulldownCursor()
 {
   return mouse_pos_pd;
+}
+
+//
+Vector
+getScroll()
+{
+  return mouse_scroll;
 }
 
 } // namespace Graphics

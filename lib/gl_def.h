@@ -43,6 +43,10 @@ struct Locate
 {
   double x, y;
 };
+struct Vector
+{
+  double x, y;
+};
 struct Color
 {
   float r;

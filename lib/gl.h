@@ -45,4 +45,5 @@ bool        isEnabledEvent();
 void        openPulldown();
 void        closePulldown();
 Locate      getPulldownCursor();
+Vector      getScroll();
 } // namespace Graphics

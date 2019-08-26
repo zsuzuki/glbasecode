@@ -2,6 +2,7 @@
 
 #include "checkbox.h"
 #include "dialog.h"
+#include "drawbox.h"
 #include "font.h"
 #include "gl.h"
 #include "label.h"

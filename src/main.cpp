@@ -159,7 +159,7 @@ setup()
 
 //
 bool
-onUpdate(FontDraw::WidgetPtr font)
+onUpdate(FontDraw::WidgetPtr font, DrawBox::BoxPtr dbox)
 {
   // プリミティブを描画
   if (DispPrim)
@@ -181,6 +181,20 @@ onUpdate(FontDraw::WidgetPtr font)
   font->setColor(Graphics::Cyan);
   font->print("Status: Echo", -0.98f, -1.0f);
 
+  // 描画ボックス内にフォント表示
+  dbox->begin();
+  for (int i = 0; i < 15; i++)
+  {
+    double x = dbox->getBaseX() + 20.0;
+    double y = dbox->getBaseY() + i * 50.0;
+    auto   l = Graphics::calcLocate(x, y);
+    font->setColor(Graphics::LightGray);
+    char buff[64];
+    std::snprintf(buff, sizeof(buff), "DrawBox PRINT SAMPLE No. %2d", i);
+    font->print(buff, l.x, l.y);
+  }
+  dbox->end();
+
   return true;
 }
 } // namespace
@@ -201,9 +215,11 @@ main(int argc, char** argv)
   GLLib::bindLayer();
 
   // フレームループ
+  auto dbox = DrawBox::create(font, 200, 700, 300, 400);
+  dbox->setDrawSize(600, 750);
   for (;;)
   {
-    if (GLLib::update([font]() { return onUpdate(font); }) == false)
+    if (GLLib::update([&]() { return onUpdate(font, dbox); }) == false)
       break;
   }
 
