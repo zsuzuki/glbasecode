@@ -118,7 +118,9 @@ public:
     da.h = h;
     da.e = true;
   }
-  void clearDrawArea() override { da.e = false; }
+  void  clearDrawArea() override { da.e = false; }
+  float getSizeX() const override { return 21.0f; }
+  float getSizeY() const override { return 42.0f; }
 };
 
 // 文字テクスチャキャッシュ

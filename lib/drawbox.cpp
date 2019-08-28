@@ -1,4 +1,5 @@
 #include "drawbox.h"
+#include "bb.h"
 #include "gl.h"
 #include "primitive2d.h"
 
@@ -40,11 +41,16 @@ BoxImpl::begin()
 {
   Graphics::enableScissor(x, y, width, height);
   font->setDrawArea(x, y, width, height);
-  auto sc = Graphics::getScroll();
-  ofs_x += sc.x;
-  ofs_y += sc.y;
-  ofs_x = ofs_x < 0.0 ? 0.0 : ofs_x > scr_w ? scr_w : ofs_x;
-  ofs_y = ofs_y < 0.0 ? 0.0 : ofs_y > scr_h ? scr_h : ofs_y;
+  auto bbox = BoundingBox::Rect{x, y, width, height};
+  auto mpos = Graphics::getMousePosition();
+  if (bbox.check(mpos.x, mpos.y))
+  {
+    auto sc = Graphics::getScroll();
+    ofs_x += sc.x;
+    ofs_y += sc.y;
+    ofs_x = ofs_x < 0.0 ? 0.0 : ofs_x > scr_w ? scr_w : ofs_x;
+    ofs_y = ofs_y < 0.0 ? 0.0 : ofs_y > scr_h ? scr_h : ofs_y;
+  }
 }
 
 //
