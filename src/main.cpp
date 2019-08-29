@@ -5,8 +5,8 @@
 
 namespace
 {
-int  Width    = 1024;
-int  Height   = 1024;
+int  Width    = 1600;
+int  Height   = 1200;
 bool DispPrim = true;
 
 // file drag&drop
@@ -106,9 +106,10 @@ setupMenu3()
 
 //
 void
-setup()
+setup(FontDraw::WidgetPtr font)
 {
   Graphics::setDropCallback(drop_file);
+  Graphics::setWindowSize({(double)Width, (double)Height});
 
   // top menu
   {
@@ -128,9 +129,10 @@ setup()
     dlg1->setOK([](bool) { std::cout << "OK Dialog1" << std::endl; });
     dlg2->setOK([](bool) { std::cout << "OK Dialog2" << std::endl; });
     dlg2->setCancel([](bool) { std::cout << "Cancel Dialog2" << std::endl; });
-    auto db = setButton("OK Dialog", Width - 150, 300,
-                        [dlg1]() { Dialog::open(dlg1); });
-    setButton("With Cancel", Width - 150, 300 + db->getHeight() + 40,
+    auto btnx = Width - font->getSizeX() * 12.0 - 50;
+    auto db =
+        setButton("OK Dialog", btnx, 300, [dlg1]() { Dialog::open(dlg1); });
+    setButton("With Cancel", btnx, 300 + db->getHeight() + 40,
               [dlg2]() { Dialog::open(dlg2); });
   }
   for (int i = 0; i < 3; i++)
@@ -211,7 +213,7 @@ main(int argc, char** argv)
   if (!font)
     return 1;
 
-  setup();
+  setup(font);
   GLLib::bindLayer();
 
   // フレームループ
