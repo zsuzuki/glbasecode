@@ -51,6 +51,10 @@ struct Box : public Base
     auto ws     = Graphics::getWindowSize();
     stick_ofs_x = sx ? ws.width - (getX() + getWidth()) : 0.0;
     stick_ofs_y = sy ? ws.height - (getY() + getHeight()) : 0.0;
+    if (stick_ofs_x < 0.0)
+      stick_ofs_x = 0.0;
+    if (stick_ofs_y < 0.0)
+      stick_ofs_y = 0.0;
   }
 
   double getX() const override { return bbox.getLeftX(); }
