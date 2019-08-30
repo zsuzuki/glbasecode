@@ -45,7 +45,21 @@ setupMenu2()
   SBox->drawSheet(true, {0.1f, 0.4f, 0.5f, 0.4f});
   SBox->setDepth(-0.1f);
   SBox->setScrollConstraint(true, false);
-  SBox->setSticky(false, true);
+
+  static bool stick_x = false, stick_y = false;
+  auto chx = 350.0;
+  auto chy = 200.0;
+  auto ch  = CheckBox::create("Sticky X", chx, chy, stick_x);
+  ch->setChanged([SBox](bool s) {
+    stick_x = s;
+    SBox->setSticky(stick_x, stick_y);
+  });
+  chx += ch->getWidth() + 40.0;
+  ch = CheckBox::create("Sticky Y", chx, chy, stick_y);
+  ch->setChanged([SBox](bool s) {
+    stick_y = s;
+    SBox->setSticky(stick_x, stick_y);
+  });
 
   double by = 100.0;
   for (int i = 0; i < 20; i++)

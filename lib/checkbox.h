@@ -3,11 +3,15 @@
 #include "font.h"
 #include "gl_def.h"
 #include "parts.h"
+#include <functional>
 #include <string>
 
 namespace CheckBox
 {
+//
 static constexpr const char* DefaultLayer = "default";
+// 値変更コールバック
+using Changed = std::function<void(bool)>;
 
 //
 struct Base : public Parts::ID
@@ -18,6 +22,7 @@ struct Base : public Parts::ID
   virtual bool getValue() const             = 0;
   virtual void setOnColor(Graphics::Color)  = 0;
   virtual void setOffColor(Graphics::Color) = 0;
+  virtual void setChanged(Changed)          = 0;
 
   virtual operator bool() const { return getValue(); }
 };

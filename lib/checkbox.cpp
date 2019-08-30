@@ -38,12 +38,14 @@ struct Item : public Base
   double  length;
   bool    value;
   Parent* parent;
+  Changed change_func;
 
   double getX() const override { return x + ox; }
   double getY() const override { return y + oy; }
   int    getWidth() const override { return w; }
   int    getHeight() const override { return h; }
   void   setParent(const Parts::ID* p) override { parent = p; }
+  void   setChanged(Changed ch) override { change_func = ch; }
 
   void setText(std::string) override;
   void setOffText(std::string) override;
@@ -74,6 +76,8 @@ on_click(ClickAct action, bool enter)
     if (focus_item)
     {
       focus_item->value = !focus_item->value;
+      if (focus_item->change_func)
+        focus_item->change_func(focus_item->value);
     }
   }
 }
