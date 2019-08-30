@@ -120,10 +120,8 @@ Box::append(Parts::IDPtr i)
   i->setParent(this);
   items.push_back(i);
 
-  auto width  = getWidth() - i->getWidth() - 20;
-  auto height = getHeight() - i->getHeight() - 20;
-  auto x      = i->getX() - width;
-  auto y      = i->getY() - height;
+  auto x = i->getX() + i->getWidth() + 20;
+  auto y = i->getY() + i->getHeight() + 20;
 
   if (x > 0.0)
   {
@@ -164,14 +162,20 @@ Box::clear()
 void
 Box::scroll_clip()
 {
+  auto mx = max_x - getWidth();
+  auto my = max_y - getHeight();
+  if (mx < 0.0)
+    mx = 0.0;
+  if (my < 0.0)
+    my = 0.0;
   if (xofs > 0.0)
     xofs = 0.0;
-  else if (xofs < -max_x)
-    xofs = -max_x;
+  else if (xofs < -mx)
+    xofs = -mx;
   if (yofs > 0.0)
     yofs = 0.0;
-  else if (yofs < -max_y)
-    yofs = -max_y;
+  else if (yofs < -my)
+    yofs = -my;
 }
 
 //
