@@ -33,6 +33,7 @@ initialize(const char* appname, const char* fontname, int w, int h)
   CheckBox::initialize(font);
   Pulldown::initialize(font);
   Dialog::initialize(font);
+  DrawBox::initialize();
 
   return font;
 }

@@ -17,8 +17,12 @@ struct Box
   virtual void   begin()                     = 0;
   virtual void   end()                       = 0;
   virtual void   setDrawSize(double, double) = 0;
+  virtual void   setDragScroll(bool)         = 0;
 };
 using BoxPtr = std::shared_ptr<Box>;
+
+//
+void initialize();
 
 //
 BoxPtr create(FontDraw::WidgetPtr f, int x, int y, int w, int h);

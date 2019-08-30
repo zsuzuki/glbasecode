@@ -221,8 +221,8 @@ scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     return;
   if (sbox_scr_callback)
     sbox_scr_callback(xoffset, yoffset);
-  mouse_scroll.x = xoffset;
-  mouse_scroll.y = yoffset;
+  mouse_scroll.x = -xoffset;
+  mouse_scroll.y = -yoffset;
 }
 
 } // namespace
