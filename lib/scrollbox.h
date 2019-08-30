@@ -16,6 +16,7 @@ struct Base : public Parts::ID
   virtual void drawSheet(bool s, Graphics::Color scol)     = 0;
   virtual void setDepth(float d)                           = 0;
   virtual void setScrollConstraint(bool sx, bool sy)       = 0;
+  virtual void setSticky(bool, bool)                       = 0;
 };
 
 using SBoxPtr = std::shared_ptr<Base>;

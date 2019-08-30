@@ -435,7 +435,9 @@ cleanupFrame()
 void
 setWindowSize(WindowSize ws)
 {
-  glfwSetWindowSize(window, ws.width / xscale, ws.height / xscale);
+  window_size.width  = ws.width;
+  window_size.height = ws.height;
+  glfwSetWindowSize(window, ws.width / xscale, ws.height / yscale);
 }
 
 //

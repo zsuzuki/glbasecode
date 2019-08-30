@@ -45,6 +45,7 @@ setupMenu2()
   SBox->drawSheet(true, {0.1f, 0.4f, 0.5f, 0.4f});
   SBox->setDepth(-0.1f);
   SBox->setScrollConstraint(true, false);
+  SBox->setSticky(false, true);
 
   double by = 100.0;
   for (int i = 0; i < 20; i++)

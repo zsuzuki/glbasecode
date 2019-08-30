@@ -27,6 +27,10 @@ struct Box : public Base
   bool              xsc_const   = false;
   bool              ysc_const   = false;
   bool              draw_sheet  = false;
+  bool              sticky_x    = false;
+  bool              sticky_y    = false;
+  double            stick_ofs_x = 0.0;
+  double            stick_ofs_y = 0.0;
   Graphics::Color   sheet_color = Graphics::Gray;
 
   void set(double x, double y, double w, double h) override;
@@ -39,6 +43,14 @@ struct Box : public Base
   {
     xsc_const = sx;
     ysc_const = sy;
+  }
+  void setSticky(bool sx, bool sy) override
+  {
+    sticky_x    = sx;
+    sticky_y    = sy;
+    auto ws     = Graphics::getWindowSize();
+    stick_ofs_x = sx ? ws.width - (getX() + getWidth()) : 0.0;
+    stick_ofs_y = sy ? ws.height - (getY() + getHeight()) : 0.0;
   }
 
   double getX() const override { return bbox.getLeftX(); }
@@ -55,6 +67,7 @@ struct Box : public Base
   }
 
   void scroll_clip();
+  void update_sticky();
 };
 using BoxPtr = std::weak_ptr<Box>;
 Layer<Box> layer;
@@ -84,6 +97,22 @@ Box::set(double x, double y, double w, double h)
   max_x = 0.0;
   max_y = 0.0;
 }
+
+//
+void
+Box::update_sticky()
+{
+  if (sticky_x || sticky_y)
+  {
+    auto ws = Graphics::getWindowSize();
+    auto x  = getX();
+    auto y  = getY();
+    auto w  = sticky_x ? ws.width - x - stick_ofs_x : getWidth();
+    auto h  = sticky_y ? ws.height - y - stick_ofs_y : getHeight();
+    bbox    = BoundingBox::Rect{x, y, w, h};
+  }
+}
+
 //
 void
 Box::append(Parts::IDPtr i)
@@ -215,6 +244,7 @@ update()
   for (auto box : box_list)
   {
     auto& bb = box->bbox;
+    box->update_sticky();
 
     Graphics::Color col = Graphics::White;
     if (!new_focus)
