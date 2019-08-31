@@ -47,9 +47,9 @@ setupMenu2()
   SBox->setScrollConstraint(true, false);
 
   static bool stick_x = false, stick_y = false;
-  auto chx = 350.0;
-  auto chy = 200.0;
-  auto ch  = CheckBox::create("Sticky X", chx, chy, stick_x);
+  auto        chx = 350.0;
+  auto        chy = 200.0;
+  auto        ch  = CheckBox::create("Sticky X", chx, chy, stick_x);
   ch->setChanged([SBox](bool s) {
     stick_x = s;
     SBox->setSticky(stick_x, stick_y);
@@ -175,8 +175,9 @@ setup(FontDraw::WidgetPtr font)
 }
 
 //
+using DBoxList = std::initializer_list<DrawBox::BoxPtr>;
 bool
-onUpdate(FontDraw::WidgetPtr font, DrawBox::BoxPtr dbox)
+onUpdate(FontDraw::WidgetPtr font, DBoxList dbl)
 {
   // プリミティブを描画
   if (DispPrim)
@@ -194,20 +195,35 @@ onUpdate(FontDraw::WidgetPtr font, DrawBox::BoxPtr dbox)
 
   // グラフィック座標系で毎フレーム描画
   font->setColor(Graphics::Green);
-  font->print("こんにちは、世界", -0.3f, -0.3f);
+  font->print("こんにちは、世界", -0.25f, 0.5f);
   font->setColor(Graphics::Cyan);
-  font->print("Status: Echo", -0.98f, -1.0f);
+  font->print("Status: Echo", -0.98f, -0.98f);
 
   // 描画ボックス内にフォント表示
+  auto dbi  = dbl.begin();
+  auto dbox = *dbi;
   dbox->begin();
   for (int i = 0; i < 15; i++)
   {
     double x = dbox->getBaseX() + 20.0;
     double y = dbox->getBaseY() + i * 50.0;
     auto   l = Graphics::calcLocate(x, y);
-    font->setColor(Graphics::LightGray);
+    font->setColor(Graphics::Orange);
     char buff[64];
     std::snprintf(buff, sizeof(buff), "DrawBox PRINT SAMPLE No. %2d", i);
+    font->print(buff, l.x, l.y);
+  }
+  dbox->end();
+  dbox = *(++dbi);
+  dbox->begin();
+  for (int i = 0; i < 20; i++)
+  {
+    double x = dbox->getBaseX() + 20.0;
+    double y = dbox->getBaseY() + i * 50.0;
+    auto   l = Graphics::calcLocate(x, y);
+    font->setColor(Graphics::Yellow);
+    char buff[64];
+    std::snprintf(buff, sizeof(buff), "No. %2d TEST DrawBox", i);
     font->print(buff, l.x, l.y);
   }
   dbox->end();
@@ -232,11 +248,14 @@ main(int argc, char** argv)
   GLLib::bindLayer();
 
   // フレームループ
-  auto dbox = DrawBox::create(font, 200, 700, 300, 400);
-  dbox->setDrawSize(600, 750);
+  auto dbox1 = DrawBox::create(font, 200, 700, 300, 400);
+  auto dbox2 = DrawBox::create(font, 800, 700, 300, 400);
+  auto dbl   = {dbox1, dbox2};
+  dbox1->setDrawSize(600, 750);
+  dbox2->setDrawSize(600, 750);
   for (;;)
   {
-    if (GLLib::update([&]() { return onUpdate(font, dbox); }) == false)
+    if (GLLib::update([&]() { return onUpdate(font, dbl); }) == false)
       break;
   }
 

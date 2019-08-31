@@ -25,6 +25,9 @@ using BoxPtr = std::shared_ptr<Box>;
 void initialize();
 
 //
+void setup();
+
+//
 BoxPtr create(FontDraw::WidgetPtr f, int x, int y, int w, int h);
 
 } // namespace DrawBox

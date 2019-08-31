@@ -68,6 +68,7 @@ update(std::function<bool()> func)
     return false;
 
   Primitive2D::setup(window);
+  DrawBox::setup();
 
   auto ret = func();
 

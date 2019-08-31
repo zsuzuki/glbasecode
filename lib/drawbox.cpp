@@ -2,6 +2,7 @@
 #include "bb.h"
 #include "gl.h"
 #include "primitive2d.h"
+#include <cmath>
 
 namespace DrawBox
 {
@@ -37,11 +38,13 @@ struct BoxImpl : public Box
   void setDragScroll(bool e) override { drag_mode = e; }
 };
 
-using ClickAct    = Graphics::ClickCallback::Action;
-using Locate      = Graphics::Locate;
-bool   valid_drag = false;
-bool   on_drag    = false;
-Locate drag_base;
+using ClickAct      = Graphics::ClickCallback::Action;
+using Locate        = Graphics::Locate;
+using Vector        = Graphics::Vector;
+BoxImpl* valid_drag = nullptr;
+BoxImpl* on_drag    = nullptr;
+Locate   drag_base;
+Vector   drag_scroll;
 
 //
 void
@@ -53,17 +56,15 @@ BoxImpl::begin()
   auto mpos = Graphics::getMousePosition();
   if (bbox.check(mpos.x, mpos.y))
   {
-    valid_drag = true;
+    valid_drag = this;
     auto sc    = Graphics::getScroll();
-    ofs_x += sc.x;
-    ofs_y += sc.y;
+    ofs_x += std::abs(sc.x) > 0.05 ? sc.x : 0.0;
+    ofs_y += std::abs(sc.y) > 0.05 ? sc.y : 0.0;
   }
-  if (drag_mode && on_drag)
+  if (drag_mode && on_drag == this)
   {
-    auto p = Graphics::getMousePosition();
-    ofs_x += drag_base.x - p.x;
-    ofs_y += drag_base.y - p.y;
-    drag_base = p;
+    ofs_x += drag_scroll.x;
+    ofs_y += drag_scroll.y;
   }
   ofs_x = ofs_x < 0.0 ? 0.0 : ofs_x > scr_w ? scr_w : ofs_x;
   ofs_y = ofs_y < 0.0 ? 0.0 : ofs_y > scr_h ? scr_h : ofs_y;
@@ -83,14 +84,13 @@ drag_check(ClickAct action, bool)
 {
   if (action == ClickAct::Press)
   {
-    on_drag = valid_drag;
-    if (on_drag)
-      drag_base = Graphics::getMousePosition();
+    on_drag   = valid_drag;
+    drag_base = Graphics::getMousePosition();
   }
   else if (action == ClickAct::Release)
   {
-    on_drag    = false;
-    valid_drag = false;
+    on_drag    = nullptr;
+    valid_drag = nullptr;
   }
 }
 
@@ -101,6 +101,20 @@ void
 initialize()
 {
   Graphics::setClickCallback({drag_check, false});
+}
+
+//
+void
+setup()
+{
+  valid_drag = nullptr;
+  if (on_drag)
+  {
+    auto p        = Graphics::getMousePosition();
+    drag_scroll.x = drag_base.x - p.x;
+    drag_scroll.y = drag_base.y - p.y;
+    drag_base     = p;
+  }
 }
 
 //
