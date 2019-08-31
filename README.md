@@ -1,6 +1,6 @@
 # 概要
 
-GLFW3を使用してシンプルなUIを構築し、簡単なグラフィックを扱えるツールを作るためのベースとなるコード。
+GLFW3を使用してシンプルなUIを構築し、簡単なグラフィックを扱えるツールを作るための、ベースとなるコード。
 
 # ビルド
 
@@ -24,7 +24,7 @@ macはbrew、もしくは自前ビルドで用意。
 > cd build
 > cmake ..
 ```
-もしくは[ninja](https://ninja-build.org/)を使用する場合。
+もしくは[ninja](https://ninja-build.org/)を使用する場合。
 ```shell
 > cmake -G Ninja ..
 > ninja
