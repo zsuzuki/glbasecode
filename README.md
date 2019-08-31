@@ -1,20 +1,58 @@
 # 概要
 
-GLFW3を使用して、最低限、フォントやプリミティブを自前で描画できるようにするためのひな形。
+GLFW3を使用してシンプルなUIを構築し、簡単なグラフィックを扱えるツールを作るためのベースとなるコード。
 
 # ビルド
 
-Windows/Macでの動作テスト。
+Windows/Macでの動作テストしている。linuxでも多分動くはず。
 
 ## 必要ライブラリ
 
 windows版はvcpkgで必要パッケージをインストールした。
+macはbrew、もしくは自前ビルドで用意。
 
 - opengl
 - glfw3
 - freetype2
 - glew(windowでは必要)
 
+## ビルド手順
+
+以下のコマンドを実行し、出来上がったプロジェクトファイルをVisual Studio/Xcodeで開いて使用する。
+```shell
+> mkdir build
+> cd build
+> cmake ..
+```
+もしくは[ninja](https://ninja-build.org/)を使用する場合。
+```shell
+> cmake -G Ninja ..
+> ninja
+```
+
+# ファイル構成
+
+基本的には"gllib.h"をインクルードすれば全機能にアクセスできる。
+
+- [gl.cpp](lib/gl.cpp)([.h](lib/gl.h)) gl,glfwへのインターフェース
+- [gllib.h](lib/gllib.h) アプリケーション用ヘッダ
+- [bb.h](lib/bb.h) バウンディングボックス
+- [layer.h](lib/layer.h) レイヤー切り替え制御
+- [linmath.h](lib/linmath.h)ベクトル演算
+- [parts.h](lib/parts.h) 各パーツの基底クラス定義
+- [checkbox.cpp](lib/checkbox.cpp)([.h](lib/checkbox.h)) チェックボックス
+- [codeconv.h](lib/codeconv.h) 文字コード変換
+- [dialog.cpp](lib/dialog.cpp)([.h](lib/dialog.h)) ダイアログ表示
+- [drawbox.cpp](lib/drawbox.cpp)([.h](lib/drawbox.h)) スクロール対応描画領域
+- [exec.cpp](lib/exec.cpp)([.h](lib/exec.h)) 子プロセス起動
+- [font.cpp](lib/font.cpp)([.h](lib/font.h)) フォント描画
+- [label.cpp](lib/label.cpp)([.h](lib/label.h)) 文字ラベル
+- [primitive2d.cpp](lib/primitive2d.cpp)([.h](lib/primitive2d.h)) プリミティブ描画
+- [pulldown.cpp](lib/pulldown.cpp)([.h](lib/pulldown.h)) プルダウンメニュー
+- [scrollbox.cpp](lib/scrollbox.cpp)([.h](lib/scrollbox.h)) スクロールボックス
+- [text.cpp](lib/text.cpp)([.h](lib/text.h)) テキスト入力
+- [textbox.cpp](lib/textbox.cpp)([.h](lib/textbox.h)) テキスト入力(パーツ)
+- [textbutton.cpp](lib/textbutton.cpp)([.h](lib/textbutton.h)) テキストボタン
 
 # クラス
 
