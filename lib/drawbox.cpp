@@ -13,11 +13,12 @@ struct BoxImpl : public Box
 {
   FontDraw::WidgetPtr font;
 
-  double x, y;
-  double width, height;
-  double ofs_x, ofs_y;
-  double scr_w, scr_h;
-  bool   drag_mode;
+  double     x, y;
+  double     width, height;
+  double     ofs_x, ofs_y;
+  double     scr_w, scr_h;
+  bool       drag_mode;
+  const Box* link;
 
   ~BoxImpl() override = default;
   double getBaseX() const override { return x - ofs_x; }
@@ -36,6 +37,7 @@ struct BoxImpl : public Box
       scr_h = 0.0;
   }
   void setDragScroll(bool e) override { drag_mode = e; }
+  void setLink(const Box* other) override { link = other; };
 };
 
 using ClickAct      = Graphics::ClickCallback::Action;
@@ -58,10 +60,10 @@ BoxImpl::begin()
   {
     valid_drag = this;
     auto sc    = Graphics::getScroll();
-    ofs_x += std::abs(sc.x) > 0.05 ? sc.x : 0.0;
-    ofs_y += std::abs(sc.y) > 0.05 ? sc.y : 0.0;
+    ofs_x += std::abs(sc.x) > 0.1 ? sc.x : 0.0;
+    ofs_y += std::abs(sc.y) > 0.1 ? sc.y : 0.0;
   }
-  if (drag_mode && on_drag == this)
+  if (drag_mode && (on_drag == this || on_drag == link))
   {
     ofs_x += drag_scroll.x;
     ofs_y += drag_scroll.y;
@@ -115,6 +117,11 @@ setup()
     drag_scroll.y = drag_base.y - p.y;
     drag_base     = p;
   }
+  else
+  {
+    drag_scroll.x = 0;
+    drag_scroll.y = 0;
+  }
 }
 
 //
@@ -132,6 +139,7 @@ create(FontDraw::WidgetPtr f, int x, int y, int w, int h)
   p->scr_w     = w * 2.0;
   p->scr_h     = h * 2.0;
   p->drag_mode = true;
+  p->link      = nullptr;
 
   return p;
 }

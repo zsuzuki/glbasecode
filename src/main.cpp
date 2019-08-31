@@ -26,11 +26,14 @@ setupMenu1()
   Label::create("SETTINGS", 100, 80, Graphics::Green, Graphics::Gray);
   TextButton::setButton("Return", 100, 150, []() { GLLib::bindLayer(); });
 
-  TextButton::setButton("Disp Primitive", 200, 300,
-                        []() { DispPrim = !DispPrim; });
-  auto tb = TextBox::create("", 200, 450, 400);
+  auto y   = 300.0;
+  auto btn = TextButton::setButton("Disp Primitive", 200, y,
+                                   []() { DispPrim = !DispPrim; });
+  y += btn->getHeight() + 80.0;
+  auto tb = TextBox::create("", 200, y, 400);
   tb->setMaxLength(16);
   tb->setPlaceHolder("filename");
+  // y += tb->getHeight() * 80.0;
 }
 
 //
@@ -253,6 +256,7 @@ main(int argc, char** argv)
   auto dbl   = {dbox1, dbox2};
   dbox1->setDrawSize(600, 750);
   dbox2->setDrawSize(600, 750);
+  dbox1->setLink(dbox2.get());
   for (;;)
   {
     if (GLLib::update([&]() { return onUpdate(font, dbl); }) == false)
