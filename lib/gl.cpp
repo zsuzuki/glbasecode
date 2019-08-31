@@ -222,7 +222,7 @@ scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
   if (sbox_scr_callback)
     sbox_scr_callback(xoffset, yoffset);
   mouse_scroll.x = -xoffset;
-  mouse_scroll.y = -yoffset;
+  mouse_scroll.y = -yoffset * 2.0;
 }
 
 } // namespace
@@ -425,6 +425,9 @@ void
 cleanupFrame()
 {
   keyinput.update();
+
+  mouse_scroll.x = 0.0;
+  mouse_scroll.y = 0.0;
 
   // ダブルバッファのスワップ
   glfwSwapBuffers(window);
