@@ -208,7 +208,6 @@ create(const char* fname)
 
     auto w = png_get_image_width(png_ptr, info_ptr);
     auto h = png_get_image_height(png_ptr, info_ptr);
-    std::cout << "size:" << w << "," << h << std::endl;
 
     auto type = png_get_color_type(png_ptr, info_ptr);
     if (type != PNG_COLOR_TYPE_RGB && type != PNG_COLOR_TYPE_RGB_ALPHA)
@@ -216,12 +215,10 @@ create(const char* fname)
 
     auto rowbytes = png_get_rowbytes(png_ptr, info_ptr);
     auto channels = (int)png_get_channels(png_ptr, info_ptr);
-    std::cout << "row:" << rowbytes << ", ch:" << channels << std::endl;
 
     std::vector<png_byte>  img(rowbytes * h);
     std::vector<png_bytep> row_p(h);
 
-    std::fill(img.begin(), img.end(), 0xff);
     for (png_uint_32 i = 0; i < h; i++)
       row_p[i] = &img[i * rowbytes];
     png_read_image(png_ptr, row_p.data());
