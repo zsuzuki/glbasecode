@@ -32,7 +32,6 @@ const char* frag_sh_s = "#version 120\n"
 GLuint vb_obj;
 GLuint vtx_sh, frg_sh, sh_prog;
 GLint  attr_coord, uni_col, uni_tex, uni_depth;
-float  Depth = 0.0f;
 
 //
 struct ImageImpl : public Image
@@ -132,7 +131,7 @@ update()
     if (!image)
       continue;
     glUniform4fv(uni_col, 1, (GLfloat*)&dset.color);
-    glUniform1f(uni_depth, dset.depth - 0.05f);
+    glUniform1f(uni_depth, dset.depth);
     GLfloat dbox[4][4] = {
         {(GLfloat)dset.x, (GLfloat)dset.y, 0, 0},
         {(GLfloat)(dset.x + dset.w), (GLfloat)dset.y, 1, 0},
@@ -247,7 +246,7 @@ create(const char* fname)
 
 //
 void
-draw(ImagePtr img, double x, double y, double w, double h)
+draw(ImagePtr img, double x, double y, double w, double h, float d)
 {
   auto dset  = DrawSet{};
   dset.image = img;
@@ -255,7 +254,7 @@ draw(ImagePtr img, double x, double y, double w, double h)
   dset.y     = y;
   dset.w     = w;
   dset.h     = h;
-  dset.depth = Depth;
+  dset.depth = d;
   dset.color = Graphics::White;
   draw_list.emplace_back(dset);
 }
