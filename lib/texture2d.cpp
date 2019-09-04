@@ -1,0 +1,266 @@
+#include "texture2d.h"
+#include "gl.h"
+#include <exception>
+#include <iostream>
+#include <png.h>
+#include <vector>
+
+namespace Texture2D
+{
+
+namespace
+{
+using Color = Graphics::Color;
+
+// shader
+const char* vtx_sh_s = "#version 120\n"
+                       "attribute vec4 coord;\n"
+                       "varying vec2 texcoord;\n"
+                       "uniform float Depth;\n"
+                       "void main(void) {\n"
+                       "  gl_Position = vec4(coord.xy, Depth, 1);\n"
+                       "  texcoord    = coord.zw;\n"
+                       "}";
+const char* frag_sh_s = "#version 120\n"
+                        "varying vec2 texcoord;\n"
+                        "uniform sampler2D tex;\n"
+                        "uniform vec4 color;\n"
+                        "void main(void) {\n"
+                        "  gl_FragColor = texture2D(tex, texcoord) * color;\n"
+                        "}";
+
+GLuint vb_obj;
+GLuint vtx_sh, frg_sh, sh_prog;
+GLint  attr_coord, uni_col, uni_tex, uni_depth;
+float  Depth = 0.0f;
+
+//
+struct ImageImpl : public Image
+{
+  int    width  = 0;
+  int    height = 0;
+  GLuint tex_id = 0;
+
+  ~ImageImpl() { clear(); };
+  //
+  int getWidth() const override { return width; }
+  int getHeight() const override { return height; }
+
+  void create(void* buffer)
+  {
+    glGenTextures(1, &tex_id);
+    glBindTexture(GL_TEXTURE_2D, tex_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+                 GL_UNSIGNED_BYTE, buffer);
+  }
+  void bind() { glBindTexture(GL_TEXTURE_2D, tex_id); }
+  void clear() { glDeleteTextures(1, &tex_id); }
+};
+
+//
+struct DrawSet
+{
+  ImagePtr image{};
+  Color    color{};
+  double   x, y;
+  double   w, h;
+  float    depth;
+};
+
+std::vector<DrawSet> draw_list;
+
+} // namespace
+
+//
+void
+initialize()
+{
+  glGenBuffers(1, &vb_obj);
+  vtx_sh = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(vtx_sh, 1, &vtx_sh_s, nullptr);
+  glCompileShader(vtx_sh);
+  frg_sh = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(frg_sh, 1, &frag_sh_s, nullptr);
+  glCompileShader(frg_sh);
+  sh_prog = glCreateProgram();
+  glAttachShader(sh_prog, vtx_sh);
+  glAttachShader(sh_prog, frg_sh);
+  glLinkProgram(sh_prog);
+  attr_coord = glGetAttribLocation(sh_prog, "coord");
+  uni_tex    = glGetUniformLocation(sh_prog, "tex");
+  uni_col    = glGetUniformLocation(sh_prog, "color");
+  uni_depth  = glGetUniformLocation(sh_prog, "Depth");
+
+  draw_list.reserve(1000);
+  draw_list.resize(0);
+}
+
+//
+void
+terminate()
+{
+  glDeleteBuffers(1, &vb_obj);
+  glDeleteProgram(sh_prog);
+  glDeleteShader(vtx_sh);
+  glDeleteShader(frg_sh);
+}
+
+//
+void
+update()
+{
+  glUseProgram(sh_prog);
+  glBindBuffer(GL_ARRAY_BUFFER, vb_obj);
+  glEnableVertexAttribArray(attr_coord);
+  glVertexAttribPointer(attr_coord, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glEnable(GL_TEXTURE_2D);
+  glActiveTexture(GL_TEXTURE0);
+  glUniform1i(uni_tex, 0);
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  for (const auto& dset : draw_list)
+  {
+    auto image = dynamic_cast<ImageImpl*>(dset.image.get());
+    if (!image)
+      continue;
+    glUniform4fv(uni_col, 1, (GLfloat*)&dset.color);
+    glUniform1f(uni_depth, dset.depth - 0.05f);
+    GLfloat dbox[4][4] = {
+        {(GLfloat)dset.x, (GLfloat)dset.y, 0, 0},
+        {(GLfloat)(dset.x + dset.w), (GLfloat)dset.y, 1, 0},
+        {(GLfloat)dset.x, (GLfloat)(dset.y - dset.h), 0, 1},
+        {(GLfloat)(dset.x + dset.w), (GLfloat)(dset.y - dset.h), 1, 1},
+    };
+    image->bind();
+    glBufferData(GL_ARRAY_BUFFER, sizeof(dbox), dbox, GL_DYNAMIC_DRAW);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  }
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glDisableVertexAttribArray(attr_coord);
+  glDisable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  draw_list.resize(0);
+}
+
+//
+ImagePtr
+create(const char* fname)
+{
+  // ファイル読み込み失敗例外
+  class ex : public std::exception
+  {
+    const char* msg = "error";
+
+  public:
+    png_structp png  = nullptr;
+    png_infop   info = nullptr;
+
+    ex(const char* m, png_structp p = nullptr, png_infop i = nullptr)
+    {
+      msg  = m;
+      png  = p;
+      info = i;
+    }
+    ~ex() = default;
+    const char* what() const noexcept override { return msg; }
+  };
+
+  // ファイルオープン
+  FILE* fp = fopen(fname, "rb");
+  if (!fp)
+    return ImagePtr{};
+
+  auto res = ImagePtr{};
+  try
+  {
+    // 読み込み(これ以降はエラーは例外処理)
+    png_byte header[8];
+    auto     hsize = sizeof(header);
+    if (fread(header, 1, hsize, fp) != hsize)
+      throw(ex{"header read failed"});
+
+    auto is_png = !png_sig_cmp(header, 0, hsize);
+    if (!is_png)
+      throw(ex{"not png file"});
+
+    auto png_ptr = png_create_read_struct(
+        PNG_LIBPNG_VER_STRING, (png_voidp) nullptr, nullptr, nullptr);
+    if (!png_ptr)
+      throw(ex{"read struct create failed"});
+
+    auto info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr)
+      throw(ex{"info struct create failed"});
+
+    png_init_io(png_ptr, fp);
+    png_set_sig_bytes(png_ptr, hsize);
+    png_read_info(png_ptr, info_ptr);
+
+    auto w = png_get_image_width(png_ptr, info_ptr);
+    auto h = png_get_image_height(png_ptr, info_ptr);
+    std::cout << "size:" << w << "," << h << std::endl;
+
+    auto type = png_get_color_type(png_ptr, info_ptr);
+    if (type != PNG_COLOR_TYPE_RGB && type != PNG_COLOR_TYPE_RGB_ALPHA)
+      throw(ex{"not support format"});
+
+    auto rowbytes = png_get_rowbytes(png_ptr, info_ptr);
+    auto channels = (int)png_get_channels(png_ptr, info_ptr);
+    std::cout << "row:" << rowbytes << ", ch:" << channels << std::endl;
+
+    std::vector<png_byte>  img(rowbytes * h);
+    std::vector<png_bytep> row_p(h);
+
+    std::fill(img.begin(), img.end(), 0xff);
+    for (png_uint_32 i = 0; i < h; i++)
+      row_p[i] = &img[i * rowbytes];
+    png_read_image(png_ptr, row_p.data());
+
+    auto image    = std::make_shared<ImageImpl>();
+    image->width  = w;
+    image->height = h;
+    image->create(img.data());
+    res = image;
+
+    png_read_end(png_ptr, nullptr);
+    png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
+  }
+  catch (const ex& e)
+  {
+    // エラー
+    std::cerr << "png read error: " << e.what() << std::endl;
+    auto p = e.png;
+    auto i = e.info;
+    png_destroy_read_struct(&p, &i, nullptr);
+  }
+
+  fclose(fp);
+  return res;
+}
+
+//
+void
+draw(ImagePtr img, double x, double y, double w, double h)
+{
+  auto dset  = DrawSet{};
+  dset.image = img;
+  dset.x     = x;
+  dset.y     = y;
+  dset.w     = w;
+  dset.h     = h;
+  dset.depth = Depth;
+  dset.color = Graphics::White;
+  draw_list.emplace_back(dset);
+}
+
+} // namespace Texture2D

@@ -179,8 +179,9 @@ setup(FontDraw::WidgetPtr font)
 
 //
 using DBoxList = std::initializer_list<DrawBox::BoxPtr>;
+using ImgList  = std::initializer_list<Texture2D::ImagePtr>;
 bool
-onUpdate(FontDraw::WidgetPtr font, DBoxList dbl)
+onUpdate(FontDraw::WidgetPtr font, DBoxList dbl, ImgList imgl)
 {
   // プリミティブを描画
   if (DispPrim)
@@ -198,6 +199,7 @@ onUpdate(FontDraw::WidgetPtr font, DBoxList dbl)
 
   // グラフィック座標系で毎フレーム描画
   font->setColor(Graphics::Green);
+  font->setDepth(-0.5f);
   font->print("こんにちは、世界", -0.25f, 0.5f);
   font->setColor(Graphics::Cyan);
   font->print("Status: Echo", -0.98f, -0.98f);
@@ -231,6 +233,13 @@ onUpdate(FontDraw::WidgetPtr font, DBoxList dbl)
   }
   dbox->end();
 
+  auto imgi = imgl.begin();
+  auto img1 = *imgi;
+  Texture2D::draw(img1, 0.0, 0.0, 0.4, 0.4);
+
+  auto img2 = *(++imgi);
+  Texture2D::draw(img2, -0.5, 0.7, 0.4, 0.4);
+
   return true;
 }
 } // namespace
@@ -241,7 +250,7 @@ onUpdate(FontDraw::WidgetPtr font, DBoxList dbl)
 int
 main(int argc, char** argv)
 {
-  const char* fontname = "font/SourceHanCodeJP-Normal.otf";
+  const char* fontname = "res/SourceHanCodeJP-Normal.otf";
 
   auto font = GLLib::initialize("Sample", fontname, Width, Height);
   if (!font)
@@ -250,16 +259,23 @@ main(int argc, char** argv)
   setup(font);
   GLLib::bindLayer();
 
-  // フレームループ
+  // DrawBox
   auto dbox1 = DrawBox::create(font, 200, 700, 300, 400);
   auto dbox2 = DrawBox::create(font, 800, 700, 300, 400);
   auto dbl   = {dbox1, dbox2};
   dbox1->setDrawSize(600, 750);
   dbox2->setDrawSize(600, 750);
   dbox1->setLink(dbox2.get());
+
+  // Image
+  auto img1 = Texture2D::create("res/test.png");
+  auto img2 = Texture2D::create("res/textest.png");
+  auto imgl = {img1, img2};
+
+  // フレームループ
   for (;;)
   {
-    if (GLLib::update([&]() { return onUpdate(font, dbl); }) == false)
+    if (GLLib::update([&]() { return onUpdate(font, dbl, imgl); }) == false)
       break;
   }
 

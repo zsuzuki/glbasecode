@@ -11,6 +11,7 @@
 #include "scrollbox.h"
 #include "textbox.h"
 #include "textbutton.h"
+#include "texture2d.h"
 #include <functional>
 
 namespace GLLib
@@ -34,6 +35,7 @@ initialize(const char* appname, const char* fontname, int w, int h)
   Pulldown::initialize(font);
   Dialog::initialize(font);
   DrawBox::initialize();
+  Texture2D::initialize();
 
   return font;
 }
@@ -42,6 +44,7 @@ initialize(const char* appname, const char* fontname, int w, int h)
 inline void
 terminate()
 {
+  Texture2D::terminate();
   FontDraw::terminate();
   Primitive2D::terminate();
   Graphics::terminate();
@@ -81,6 +84,7 @@ update(std::function<bool()> func)
   CheckBox::update();
 
   Primitive2D::cleanup();
+  Texture2D::update();
   FontDraw::render(window);
   Graphics::cleanupFrame();
 

@@ -9,6 +9,7 @@ project(gltest)
 
 find_package(OpenGL REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(PNG 1.6.0 REQUIRED)
 if (WIN32)
 find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
@@ -22,6 +23,7 @@ include_directories(lib)
 include_directories(${GLFW_INCLUDE_DIRS})
 include_directories(${FREETYPE_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${PNG_INCLUDE_DIRS})
 
 set(main_src
     src/main.cpp
@@ -38,6 +40,7 @@ set(main_src
     lib/pulldown.cpp
     lib/dialog.cpp
     lib/drawbox.cpp
+    lib/texture2d.cpp
     lib/exec.cpp)
 
 add_executable(${PROJECT_NAME} ${main_src})
@@ -49,6 +52,7 @@ target_link_libraries(${PROJECT_NAME}
     glfw
     ${FREETYPE_LIBRARY}
     ${GLEW_LIBRARIES}
+    ${PNG_LIBRARIES}
     )
 else()
 find_library(OpenGL_LIBRARY OpenGL)
@@ -59,5 +63,6 @@ target_link_libraries(${PROJECT_NAME}
     ${GLFW_LIBRARIES}
     ${OpenGL_LIBRARY}
     ${FREETYPE_LIBRARY}
+    ${PNG_LIBRARY}
     )
 endif()

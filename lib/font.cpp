@@ -23,16 +23,15 @@ GLuint     vertex_shader, fragment_shader, program;
 GLint      attribute_coord, uniform_color, uniform_tex, DEPTH;
 float      DrawDepth = 0.0f;
 
-static const char* vertex_shader_text =
-    "#version 120\n"
-    "attribute vec4 coord;\n"
-    "varying vec2 texcoord;\n"
-    "uniform float Depth;\n"
-    "void main(void) {\n"
-    "  gl_Position = vec4(coord.xy, Depth, 1);\n"
-    "  texcoord    = coord.zw;\n"
-    "}";
-static const char* fragment_shader_text =
+const char* vertex_shader_text = "#version 120\n"
+                                 "attribute vec4 coord;\n"
+                                 "varying vec2 texcoord;\n"
+                                 "uniform float Depth;\n"
+                                 "void main(void) {\n"
+                                 "  gl_Position = vec4(coord.xy, Depth, 1);\n"
+                                 "  texcoord    = coord.zw;\n"
+                                 "}";
+const char* fragment_shader_text =
     "#version 120\n"
     "varying vec2 texcoord;\n"
     "uniform sampler2D tex;\n"
