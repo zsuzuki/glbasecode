@@ -41,29 +41,8 @@ const char* fragment_shader_text =
     "}";
 
 // 色
-using Color = Graphics::Color;
-
-//
-struct DrawArea
-{
-  double x = 0.0;
-  double y = 0.0;
-  double w = 0.0;
-  double h = 0.0;
-  bool   e = false;
-
-  void set(const DrawArea& old)
-  {
-    if (e)
-    {
-      if (old.e == false || x != old.x || y != old.y || w != old.w ||
-          h != old.h)
-        Graphics::enableScissor(x, y, w, h);
-    }
-    else if (old.e)
-      Graphics::disableScissor();
-  }
-};
+using Color    = Graphics::Color;
+using DrawArea = Graphics::DrawArea;
 
 // フォント描画1つ分
 struct DrawSet

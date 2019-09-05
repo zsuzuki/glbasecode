@@ -20,6 +20,18 @@ namespace Graphics
 {
 using KeyInput = const Key::Input;
 
+// 描画エリア(シザリング)指定
+struct DrawArea
+{
+  double x = 0.0;
+  double y = 0.0;
+  double w = 0.0;
+  double h = 0.0;
+  bool   e = false;
+
+  inline void set(const DrawArea& old);
+};
+
 //
 bool        initialize(const char* appname, int w, int h);
 GLFWwindow* setupFrame();
@@ -47,4 +59,18 @@ void        openPulldown();
 void        closePulldown();
 Locate      getPulldownCursor();
 Vector      getScroll();
+
+//
+void
+DrawArea::set(const DrawArea& old)
+{
+  if (e)
+  {
+    if (old.e == false || x != old.x || y != old.y || w != old.w || h != old.h)
+      Graphics::enableScissor(x, y, w, h);
+  }
+  else if (old.e)
+    Graphics::disableScissor();
+}
+
 } // namespace Graphics

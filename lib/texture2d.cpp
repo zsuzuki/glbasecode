@@ -10,7 +10,8 @@ namespace Texture2D
 
 namespace
 {
-using Color = Graphics::Color;
+using Color    = Graphics::Color;
+using DrawArea = Graphics::DrawArea;
 
 // shader
 const char* vtx_sh_s = "#version 120\n"
@@ -29,9 +30,10 @@ const char* frag_sh_s = "#version 120\n"
                         "  gl_FragColor = texture2D(tex, texcoord) * color;\n"
                         "}";
 
-GLuint vb_obj;
-GLuint vtx_sh, frg_sh, sh_prog;
-GLint  attr_coord, uni_col, uni_tex, uni_depth;
+GLuint   vb_obj;
+GLuint   vtx_sh, frg_sh, sh_prog;
+GLint    attr_coord, uni_col, uni_tex, uni_depth;
+DrawArea draw_area{};
 
 //
 struct ImageImpl : public Image
@@ -45,7 +47,7 @@ struct ImageImpl : public Image
   int getWidth() const override { return width; }
   int getHeight() const override { return height; }
 
-  void create(void* buffer)
+  void createRGB(void* buffer, int ch)
   {
     glGenTextures(1, &tex_id);
     glBindTexture(GL_TEXTURE_2D, tex_id);
@@ -54,8 +56,9 @@ struct ImageImpl : public Image
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, buffer);
+    auto t = ch == 4 ? GL_RGBA : GL_RGB;
+    glTexImage2D(GL_TEXTURE_2D, 0, t, width, height, 0, t, GL_UNSIGNED_BYTE,
+                 buffer);
   }
   void bind() { glBindTexture(GL_TEXTURE_2D, tex_id); }
   void clear() { glDeleteTextures(1, &tex_id); }
@@ -111,6 +114,24 @@ terminate()
 
 //
 void
+setDrawArea(double x, double y, double w, double h)
+{
+  draw_area.x = x;
+  draw_area.y = y;
+  draw_area.w = w;
+  draw_area.h = h;
+  draw_area.e = true;
+}
+
+//
+void
+clearDrawArea()
+{
+  draw_area.e = false;
+}
+
+//
+void
 update()
 {
   glUseProgram(sh_prog);
@@ -125,6 +146,7 @@ update()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  auto da = DrawArea{};
   for (const auto& dset : draw_list)
   {
     auto image = dynamic_cast<ImageImpl*>(dset.image.get());
@@ -139,9 +161,12 @@ update()
         {(GLfloat)(dset.x + dset.w), (GLfloat)(dset.y - dset.h), 1, 1},
     };
     image->bind();
+    draw_area.set(da);
+    da = draw_area;
     glBufferData(GL_ARRAY_BUFFER, sizeof(dbox), dbox, GL_DYNAMIC_DRAW);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
   }
+  Graphics::disableScissor();
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glDisableVertexAttribArray(attr_coord);
@@ -225,7 +250,7 @@ create(const char* fname)
     auto image    = std::make_shared<ImageImpl>();
     image->width  = w;
     image->height = h;
-    image->create(img.data());
+    image->createRGB(img.data(), channels);
     res = image;
 
     png_read_end(png_ptr, nullptr);
