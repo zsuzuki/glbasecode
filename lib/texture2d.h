@@ -33,6 +33,9 @@ ImagePtr create(const char*);
 void draw(ImagePtr, double x, double y, double w, double h, float d = 0.0f);
 
 //
+void setFadeColor(Graphics::Color);
+
+//
 void setDrawArea(double x, double y, double w, double h);
 
 //

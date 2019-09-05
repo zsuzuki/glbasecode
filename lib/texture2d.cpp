@@ -34,6 +34,7 @@ GLuint   vb_obj;
 GLuint   vtx_sh, frg_sh, sh_prog;
 GLint    attr_coord, uni_col, uni_tex, uni_depth;
 DrawArea draw_area{};
+Color    fade_color = Graphics::White;
 
 //
 struct ImageImpl : public Image
@@ -128,6 +129,13 @@ void
 clearDrawArea()
 {
   draw_area.e = false;
+}
+
+//
+void
+setFadeColor(Graphics::Color c)
+{
+  fade_color = c;
 }
 
 //
@@ -280,7 +288,7 @@ draw(ImagePtr img, double x, double y, double w, double h, float d)
   dset.w     = w;
   dset.h     = h;
   dset.depth = d;
-  dset.color = Graphics::White;
+  dset.color = fade_color;
   draw_list.emplace_back(dset);
 }
 
