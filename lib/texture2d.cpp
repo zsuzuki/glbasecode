@@ -137,7 +137,9 @@ update()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  auto da = DrawArea{};
+  auto da  = DrawArea{};
+  auto ws  = Graphics::getWindowSize();
+  auto asp = ws.width / ws.height;
   for (const auto& dset : draw_list)
   {
     auto image = dynamic_cast<ImageImpl*>(dset.image.get());
@@ -178,7 +180,7 @@ update()
         auto x = p[0];
         auto y = p[1];
         p[0]   = x * c + y * s + dset.x;
-        p[1]   = -x * s + y * c + dset.y;
+        p[1]   = (-x * s + y * c) * asp + dset.y;
       }
     }
     else
@@ -186,7 +188,7 @@ update()
       for (auto& p : dbox)
       {
         p[0] += dset.x;
-        p[1] += dset.y;
+        p[1] = p[1] * asp + dset.y;
       }
     }
     image->bind();
