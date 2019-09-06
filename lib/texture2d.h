@@ -17,6 +17,32 @@ struct Image
 using ImagePtr = std::shared_ptr<Image>;
 
 //
+struct DrawSet
+{
+  using Color = Graphics::Color;
+  enum class Align : int
+  {
+    LeftTop,
+    Left,
+    LeftBottom,
+    CenterTop,
+    Center,
+    CenterBottom,
+    RightTop,
+    Right,
+    RightBottom,
+  };
+
+  ImagePtr image;
+  double   x, y;
+  double   width, height;
+  float    depth;
+  double   rotate;
+  Align    align;
+  Color    color;
+};
+
+//
 void initialize();
 
 //
@@ -30,10 +56,7 @@ void update();
 ImagePtr create(const char*);
 
 //
-void draw(ImagePtr, double x, double y, double w, double h, float d = 0.0f);
-
-//
-void setFadeColor(Graphics::Color);
+void draw(const DrawSet& di);
 
 //
 void setDrawArea(double x, double y, double w, double h);

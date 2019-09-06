@@ -235,10 +235,27 @@ onUpdate(FontDraw::WidgetPtr font, DBoxList dbl, ImgList imgl)
 
   auto imgi = imgl.begin();
   auto img1 = *imgi;
-  Texture2D::draw(img1, 0.0, 0.0, 0.4, 0.4);
-
   auto img2 = *(++imgi);
-  Texture2D::draw(img2, -0.5, 0.7, 0.4, 0.4);
+
+  Texture2D::DrawSet dset;
+  dset.image  = img1;
+  dset.x      = 0.0;
+  dset.y      = 0.0;
+  dset.width  = 0.4;
+  dset.height = 0.4;
+  dset.depth  = 0.0f;
+  dset.rotate = 0.0;
+  dset.align  = Texture2D::DrawSet::Align::Center;
+  dset.color  = Graphics::White;
+  Texture2D::draw(dset);
+
+  dset.image  = img2;
+  dset.x      = -0.5;
+  dset.y      = 0.7;
+  dset.width  = 0.4;
+  dset.height = 0.4;
+  dset.color  = Graphics::Yellow;
+  Texture2D::draw(dset);
 
   return true;
 }

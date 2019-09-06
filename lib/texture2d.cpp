@@ -34,7 +34,6 @@ GLuint   vb_obj;
 GLuint   vtx_sh, frg_sh, sh_prog;
 GLint    attr_coord, uni_col, uni_tex, uni_depth;
 DrawArea draw_area{};
-Color    fade_color = Graphics::White;
 
 //
 struct ImageImpl : public Image
@@ -63,16 +62,6 @@ struct ImageImpl : public Image
   }
   void bind() { glBindTexture(GL_TEXTURE_2D, tex_id); }
   void clear() { glDeleteTextures(1, &tex_id); }
-};
-
-//
-struct DrawSet
-{
-  ImagePtr image{};
-  Color    color{};
-  double   x, y;
-  double   w, h;
-  float    depth;
 };
 
 std::vector<DrawSet> draw_list;
@@ -133,13 +122,6 @@ clearDrawArea()
 
 //
 void
-setFadeColor(Graphics::Color c)
-{
-  fade_color = c;
-}
-
-//
-void
 update()
 {
   glUseProgram(sh_prog);
@@ -162,11 +144,15 @@ update()
       continue;
     glUniform4fv(uni_col, 1, (GLfloat*)&dset.color);
     glUniform1f(uni_depth, dset.depth);
+    GLfloat left       = dset.x;
+    GLfloat right      = dset.x + dset.width;
+    GLfloat top        = dset.y;
+    GLfloat bottom     = dset.y - dset.height;
     GLfloat dbox[4][4] = {
-        {(GLfloat)dset.x, (GLfloat)dset.y, 0, 0},
-        {(GLfloat)(dset.x + dset.w), (GLfloat)dset.y, 1, 0},
-        {(GLfloat)dset.x, (GLfloat)(dset.y - dset.h), 0, 1},
-        {(GLfloat)(dset.x + dset.w), (GLfloat)(dset.y - dset.h), 1, 1},
+        {left, top, 0, 0},
+        {right, top, 1, 0},
+        {left, bottom, 0, 1},
+        {right, bottom, 1, 1},
     };
     image->bind();
     draw_area.set(da);
@@ -279,17 +265,9 @@ create(const char* fname)
 
 //
 void
-draw(ImagePtr img, double x, double y, double w, double h, float d)
+draw(const DrawSet& di)
 {
-  auto dset  = DrawSet{};
-  dset.image = img;
-  dset.x     = x;
-  dset.y     = y;
-  dset.w     = w;
-  dset.h     = h;
-  dset.depth = d;
-  dset.color = fade_color;
-  draw_list.emplace_back(dset);
+  draw_list.emplace_back(di);
 }
 
 } // namespace Texture2D
