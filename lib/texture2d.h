@@ -6,6 +6,20 @@
 namespace Texture2D
 {
 //
+enum class Align : int
+{
+  LeftTop,
+  Left,
+  LeftBottom,
+  CenterTop,
+  Center,
+  CenterBottom,
+  RightTop,
+  Right,
+  RightBottom,
+};
+
+//
 struct Image
 {
   virtual ~Image() = default;
@@ -20,18 +34,6 @@ using ImagePtr = std::shared_ptr<Image>;
 struct DrawSet
 {
   using Color = Graphics::Color;
-  enum class Align : int
-  {
-    LeftTop,
-    Left,
-    LeftBottom,
-    CenterTop,
-    Center,
-    CenterBottom,
-    RightTop,
-    Right,
-    RightBottom,
-  };
 
   ImagePtr image;
   double   x, y;

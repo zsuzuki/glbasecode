@@ -1,5 +1,6 @@
 #include "texture2d.h"
 #include "gl.h"
+#include <cmath>
 #include <exception>
 #include <iostream>
 #include <png.h>
@@ -144,16 +145,50 @@ update()
       continue;
     glUniform4fv(uni_col, 1, (GLfloat*)&dset.color);
     glUniform1f(uni_depth, dset.depth);
-    GLfloat left       = dset.x;
-    GLfloat right      = dset.x + dset.width;
-    GLfloat top        = dset.y;
-    GLfloat bottom     = dset.y - dset.height;
+
+    static const GLfloat align_scale[][4] = {
+        {0.0f, 1.0f, 0.0f, 1.0f},   // Left Top
+        {0.0f, 1.0f, -0.5f, 0.5f},  // Left
+        {0.0f, 1.0f, -1.0f, 0.0f},  // Left Bottom
+        {-0.5f, 0.5f, 0.0f, 1.0f},  // Center Top
+        {-0.5f, 0.5f, -0.5f, 0.5f}, // Center
+        {-0.5f, 0.5f, -1.0f, 0.0f}, // Center Bottom
+        {-1.0f, 0.0f, 0.0f, 1.0f},  // Right Top
+        {-1.0f, 0.0f, -0.5f, 0.5f}, // Right
+        {-1.0f, 0.0f, -1.0f, 0.0f}, // Right Bottom
+    };
+    int     al_ofs     = static_cast<int>(dset.align);
+    auto    al_list    = align_scale[al_ofs];
+    GLfloat left       = dset.width * al_list[0];
+    GLfloat right      = dset.width * al_list[1];
+    GLfloat top        = -dset.height * al_list[2];
+    GLfloat bottom     = -dset.height * al_list[3];
     GLfloat dbox[4][4] = {
         {left, top, 0, 0},
         {right, top, 1, 0},
         {left, bottom, 0, 1},
         {right, bottom, 1, 1},
     };
+    if (dset.rotate != 0.0)
+    {
+      auto c = std::cos(dset.rotate);
+      auto s = std::sin(dset.rotate);
+      for (auto& p : dbox)
+      {
+        auto x = p[0];
+        auto y = p[1];
+        p[0]   = x * c + y * s + dset.x;
+        p[1]   = -x * s + y * c + dset.y;
+      }
+    }
+    else
+    {
+      for (auto& p : dbox)
+      {
+        p[0] += dset.x;
+        p[1] += dset.y;
+      }
+    }
     image->bind();
     draw_area.set(da);
     da = draw_area;

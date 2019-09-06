@@ -1,3 +1,4 @@
+#include <cmath>
 #include <exec.h>
 #include <gllib.h>
 #include <iostream>
@@ -19,6 +20,24 @@ drop_file(int num, const char** paths)
   }
 }
 
+std::vector<Graphics::Color> color_list = {
+    Graphics::White,  Graphics::Red,   Graphics::Green,   Graphics::Blue,
+    Graphics::Yellow, Graphics::Cyan,  Graphics::Magenta, Graphics::Orange,
+    Graphics::Gray,   Graphics::Sepia,
+};
+
+std::vector<Texture2D::Align> tex_align_list = {
+    Texture2D::Align::LeftTop,     Texture2D::Align::Left,
+    Texture2D::Align::LeftBottom,  Texture2D::Align::CenterTop,
+    Texture2D::Align::Center,      Texture2D::Align::CenterBottom,
+    Texture2D::Align::RightTop,    Texture2D::Align::Right,
+    Texture2D::Align::RightBottom,
+};
+int    tex_align  = 0;
+int    tex_color  = 0;
+double tex_rotate = 0.0;
+bool   tex_rot    = true;
+
 //
 void
 setupMenu1()
@@ -26,14 +45,39 @@ setupMenu1()
   Label::create("SETTINGS", 100, 80, Graphics::Green, Graphics::Gray);
   TextButton::setButton("Return", 100, 150, []() { GLLib::bindLayer(); });
 
-  auto y   = 300.0;
-  auto btn = TextButton::setButton("Disp Primitive", 200, y,
+  auto x = 200.0;
+  auto y = 300.0;
+
+  // プリミティブの表示・非表示
+  auto btn = TextButton::setButton("Disp Primitive", x, y,
                                    []() { DispPrim = !DispPrim; });
-  y += btn->getHeight() + 80.0;
-  auto tb = TextBox::create("", 200, y, 400);
-  tb->setMaxLength(16);
-  tb->setPlaceHolder("filename");
-  // y += tb->getHeight() * 80.0;
+
+  // テクスチャ表示のアライン
+  y += btn->getHeight() + 20.0;
+  Pulldown::List pl{"Left Top",   "Left",   "Left Bottom",
+                    "Center Top", "Center", "Center Bottom",
+                    "Right Top",  "Right",  "Right Bottom"};
+
+  auto pd = Pulldown::create(std::move(pl), 6);
+  auto tb = TextButton::setButton("Tex Align", x, y, []() {});
+  tb->setPulldown(pd);
+  pd->setSelected([](int idx, auto) { tex_align = idx; });
+
+  // テクスチャの色
+  y += tb->getHeight() + 20.0;
+  Pulldown::List cl = {
+      "White", "Red",     "Green",  "Blue", "Yellow",
+      "Cyan",  "Magenta", "Orange", "Gray", "Sepia",
+  };
+  pd = Pulldown::create(std::move(cl), 6);
+  tb = TextButton::setButton("Tex Color", x, y, []() {});
+  tb->setPulldown(pd);
+  pd->setSelected([](int idx, auto) { tex_color = idx; });
+
+  // テクスチャの回転 ON/OFF
+  y += tb->getHeight() + 20.0;
+  auto ch = CheckBox::create("Tex Rotate", x, y, tex_rot);
+  ch->setChanged([](bool s) { tex_rot = s; });
 }
 
 //
@@ -245,17 +289,20 @@ onUpdate(FontDraw::WidgetPtr font, DBoxList dbl, ImgList imgl)
   dset.height = 0.4;
   dset.depth  = 0.0f;
   dset.rotate = 0.0;
-  dset.align  = Texture2D::DrawSet::Align::Center;
+  dset.align  = Texture2D::Align::Center;
   dset.color  = Graphics::White;
   Texture2D::draw(dset);
 
   dset.image  = img2;
-  dset.x      = -0.5;
-  dset.y      = 0.7;
+  dset.x      = -0.2;
+  dset.y      = 0.4;
   dset.width  = 0.4;
   dset.height = 0.4;
-  dset.color  = Graphics::Yellow;
+  dset.rotate = tex_rotate;
+  dset.align  = tex_align_list[tex_align];
+  dset.color  = color_list[tex_color];
   Texture2D::draw(dset);
+  tex_rotate += tex_rot ? M_PI / 180.0 : 0.0;
 
   return true;
 }
