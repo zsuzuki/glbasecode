@@ -33,7 +33,7 @@ std::vector<Texture2D::Align> tex_align_list = {
     Texture2D::Align::RightTop,    Texture2D::Align::Right,
     Texture2D::Align::RightBottom,
 };
-int    tex_align  = 0;
+int    tex_align  = 4;
 int    tex_color  = 0;
 double tex_rotate = 0.0;
 bool   tex_rot    = true;
@@ -286,7 +286,7 @@ onUpdate(FontDraw::WidgetPtr font, DBoxList dbl, ImgList imgl)
   dset.x      = 0.0;
   dset.y      = 0.0;
   dset.width  = 0.4;
-  dset.height = 0.4;
+  dset.height = 0.4 * (512.0 / 640.0);
   dset.depth  = 0.0f;
   dset.rotate = 0.0;
   dset.align  = Texture2D::Align::Center;
