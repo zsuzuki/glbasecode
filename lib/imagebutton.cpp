@@ -12,12 +12,14 @@ namespace ImageButton
 
 namespace
 {
+using ImagePtr = Texture2D::ImagePtr;
+using BBox     = BoundingBox::Rect;
+using Parent   = const Parts::ID;
+using Color    = Graphics::Color;
+
 //
 struct ButtonImpl : public Button
 {
-  using ImagePtr = Texture2D::ImagePtr;
-  using BBox     = BoundingBox::Rect;
-  using Parent   = const Parts::ID;
   ImagePtr      focus_image;
   ImagePtr      unfocus_image;
   PressCallback callback;
@@ -28,6 +30,8 @@ struct ButtonImpl : public Button
   double        depth;
   bool          press;
   Parent*       parent;
+  Color         focus_color;
+  Color         unfocus_color;
 
   ~ButtonImpl() = default;
   double getX() const override { return x + ox; }
@@ -37,12 +41,26 @@ struct ButtonImpl : public Button
   float  getDepth() const override { return depth; }
   void   setParent(const Parts::ID* p) override { parent = p; }
   bool   getFocus() const override;
-  void   setFocusIcon(const char*) override {}
-  void   setUnFocusIcon(const char*) override {}
-  void   setImageWidth(double) override {}
-  void   setImageHeight(double) override {}
+  void   setFocusIcon(const char* fname) override
+  {
+    focus_image = new_image(fname);
+  }
+  void setUnFocusIcon(const char* fname) override
+  {
+    unfocus_image = new_image(fname);
+  }
+  void setFocusColor(Graphics::Color c) override { focus_color = c; };
+  void setUnFocusColor(Graphics::Color c) override { unfocus_color = c; };
+  void setImageWidth(double) override {}
+  void setImageHeight(double) override {}
 
   void draw(bool focus);
+
+  Texture2D::ImagePtr new_image(const char* fname)
+  {
+    auto img = Texture2D::create(fname);
+    return img;
+  }
 
   std::pair<bool, bool> update()
   {
@@ -113,7 +131,7 @@ ButtonImpl::draw(bool focus)
   dset.depth  = depth;
   dset.rotate = 0.0;
   dset.align  = Texture2D::Align::LeftTop;
-  dset.color  = focus ? Graphics::Red : Graphics::White;
+  dset.color  = focus ? focus_color : unfocus_color;
   Texture2D::draw(dset);
 }
 
@@ -213,6 +231,8 @@ create(const char* in, double x, double y, PressCallback cb, bool c_ent)
   btn->callback      = cb;
   btn->parent        = nullptr;
   btn->press         = false;
+  btn->focus_color   = Graphics::White;
+  btn->unfocus_color = Graphics::White;
 
   auto& button_list = layer.getCurrent();
   button_list.push_back(btn);

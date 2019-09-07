@@ -15,10 +15,12 @@ static constexpr const char* DefaultLayer = "default";
 //
 struct Button : public Parts::ID
 {
-  virtual void setFocusIcon(const char*)   = 0;
-  virtual void setUnFocusIcon(const char*) = 0;
-  virtual void setImageWidth(double)       = 0;
-  virtual void setImageHeight(double)      = 0;
+  virtual void setFocusIcon(const char*)        = 0;
+  virtual void setUnFocusIcon(const char*)      = 0;
+  virtual void setImageWidth(double)            = 0;
+  virtual void setImageHeight(double)           = 0;
+  virtual void setFocusColor(Graphics::Color)   = 0;
+  virtual void setUnFocusColor(Graphics::Color) = 0;
 };
 using ID = std::shared_ptr<Button>;
 

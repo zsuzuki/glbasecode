@@ -175,8 +175,10 @@ setup(FontDraw::WidgetPtr font)
 
   // top menu
   {
-    ImageButton::create("res/close.png", Width - 58, 10,
-                        []() { Graphics::finish(); });
+    auto ib = ImageButton::create("res/close.png", Width - 58, 10,
+                                  []() { Graphics::finish(); });
+    ib->setFocusColor(Graphics::Green);
+    ib->setFocusIcon("res/exit_to_app.png");
     auto dlg1 = Dialog::create("Welcome\nHello, World\nDialog");
     auto dlg2 = Dialog::create("OK or Cancel ?", true);
     dlg1->setOK([](bool) { std::cout << "OK Dialog1" << std::endl; });
