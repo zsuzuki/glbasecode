@@ -43,6 +43,7 @@ struct Body : public Base
   Select     sel_state;
 
   //
+  ~Body() = default;
   double getX() const override { return x; }
   double getY() const override { return y; }
   int    getWidth() const override { return width; }

@@ -33,6 +33,7 @@ struct Box : public Base
   double            stick_ofs_y = 0.0;
   Graphics::Color   sheet_color = Graphics::Gray;
 
+  ~Box() = default;
   void set(double x, double y, double w, double h) override;
   void append(Parts::IDPtr) override;
   void erase(Parts::IDPtr) override;
