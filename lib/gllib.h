@@ -5,6 +5,7 @@
 #include "drawbox.h"
 #include "font.h"
 #include "gl.h"
+#include "imagebutton.h"
 #include "label.h"
 #include "primitive2d.h"
 #include "pulldown.h"
@@ -36,6 +37,7 @@ initialize(const char* appname, const char* fontname, int w, int h)
   Dialog::initialize(font);
   DrawBox::initialize();
   Texture2D::initialize();
+  ImageButton::initialize();
 
   return font;
 }
@@ -60,6 +62,7 @@ bindLayer(std::string name = "default")
   CheckBox::bindLayer(name);
   TextBox::bindLayer(name);
   Pulldown::bindLayer(name);
+  ImageButton::bindLayer(name);
 }
 
 // フレーム内実行
@@ -82,6 +85,7 @@ update(std::function<bool()> func)
   Pulldown::update();
   Label::update();
   CheckBox::update();
+  ImageButton::update();
 
   Primitive2D::cleanup();
   Texture2D::update();

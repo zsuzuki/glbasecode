@@ -175,27 +175,18 @@ setup(FontDraw::WidgetPtr font)
 
   // top menu
   {
-    using namespace TextButton;
-    setDefaultColor(ColorType::UnFocusFont, Graphics::Orange);
-    setDefaultColor(ColorType::FocusFont, Graphics::Orange);
-    setDefaultColor(ColorType::FocusBG, Graphics::Gray);
-    setDefaultColor(ColorType::PressFont, Graphics::Green);
-    auto eb = setButton("Exit", Width - 150, 50, []() { Graphics::finish(); });
-    eb->setColor(ColorType::UnFocusFont, Graphics::Red);
-    eb->setColor(ColorType::FocusFont, Graphics::Red);
-    eb->setColor(ColorType::FocusBG, Graphics::Sepia);
-    eb->setColor(ColorType::PressBG, Graphics::Red);
-    eb->setColor(ColorType::PressFont, Graphics::Black);
+    ImageButton::create("res/close.png", Width - 58, 10,
+                        []() { Graphics::finish(); });
     auto dlg1 = Dialog::create("Welcome\nHello, World\nDialog");
     auto dlg2 = Dialog::create("OK or Cancel ?", true);
     dlg1->setOK([](bool) { std::cout << "OK Dialog1" << std::endl; });
     dlg2->setOK([](bool) { std::cout << "OK Dialog2" << std::endl; });
     dlg2->setCancel([](bool) { std::cout << "Cancel Dialog2" << std::endl; });
     auto btnx = Width - font->getSizeX() * 12.0 - 50;
-    auto db =
-        setButton("OK Dialog", btnx, 300, [dlg1]() { Dialog::open(dlg1); });
-    setButton("With Cancel", btnx, 300 + db->getHeight() + 40,
-              [dlg2]() { Dialog::open(dlg2); });
+    auto db   = TextButton::setButton("OK Dialog", btnx, 300,
+                                    [dlg1]() { Dialog::open(dlg1); });
+    TextButton::setButton("With Cancel", btnx, 300 + db->getHeight() + 40,
+                          [dlg2]() { Dialog::open(dlg2); });
   }
   for (int i = 0; i < 3; i++)
   {
@@ -286,7 +277,7 @@ onUpdate(FontDraw::WidgetPtr font, DBoxList dbl, ImgList imgl)
   dset.x      = 0.0;
   dset.y      = 0.0;
   dset.width  = 0.4;
-  dset.height = 0.4 * (512.0 / 640.0);
+  dset.height = 0.4 * ((double)img1->getHeight() / (double)img1->getWidth());
   dset.depth  = 0.0f;
   dset.rotate = 0.0;
   dset.align  = Texture2D::Align::Center;
@@ -295,8 +286,8 @@ onUpdate(FontDraw::WidgetPtr font, DBoxList dbl, ImgList imgl)
 
   auto ws     = Graphics::getWindowSize();
   dset.image  = img2;
-  dset.x      = -0.2;
-  dset.y      = 0.4;
+  dset.x      = -0.5;
+  dset.y      = 0.5;
   dset.width  = img2->getWidth() * 2.0 / ws.width;
   dset.height = img2->getHeight() * 2.0 / ws.width;
   dset.rotate = tex_rotate;

@@ -57,7 +57,7 @@ struct ImageImpl : public Image
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    auto t = ch == 4 ? GL_RGBA : GL_RGB;
+    auto t = (ch == 4) ? GL_RGBA : (ch == 3) ? GL_RGB : GL_LUMINANCE_ALPHA;
     glTexImage2D(GL_TEXTURE_2D, 0, t, width, height, 0, t, GL_UNSIGNED_BYTE,
                  buffer);
   }
@@ -149,22 +149,22 @@ update()
     glUniform1f(uni_depth, dset.depth);
 
     static const GLfloat align_scale[][4] = {
-        {0.0f, 1.0f, 0.0f, 1.0f},   // Left Top
-        {0.0f, 1.0f, -0.5f, 0.5f},  // Left
-        {0.0f, 1.0f, -1.0f, 0.0f},  // Left Bottom
-        {-0.5f, 0.5f, 0.0f, 1.0f},  // Center Top
-        {-0.5f, 0.5f, -0.5f, 0.5f}, // Center
-        {-0.5f, 0.5f, -1.0f, 0.0f}, // Center Bottom
-        {-1.0f, 0.0f, 0.0f, 1.0f},  // Right Top
-        {-1.0f, 0.0f, -0.5f, 0.5f}, // Right
-        {-1.0f, 0.0f, -1.0f, 0.0f}, // Right Bottom
+        {0.0f, 1.0f, 0.0f, -1.0f},  // Left Top
+        {0.0f, 1.0f, 0.5f, -0.5f},  // Left
+        {0.0f, 1.0f, 1.0f, 0.0f},   // Left Bottom
+        {-0.5f, 0.5f, 0.0f, -1.0f}, // Center Top
+        {-0.5f, 0.5f, 0.5f, -0.5f}, // Center
+        {-0.5f, 0.5f, 1.0f, 0.0f},  // Center Bottom
+        {-1.0f, 0.0f, 0.0f, -1.0f}, // Right Top
+        {-1.0f, 0.0f, 0.5f, -0.5f}, // Right
+        {-1.0f, 0.0f, 1.0f, 0.0f},  // Right Bottom
     };
     int     al_ofs     = static_cast<int>(dset.align);
     auto    al_list    = align_scale[al_ofs];
     GLfloat left       = dset.width * al_list[0];
     GLfloat right      = dset.width * al_list[1];
-    GLfloat top        = -dset.height * al_list[2];
-    GLfloat bottom     = -dset.height * al_list[3];
+    GLfloat top        = dset.height * al_list[2];
+    GLfloat bottom     = dset.height * al_list[3];
     GLfloat dbox[4][4] = {
         {left, top, 0, 0},
         {right, top, 1, 0},
@@ -265,7 +265,8 @@ create(const char* fname)
     auto h = png_get_image_height(png_ptr, info_ptr);
 
     auto type = png_get_color_type(png_ptr, info_ptr);
-    if (type != PNG_COLOR_TYPE_RGB && type != PNG_COLOR_TYPE_RGB_ALPHA)
+    if (type != PNG_COLOR_TYPE_RGB && type != PNG_COLOR_TYPE_RGB_ALPHA &&
+        type != PNG_COLOR_TYPE_GRAY_ALPHA)
       throw(ex{"not support format"});
 
     auto rowbytes = png_get_rowbytes(png_ptr, info_ptr);

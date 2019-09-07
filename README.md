@@ -257,3 +257,7 @@ http://marina.sys.wakayama-u.ac.jp/~tokoi/
 
 本プログラムは表示フォントに「源ノ角ゴシック Code JP」(https://github.com/adobe-fonts/source-han-code-jp) を使用しています。
 Licensed under SIL Open Font License 1.1 (http://scripts.sil.org/OFL)
+
+アイコンのPNGデータについては「MATERIAL DESIGN」サイトのものを使用しています。
+(https://material.io/resources/icons/?style=baseline)
+このアイコンは[Apache2.0ライセンス](http://www.apache.org/licenses/LICENSE-2.0)で配布されています。
