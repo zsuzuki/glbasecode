@@ -116,8 +116,13 @@ setupMenu2()
     auto cb = CheckBox::create("Chk", x, by, false);
     cb->setOnColor(Graphics::Green);
     cb->setOffText("Off");
-    x += cb->getWidth() + 50.0;
+    x += cb->getWidth() + 40.0;
     SBox->append(cb);
+
+    auto ib = ImageButton::create("res/check.png", x, by, []() {});
+    ib->setFocusColor(Graphics::Orange);
+    SBox->append(ib);
+    x += ib->getWidth() + 40.0;
 
     std::string l = "Item";
     l += std::to_string(i + 1);

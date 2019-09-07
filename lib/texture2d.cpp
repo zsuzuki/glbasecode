@@ -65,7 +65,11 @@ struct ImageImpl : public Image
   void clear() { glDeleteTextures(1, &tex_id); }
 };
 
-std::vector<DrawSet> draw_list;
+struct DrawSetIntr : public DrawSet
+{
+  DrawArea da;
+};
+std::vector<DrawSetIntr> draw_list;
 
 } // namespace
 
@@ -192,8 +196,8 @@ update()
       }
     }
     image->bind();
-    draw_area.set(da);
-    da = draw_area;
+    dset.da.set(da);
+    da = dset.da;
     glBufferData(GL_ARRAY_BUFFER, sizeof(dbox), dbox, GL_DYNAMIC_DRAW);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
   }
@@ -305,7 +309,11 @@ create(const char* fname)
 void
 draw(const DrawSet& di)
 {
-  draw_list.emplace_back(di);
+  DrawSetIntr dsi;
+  DrawSet&    dst = dsi;
+  dst             = di;
+  dsi.da          = draw_area;
+  draw_list.emplace_back(dsi);
 }
 
 } // namespace Texture2D

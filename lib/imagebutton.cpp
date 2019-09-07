@@ -64,7 +64,6 @@ struct ButtonImpl : public Button
 
   std::pair<bool, bool> update()
   {
-    float depth    = 0.0f;
     float inrect   = true;
     bool  en_focus = true;
     if (parent)
@@ -72,7 +71,6 @@ struct ButtonImpl : public Button
       ox       = parent->getPlacementX();
       oy       = parent->getPlacementY();
       en_focus = parent->getFocus();
-      depth    = parent->getDepth() - 0.1f;
     }
     bbox = BBox{x + ox, y + oy, w, h};
     if (parent)
@@ -111,28 +109,34 @@ button_click(ClickAct action, bool enter)
 void
 ButtonImpl::draw(bool focus)
 {
-  //   if (parent)
-  //   {
-  //     auto px = parent->getX();
-  //     auto py = parent->getY();
-  //     auto pw = parent->getWidth();
-  //     auto ph = parent->getHeight();
-  //     Texture2D::setDrawArea(px,py,pw,ph);
-  //   }
+  float ldepth = depth;
+  if (parent)
+  {
+    auto px = parent->getX();
+    auto py = parent->getY();
+    auto pw = parent->getWidth();
+    auto ph = parent->getHeight();
+    ldepth += parent->getDepth();
+    Texture2D::setDrawArea(px, py, pw, ph);
+  }
 
   Texture2D::DrawSet dset;
   dset.image  = focus ? focus_image : unfocus_image;
-  auto lt     = Graphics::calcLocate(getX(), getY());
-  auto rb     = Graphics::calcLocate(getX() + getWidth(), getY() + getHeight());
+  auto loc    = bbox.getLocate();
+  auto btm    = bbox.getBottom();
+  auto lt     = Graphics::calcLocate(loc.x, loc.y);
+  auto rb     = Graphics::calcLocate(btm.x, btm.y);
   dset.x      = lt.x;
   dset.y      = lt.y;
   dset.width  = rb.x - lt.x;
   dset.height = lt.y - rb.y;
-  dset.depth  = depth;
+  dset.depth  = ldepth;
   dset.rotate = 0.0;
   dset.align  = Texture2D::Align::LeftTop;
   dset.color  = focus ? focus_color : unfocus_color;
   Texture2D::draw(dset);
+
+  Texture2D::clearDrawArea();
 }
 
 //
@@ -227,6 +231,7 @@ create(const char* in, double x, double y, PressCallback cb, bool c_ent)
   btn->h             = img->getHeight();
   btn->ox            = 0.0;
   btn->oy            = 0.0;
+  btn->depth         = -0.05f;
   btn->bbox          = BoundingBox::Rect{x, y, btn->w, btn->h};
   btn->callback      = cb;
   btn->parent        = nullptr;
