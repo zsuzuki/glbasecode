@@ -293,11 +293,12 @@ onUpdate(FontDraw::WidgetPtr font, DBoxList dbl, ImgList imgl)
   dset.color  = Graphics::White;
   Texture2D::draw(dset);
 
+  auto ws     = Graphics::getWindowSize();
   dset.image  = img2;
   dset.x      = -0.2;
   dset.y      = 0.4;
-  dset.width  = 0.4;
-  dset.height = 0.4;
+  dset.width  = img2->getWidth() * 2.0 / ws.width;
+  dset.height = img2->getHeight() * 2.0 / ws.width;
   dset.rotate = tex_rotate;
   dset.align  = tex_align_list[tex_align];
   dset.color  = color_list[tex_color];
