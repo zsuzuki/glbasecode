@@ -29,7 +29,7 @@ struct DrawArea
   double h = 0.0;
   bool   e = false;
 
-  inline void set(const DrawArea& old);
+  inline void set(const DrawArea& old) const;
 };
 
 //
@@ -62,7 +62,7 @@ Vector      getScroll();
 
 //
 void
-DrawArea::set(const DrawArea& old)
+DrawArea::set(const DrawArea& old) const
 {
   if (e)
   {
