@@ -220,8 +220,10 @@ update()
 ID
 create(const char* in, double x, double y, PressCallback cb, bool c_ent)
 {
-  auto btn = std::make_shared<ButtonImpl>();
   auto img = Texture2D::create(in);
+  if (!img)
+    return ID{};
+  auto btn = std::make_shared<ButtonImpl>();
 
   btn->focus_image   = img;
   btn->unfocus_image = img;
