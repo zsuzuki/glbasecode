@@ -131,9 +131,9 @@ ButtonImpl::draw(bool focus)
   dset.width  = rb.x - lt.x;
   dset.height = lt.y - rb.y;
   dset.depth  = ldepth;
-  dset.rotate = 0.0;
   dset.align  = Texture2D::Align::LeftTop;
   dset.color  = focus ? focus_color : unfocus_color;
+  dset.aspect = false;
   Texture2D::draw(dset);
 
   Texture2D::clearDrawArea();

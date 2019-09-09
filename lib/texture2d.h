@@ -35,13 +35,16 @@ struct DrawSet
 {
   using Color = Graphics::Color;
 
-  ImagePtr image;
-  double   x, y;
-  double   width, height;
-  float    depth;
-  double   rotate;
-  Align    align;
-  Color    color;
+  ImagePtr image{};
+  double   x      = 0.0;
+  double   y      = 0.0;
+  double   width  = 0.0;
+  double   height = 0.0;
+  double   rotate = 0.0;
+  float    depth  = 0.0f;
+  Align    align  = Align::Center;
+  Color    color  = Graphics::White;
+  bool     aspect = true;
 };
 
 //

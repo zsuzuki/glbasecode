@@ -281,14 +281,8 @@ onUpdate(FontDraw::WidgetPtr font, DBoxList dbl, ImgList imgl)
 
   Texture2D::DrawSet dset;
   dset.image  = img1;
-  dset.x      = 0.0;
-  dset.y      = 0.0;
   dset.width  = 0.4;
   dset.height = 0.4 * ((double)img1->getHeight() / (double)img1->getWidth());
-  dset.depth  = 0.0f;
-  dset.rotate = 0.0;
-  dset.align  = Texture2D::Align::Center;
-  dset.color  = Graphics::White;
   Texture2D::draw(dset);
 
   auto ws     = Graphics::getWindowSize();

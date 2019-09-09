@@ -175,6 +175,7 @@ update()
         {left, bottom, 0, 1},
         {right, bottom, 1, 1},
     };
+    auto my_asp = dset.aspect ? asp : 1.0;
     if (dset.rotate != 0.0)
     {
       auto c = std::cos(dset.rotate);
@@ -184,7 +185,7 @@ update()
         auto x = p[0];
         auto y = p[1];
         p[0]   = x * c + y * s + dset.x;
-        p[1]   = (-x * s + y * c) * asp + dset.y;
+        p[1]   = (-x * s + y * c) * my_asp + dset.y;
       }
     }
     else
@@ -192,7 +193,7 @@ update()
       for (auto& p : dbox)
       {
         p[0] += dset.x;
-        p[1] = p[1] * asp + dset.y;
+        p[1] = p[1] * my_asp + dset.y;
       }
     }
     image->bind();
