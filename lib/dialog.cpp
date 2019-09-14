@@ -161,7 +161,7 @@ void
 Body::draw()
 {
   Primitive2D::drawBox(x, y, x + width, y + height, Graphics::DarkGray, true);
-  Primitive2D::setDepth(-0.11f);
+  Primitive2D::setDepth(-0.92f);
   Primitive2D::drawBox(x, y, x + width, y + height, Graphics::White, false);
   font->setColor(Graphics::White);
   auto dy  = y + 150;
@@ -249,8 +249,8 @@ update()
   if (!current_dialog)
     return;
 
-  Primitive2D::pushDepth(-0.1f);
-  font->pushDepth(-0.11f);
+  Primitive2D::pushDepth(-0.9f);
+  font->pushDepth(-0.91f);
   current_dialog->update();
   current_dialog->draw();
   Primitive2D::popDepth();

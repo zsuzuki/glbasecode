@@ -78,7 +78,6 @@ update(std::function<bool()> func)
 
   auto ret = func();
 
-  Dialog::update();
   ScrollBox::update();
   TextBox::update();
   TextButton::update();
@@ -86,6 +85,7 @@ update(std::function<bool()> func)
   Label::update();
   CheckBox::update();
   ImageButton::update();
+  Dialog::update();
 
   Primitive2D::cleanup();
   Texture2D::update();
