@@ -42,6 +42,7 @@ set(main_src
     lib/drawbox.cpp
     lib/texture2d.cpp
     lib/imagebutton.cpp
+    lib/sheet.cpp
     lib/exec.cpp)
 
 add_executable(${PROJECT_NAME} ${main_src})
