@@ -18,20 +18,21 @@ struct Box : public Base
 
   ItemList          items{};
   BoundingBox::Rect bbox{};
-  double            xofs        = 0.0;
-  double            yofs        = 0.0;
-  double            depth       = 0.0;
-  double            max_x       = 0.0;
-  double            max_y       = 0.0;
-  bool              focus       = false;
-  bool              xsc_const   = false;
-  bool              ysc_const   = false;
-  bool              draw_sheet  = false;
-  bool              sticky_x    = false;
-  bool              sticky_y    = false;
-  double            stick_ofs_x = 0.0;
-  double            stick_ofs_y = 0.0;
-  Graphics::Color   sheet_color = Graphics::Gray;
+  double            xofs         = 0.0;
+  double            yofs         = 0.0;
+  double            depth        = 0.0;
+  double            max_x        = 0.0;
+  double            max_y        = 0.0;
+  bool              focus        = false;
+  bool              xsc_const    = false;
+  bool              ysc_const    = false;
+  bool              draw_sheet   = false;
+  bool              sticky_x     = false;
+  bool              sticky_y     = false;
+  double            stick_ofs_x  = 0.0;
+  double            stick_ofs_y  = 0.0;
+  Graphics::Color   sheet_color  = Graphics::Gray;
+  Graphics::Color   border_color = Graphics::Orange;
 
   ~Box() = default;
   void set(double x, double y, double w, double h) override;
@@ -40,6 +41,7 @@ struct Box : public Base
   void clear() override;
   void drawSheet(bool s, Graphics::Color scol) override;
   void setDepth(float d) override;
+  void setFocusBorderColor(Graphics::Color c) override { border_color = c; }
   void setScrollConstraint(bool sx, bool sy) override
   {
     xsc_const = sx;
@@ -260,7 +262,7 @@ update()
     {
       box->focus = bb.check(mpos.x, mpos.y);
       if (box->focus)
-        col = Graphics::Green;
+        col = box->border_color;
       new_focus = box;
     }
     else
@@ -270,9 +272,10 @@ update()
     Primitive2D::pushDepth(box->depth);
     if (box->draw_sheet)
     {
+      Primitive2D::setDepth(box->depth + 0.1f);
       Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, box->sheet_color, true);
     }
-    Primitive2D::setDepth(box->depth - 0.01f);
+    Primitive2D::setDepth(box->depth + 0.08f);
     Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, col, false);
     Primitive2D::popDepth();
   }

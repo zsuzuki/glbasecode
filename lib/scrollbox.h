@@ -17,6 +17,7 @@ struct Base : public Parts::ID
   virtual void setDepth(float d)                           = 0;
   virtual void setScrollConstraint(bool sx, bool sy)       = 0;
   virtual void setSticky(bool, bool)                       = 0;
+  virtual void setFocusBorderColor(Graphics::Color)        = 0;
 };
 
 using SBoxPtr = std::shared_ptr<Base>;
