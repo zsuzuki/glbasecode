@@ -127,10 +127,10 @@ struct Button : public Base
       ox       = parent->getPlacementX();
       oy       = parent->getPlacementY();
       en_focus = parent->getFocus();
-      depth    = parent->getDepth() - 0.1f;
+      depth    = parent->getDepth() - 0.01f;
     }
     Primitive2D::setDepth(depth);
-    font->setDepth(depth - 0.05f);
+    font->setDepth(depth - 0.02f);
     bbox = BBox{x + ox, y + oy, w, h};
     if (parent)
       inrect = parent->inRect(bbox);

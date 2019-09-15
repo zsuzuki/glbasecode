@@ -258,16 +258,16 @@ Item::updateAndDraw(const Graphics::Locate& mpos)
   if (opened == false)
     return false;
 
-  auto depth = parent->getDepth() - 0.1f;
+  auto depth = parent->getDepth() - 0.05f;
 
   // 下敷きを描画
   auto bcol = Graphics::DarkGray;
   auto loc  = bbox.getLocate();
   auto btm  = bbox.getBottom();
-  Primitive2D::setDepth(depth - 0.1f);
+  Primitive2D::setDepth(depth - 0.01f);
   Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, bcol, true);
   auto lcol = Graphics::White;
-  Primitive2D::setDepth(depth - 0.11f);
+  Primitive2D::setDepth(depth - 0.02f);
   Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, lcol, false);
 
   // フォーカス

@@ -57,10 +57,10 @@ Item::update()
   {
     ox    = parent->getPlacementX();
     oy    = parent->getPlacementY();
-    depth = parent->getDepth() - 0.1f;
+    depth = parent->getDepth() - 0.01f;
   }
   Primitive2D::setDepth(depth);
-  font->setDepth(depth - 0.05f);
+  font->setDepth(depth - 0.02f);
   bbox = BBox{x + ox, y + oy, w, h};
   return parent ? parent->inRect(bbox) : true;
 }

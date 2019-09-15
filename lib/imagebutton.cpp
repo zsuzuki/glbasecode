@@ -233,7 +233,7 @@ create(const char* in, double x, double y, PressCallback cb, bool c_ent)
   btn->h             = img->getHeight();
   btn->ox            = 0.0;
   btn->oy            = 0.0;
-  btn->depth         = -0.05f;
+  btn->depth         = -0.01f;
   btn->bbox          = BoundingBox::Rect{x, y, btn->w, btn->h};
   btn->callback      = cb;
   btn->parent        = nullptr;
