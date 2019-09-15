@@ -90,8 +90,9 @@ setupMenu2()
   auto SBox = ScrollBox::create();
   SBox->set(300, 300, 700, 700);
   SBox->drawSheet(true, {0.1f, 0.4f, 0.5f, 0.4f});
-  SBox->setDepth(-0.1f);
+  SBox->setDepth(0.5f);
   SBox->setScrollConstraint(true, false);
+  SBox->setFocusBorderColor({0.0f, 1.0f, 1.0f, 1.0f});
 
   static bool stick_x = false, stick_y = false;
   auto        chx = 350.0;
@@ -133,6 +134,8 @@ setupMenu2()
   auto tfg = Graphics::Yellow;
   auto tbg = Graphics::Blue;
   SBox->append(Label::create("Scroll Menu", 150, 20, tfg, tbg));
+
+  SBox->append(Sheet::create(10, 10, 500, 80));
 }
 
 //
@@ -234,6 +237,7 @@ onUpdate(FontDraw::WidgetPtr font, DBoxList dbl, ImgList imgl)
         {0.4f, 0.4f, 0.0f, 0.0f, 1.0f},
         {-0.4f, 0.4f, 1.0f, 1.0f, 1.0f},
     };
+    Primitive2D::setDepth(0.99f);
     Primitive2D::drawQuads(vl);
     static const Primitive2D::Vertex v = {0.0f, 0.0f, 0.5f, 1.0f, 1.0f};
     Primitive2D::drawCircle(v, 0.5f, 32, 8.0f);
@@ -283,6 +287,7 @@ onUpdate(FontDraw::WidgetPtr font, DBoxList dbl, ImgList imgl)
   dset.image  = img1;
   dset.width  = 0.4;
   dset.height = 0.4 * ((double)img1->getHeight() / (double)img1->getWidth());
+  dset.depth  = 0.95f;
   Texture2D::draw(dset);
 
   auto ws     = Graphics::getWindowSize();
