@@ -13,18 +13,18 @@ namespace
 {
 const char* vt_sh = "#version 110\n"
                     "uniform mat4 MVP;\n"
-                    "attribute vec3 vCol;\n"
+                    "attribute vec4 vCol;\n"
                     "attribute vec2 vPos;\n"
                     "uniform float Depth;\n"
-                    "varying vec3 color;\n"
+                    "varying vec4 color;\n"
                     "void main() {\n"
                     "    gl_Position = MVP * vec4(vPos, Depth, 1.0);\n"
                     "    color = vCol;\n"
                     "}\n";
 const char* fg_sh = "#version 110\n"
-                    "varying vec3 color;\n"
+                    "varying vec4 color;\n"
                     "void main() {\n"
-                    "    gl_FragColor = vec4(color, 1.0);\n"
+                    "    gl_FragColor = color;\n"
                     "}\n";
 
 GLuint     vertex_shader, fragment_shader, program;
@@ -95,10 +95,9 @@ setup(GLFWwindow* window)
   glVertexAttribPointer(vpos, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         &((Vertex*)0)->x);
   glEnableVertexAttribArray(vcol);
-  glVertexAttribPointer(vcol, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+  glVertexAttribPointer(vcol, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         &((Vertex*)0)->r);
 
-  glDisable(GL_BLEND);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
@@ -212,6 +211,7 @@ drawBox(double lx, double ty, double rx, double by, const Color& col, bool fill)
     v.r = col.r;
     v.g = col.g;
     v.b = col.b;
+    v.a = col.a;
   }
   if (fill)
   {
