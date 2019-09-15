@@ -127,7 +127,10 @@ setupMenu2()
 
     std::string l = "Item";
     l += std::to_string(i + 1);
-    auto p = TextButton::setButton(l, x, by, []() {});
+    auto p  = TextButton::setButton(l, x, by, []() {});
+    auto bg = Graphics::Black;
+    bg.a    = 0.1f;
+    p->setColor(TextButton::ColorType::UnFocusBG, bg);
     by += p->getHeight() + 10;
     SBox->append(p);
   }
@@ -135,7 +138,10 @@ setupMenu2()
   auto tbg = Graphics::Blue;
   SBox->append(Label::create("Scroll Menu", 150, 20, tfg, tbg));
 
-  SBox->append(Sheet::create(10, 10, 500, 80));
+  auto sh = Sheet::create(10, 10, 500, 80);
+  SBox->append(sh);
+  sh->setFillColor(Graphics::Red);
+  sh->setBorderColor(Graphics::Yellow);
 }
 
 //
