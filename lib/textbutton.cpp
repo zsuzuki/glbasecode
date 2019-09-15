@@ -223,9 +223,12 @@ Button::draw(ColorType fg, ColorType bg)
 
   // 下敷きを描画
   auto bcol = getColor(bg);
-  auto loc  = bbox.getLocate();
-  auto btm  = bbox.getBottom();
-  Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, bcol, true);
+  if (bcol.a > 0.0f)
+  {
+    auto loc = bbox.getLocate();
+    auto btm = bbox.getBottom();
+    Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, bcol, true);
+  }
 
   // キャプション
   auto fcol = getColor(fg);
