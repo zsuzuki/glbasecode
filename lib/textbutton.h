@@ -19,6 +19,7 @@ enum class ColorType : int
   UnFocusFont,
   FocusFont,
   PressFont,
+  Border
 };
 static constexpr const char* DefaultLayer = "default";
 

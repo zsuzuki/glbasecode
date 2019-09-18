@@ -27,6 +27,7 @@ std::map<ColorType, Color> color_map = {
     {ColorType::UnFocusFont, Graphics::White},
     {ColorType::FocusFont, Graphics::White},
     {ColorType::PressFont, DarkGray},
+    {ColorType::Border, Graphics::ClearColor},
 };
 
 //
@@ -51,6 +52,7 @@ struct Button : public Base
   Color         c_uff;
   Color         c_ff;
   Color         c_pf;
+  Color         c_bd;
   Pulldown::ID  pulldown;
 
   void   setCaption(std::string c) override { caption = c; }
@@ -82,6 +84,9 @@ struct Button : public Base
     case ColorType::PressFont:
       c_pf = col;
       break;
+    case ColorType::Border:
+      c_bd = col;
+      break;
     }
   }
   Color getColor(ColorType ct) const
@@ -107,6 +112,9 @@ struct Button : public Base
     case ColorType::PressFont:
       col = c_pf;
       break;
+    case ColorType::Border:
+      col = c_bd;
+      break;
     }
     return col;
   }
@@ -119,7 +127,6 @@ struct Button : public Base
 
   std::pair<bool, bool> update()
   {
-    float depth    = 0.0f;
     float inrect   = true;
     bool  en_focus = true;
     if (parent)
@@ -127,10 +134,7 @@ struct Button : public Base
       ox       = parent->getPlacementX();
       oy       = parent->getPlacementY();
       en_focus = parent->getFocus();
-      depth    = parent->getDepth() - 0.01f;
     }
-    Primitive2D::setDepth(depth);
-    font->setDepth(depth - 0.02f);
     bbox = BBox{x + ox, y + oy, w, h};
     if (parent)
       inrect = parent->inRect(bbox);
@@ -211,26 +215,35 @@ Button::getFocus() const
 void
 Button::draw(ColorType fg, ColorType bg)
 {
+  float depth = 0.0f;
   if (parent)
   {
     auto px = parent->getX();
     auto py = parent->getY();
     auto pw = parent->getWidth();
     auto ph = parent->getHeight();
+    depth   = parent->getDepth() - 0.01f;
     Graphics::enableScissor(px, py, pw, ph);
     font->setDrawArea(px, py, pw, ph);
   }
 
   // 下敷きを描画
   auto bcol = getColor(bg);
+  auto loc  = bbox.getLocate();
+  auto btm  = bbox.getBottom();
   if (bcol.a > 0.0f)
   {
-    auto loc = bbox.getLocate();
-    auto btm = bbox.getBottom();
+    Primitive2D::setDepth(depth);
     Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, bcol, true);
+  }
+  if (c_bd.a > 0.0f)
+  {
+    Primitive2D::setDepth(depth - 0.02f);
+    Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, c_bd, false);
   }
 
   // キャプション
+  font->setDepth(depth - 0.02f);
   auto fcol = getColor(fg);
   font->setColor(fcol);
   print(caption, getX() + 20, getY() + 42);
@@ -278,6 +291,7 @@ setButton(std::string caption, double x, double y, PressCallback cb,
   btn->c_uff       = color_map[ColorType::UnFocusFont];
   btn->c_ff        = color_map[ColorType::FocusFont];
   btn->c_pf        = color_map[ColorType::PressFont];
+  btn->c_bd        = color_map[ColorType::Border];
 
   auto& button_list = layer.getCurrent();
   button_list.push_back(btn);
@@ -349,7 +363,7 @@ update()
         }
       }
     }
-    // フォーカルによる色選択
+    // フォーカスによる色選択
     ColorType bg, fg;
     if (my_focus)
     {

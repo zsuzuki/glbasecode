@@ -209,7 +209,9 @@ setup(FontDraw::WidgetPtr font)
     int  idx = i + 1;
     auto t   = std::string("MENU") + std::to_string(idx);
     GLLib::bindLayer();
-    TextButton::setButton(t, 150, 150 + i * 80, [t]() { GLLib::bindLayer(t); });
+    auto mfunc = [t]() { GLLib::bindLayer(t); };
+    auto btn   = TextButton::setButton(t, 150, 150 + i * 80, mfunc);
+    btn->setColor(TextButton::ColorType::Border, Graphics::Cyan);
     GLLib::bindLayer(t);
     switch (idx)
     {
