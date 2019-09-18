@@ -7,6 +7,7 @@
 #include "gl.h"
 #include "imagebutton.h"
 #include "label.h"
+#include "notification.h"
 #include "primitive2d.h"
 #include "pulldown.h"
 #include "scrollbox.h"
@@ -36,6 +37,7 @@ initialize(const char* appname, const char* fontname, int w, int h)
   CheckBox::initialize(font);
   Pulldown::initialize(font);
   Dialog::initialize(font);
+  Notification::initialize(font);
   DrawBox::initialize();
   Texture2D::initialize();
   ImageButton::initialize();
@@ -90,6 +92,7 @@ update(std::function<bool()> func)
   CheckBox::update();
   ImageButton::update();
   Dialog::update();
+  Notification::update();
 
   Primitive2D::cleanup();
   Texture2D::update();

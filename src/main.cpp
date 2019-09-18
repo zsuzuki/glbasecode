@@ -199,10 +199,20 @@ setup(FontDraw::WidgetPtr font)
     dlg2->setOK([](bool) { std::cout << "OK Dialog2" << std::endl; });
     dlg2->setCancel([](bool) { std::cout << "Cancel Dialog2" << std::endl; });
     auto btnx = Width - font->getSizeX() * 12.0 - 50;
-    auto db   = TextButton::setButton("OK Dialog", btnx, 300,
+    auto btny = 300;
+    auto db   = TextButton::setButton("OK Dialog", btnx, btny,
                                     [dlg1]() { Dialog::open(dlg1); });
-    TextButton::setButton("With Cancel", btnx, 300 + db->getHeight() + 40,
-                          [dlg2]() { Dialog::open(dlg2); });
+    btny += db->getHeight() + 40;
+    db = TextButton::setButton("With Cancel", btnx, btny,
+                               [dlg2]() { Dialog::open(dlg2); });
+    btny += db->getHeight() + 40;
+    TextButton::setButton("notify", btnx, btny, []() {
+      static bool cnt = true;
+      auto        n   = Notification::notify(cnt ? "Hello" : "Notification");
+      n->setFontColor(cnt ? Graphics::White : Graphics::Orange);
+      n->setBorderColor(cnt ? Graphics::White : Graphics::Orange);
+      cnt = !cnt;
+    });
   }
   for (int i = 0; i < 3; i++)
   {
