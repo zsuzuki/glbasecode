@@ -3,6 +3,7 @@
 #include "codeconv.h"
 #include "gl.h"
 #include "primitive2d.h"
+#include "texture2d.h"
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <list>
@@ -12,7 +13,10 @@ namespace Dialog
 {
 namespace
 {
+using Tex2D = Texture2D::ImagePtr;
+
 FontDraw::WidgetPtr font;
+std::vector<Tex2D>  icon_list;
 
 // 選択状態
 enum class Select : int
@@ -41,16 +45,24 @@ struct Body : public Base
   OfsList    offset;
   bool       need_cancel;
   Select     sel_state;
+  int        icon;
+  int        icon_height;
 
   //
   ~Body() = default;
   double getX() const override { return x; }
   double getY() const override { return y; }
   int    getWidth() const override { return width; }
-  int    getHeight() const override { return height; }
+  int    getHeight() const override { return height + icon_height; }
   float  getDepth() const override { return depth; }
   void   setOK(DecideFunc f) override { df_ok = f; }
   void   setCancel(DecideFunc f) override { df_cancel = f; }
+  void   setIcon(int id) override
+  {
+    auto& ip    = icon_list[id];
+    icon        = id;
+    icon_height = ip->getHeight();
+  }
 
   void set_message(std::string msg)
   {
@@ -127,19 +139,21 @@ on_click(ClickAct action)
 void
 Body::update()
 {
+  auto w  = getWidth();
+  auto h  = getHeight();
   auto sz = Graphics::getWindowSize();
-  x       = (sz.width - width) * 0.5;
-  y       = (sz.height - height) * 0.5;
+  x       = (sz.width - w) * 0.5;
+  y       = (sz.height - h) * 0.5;
 
   auto mpos = Graphics::getMousePosition();
 
   if (need_cancel)
   {
     // キャンセルボタン有
-    auto dx   = x + width * 0.3 - (30 + 21 * 3);
-    auto dy   = y + height - 130;
+    auto dx   = x + w * 0.3 - (30 + 21 * 3);
+    auto dy   = y + h - 130;
     bb_cancel = BBox{dx, dy, 21 * 6 + 60, 60};
-    dx        = x + width * 0.7 - 51;
+    dx        = x + w * 0.7 - 51;
     bb_ok     = BBox{dx, dy, 102, 60};
     if (bb_cancel.check(mpos.x, mpos.y))
       sel_state = Select::Cancel;
@@ -149,8 +163,8 @@ Body::update()
   else
   {
     // キャンセルボタン無
-    auto dx   = x + width * 0.5 - 51;
-    auto dy   = y + height - 130;
+    auto dx   = x + w * 0.5 - 51;
+    auto dy   = y + h - 130;
     bb_ok     = BBox{dx, dy, 102, 60};
     sel_state = bb_ok.check(mpos.x, mpos.y) ? Select::OK : Select::None;
   }
@@ -160,11 +174,29 @@ Body::update()
 void
 Body::draw()
 {
-  Primitive2D::drawBox(x, y, x + width, y + height, Graphics::DarkGray, true);
+  auto w = getWidth();
+  auto h = getHeight();
+  Primitive2D::drawBox(x, y, x + w, y + h, Graphics::DarkGray, true);
   Primitive2D::setDepth(-0.92f);
-  Primitive2D::drawBox(x, y, x + width, y + height, Graphics::White, false);
+  Primitive2D::drawBox(x, y, x + w, y + h, Graphics::White, false);
   font->setColor(Graphics::White);
-  auto dy  = y + 150;
+  auto dy = y + 75;
+  if (icon >= 0)
+  {
+    auto ws     = Graphics::getWindowSize();
+    auto dset   = Texture2D::DrawSet();
+    auto loc    = Graphics::calcLocate(x + w * 0.5, dy);
+    dset.image  = icon_list[icon];
+    dset.height = icon_height * 2.0 / ws.width;
+    dset.width  = dset.image->getWidth() * 2.0 / ws.width;
+    dset.align  = Texture2D::Align::CenterTop;
+    dset.depth  = -0.94f;
+    dset.x      = loc.x;
+    dset.y      = loc.y;
+    Texture2D::draw(dset);
+    dy += icon_height;
+  }
+  dy += 75;
   auto ofs = offset.begin();
   for (auto& m : message)
   {
@@ -202,15 +234,27 @@ initialize(FontDraw::WidgetPtr f)
 }
 
 //
+int
+registIcon(const char* fname)
+{
+  int  idx = icon_list.size();
+  auto p   = Texture2D::create(fname);
+  icon_list.push_back(p);
+  return idx;
+}
+
+//
 ID
 create(std::string msg, bool need_cancel)
 {
   auto dlg = std::make_shared<Body>();
   dlg->set_message(msg);
-  dlg->width       = dlg->max_length * 21 + 300 * 2;
-  dlg->height      = dlg->message.size() * 40 + 400;
+  dlg->width       = dlg->max_length * font->getSizeX() + 300 * 2;
+  dlg->height      = dlg->message.size() * font->getSizeY() + 330;
   dlg->need_cancel = need_cancel;
   dlg->sel_state   = Select::None;
+  dlg->icon        = -1;
+  dlg->icon_height = 0;
   return dlg;
 }
 

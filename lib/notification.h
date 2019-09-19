@@ -25,8 +25,10 @@ ID notify(std::string msg, int dispms = 3000);
 //
 void initialize(FontDraw::WidgetPtr);
 
-//
-int registIcon(const char*);
+// 通知時に同時に出せるアイコンの登録
+// fname: アイコンのファイル名
+// 戻り値: アイコンのID(ID->setIconで渡す)
+int registIcon(const char* fname);
 
 //
 void update();

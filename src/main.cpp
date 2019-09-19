@@ -189,15 +189,20 @@ setup(FontDraw::WidgetPtr font)
 
   // top menu
   {
+    // 終了ボタン
     auto ib = ImageButton::create("res/close.png", Width - 58, 10,
                                   []() { Graphics::finish(); });
     ib->setFocusColor(Graphics::Green);
     ib->setFocusIcon("res/exit_to_app.png");
-    auto dlg1 = Dialog::create("Welcome\nHello, World\nDialog");
-    auto dlg2 = Dialog::create("OK or Cancel ?", true);
+    // ダイアログ
+    int  dicon_id = Dialog::registIcon("res/warning.png");
+    auto dlg1     = Dialog::create("Welcome\nHello, World\nDialog");
+    auto dlg2     = Dialog::create("OK or Cancel ?", true);
+    dlg1->setIcon(dicon_id);
     dlg1->setOK([](bool) { std::cout << "OK Dialog1" << std::endl; });
     dlg2->setOK([](bool) { std::cout << "OK Dialog2" << std::endl; });
     dlg2->setCancel([](bool) { std::cout << "Cancel Dialog2" << std::endl; });
+    // ダイアログ呼び出し
     auto btnx = Width - font->getSizeX() * 12.0 - 50;
     auto btny = 300;
     auto db   = TextButton::setButton("OK Dialog", btnx, btny,
@@ -206,14 +211,15 @@ setup(FontDraw::WidgetPtr font)
     db = TextButton::setButton("With Cancel", btnx, btny,
                                [dlg2]() { Dialog::open(dlg2); });
     btny += db->getHeight() + 40;
-    auto icon_id = Notification::registIcon("res/notification_important.png");
-    TextButton::setButton("notify", btnx, btny, [icon_id]() {
+    // 通知
+    auto nficon_id = Notification::registIcon("res/notification_important.png");
+    TextButton::setButton("notify", btnx, btny, [nficon_id]() {
       static bool cnt = true;
       auto        n   = Notification::notify(cnt ? "Hello" : "Notification");
       n->setFontColor(cnt ? Graphics::White : Graphics::Orange);
       n->setBorderColor(cnt ? Graphics::White : Graphics::Orange);
       if (!cnt)
-        n->setIcon(icon_id);
+        n->setIcon(nficon_id);
       cnt = !cnt;
     });
   }
