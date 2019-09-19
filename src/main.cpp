@@ -206,11 +206,14 @@ setup(FontDraw::WidgetPtr font)
     db = TextButton::setButton("With Cancel", btnx, btny,
                                [dlg2]() { Dialog::open(dlg2); });
     btny += db->getHeight() + 40;
-    TextButton::setButton("notify", btnx, btny, []() {
+    auto icon_id = Notification::registIcon("res/notification_important.png");
+    TextButton::setButton("notify", btnx, btny, [icon_id]() {
       static bool cnt = true;
       auto        n   = Notification::notify(cnt ? "Hello" : "Notification");
       n->setFontColor(cnt ? Graphics::White : Graphics::Orange);
       n->setBorderColor(cnt ? Graphics::White : Graphics::Orange);
+      if (!cnt)
+        n->setIcon(icon_id);
       cnt = !cnt;
     });
   }

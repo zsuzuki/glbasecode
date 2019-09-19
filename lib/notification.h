@@ -13,6 +13,7 @@ struct Msg
   virtual void setBorderColor(Graphics::Color) = 0;
   virtual void setFillColor(Graphics::Color)   = 0;
   virtual void setFontColor(Graphics::Color)   = 0;
+  virtual void setIcon(int)                    = 0;
 };
 using ID = std::shared_ptr<Msg>;
 
@@ -23,6 +24,9 @@ ID notify(std::string msg, int dispms = 3000);
 
 //
 void initialize(FontDraw::WidgetPtr);
+
+//
+int registIcon(const char*);
 
 //
 void update();
