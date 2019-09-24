@@ -71,8 +71,9 @@ bindLayer(std::string name = "default")
 }
 
 // フレーム内実行
+template <typename Func>
 inline bool
-update(std::function<bool()> func)
+update(Func func)
 {
   auto window = Graphics::setupFrame();
   if (!window)

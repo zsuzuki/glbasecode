@@ -3,7 +3,6 @@
 namespace Graphics
 {
 using KeyCallback    = void (*)(int, int, int, int);
-using DropCallback   = void (*)(int, const char**);
 using TextCallback   = void (*)(int);
 using ScrollCallback = void (*)(double, double);
 

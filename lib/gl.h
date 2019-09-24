@@ -15,10 +15,12 @@
 #include "gl_def.h"
 #include "key.h"
 #include <GLFW/glfw3.h>
+#include <functional>
 
 namespace Graphics
 {
-using KeyInput = const Key::Input;
+using KeyInput     = const Key::Input;
+using DropCallback = std::function<void(int, const char**)>;
 
 // 描画エリア(シザリング)指定
 struct DrawArea
