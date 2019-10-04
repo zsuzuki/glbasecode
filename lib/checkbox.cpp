@@ -55,8 +55,6 @@ struct Item : public Base
   void setOnColor(Graphics::Color c) override { on_info.color = c; }
   void setOffColor(Graphics::Color c) override { off_info.color = c; }
 
-  operator bool() const override { return getValue(); }
-
   double setBBox(const std::string& s);
   void   draw(bool);
   bool   update();

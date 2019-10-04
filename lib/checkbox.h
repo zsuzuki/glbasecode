@@ -22,7 +22,7 @@ struct Base : public Parts::ID
   virtual void setOffColor(Graphics::Color) = 0;
   virtual void setChanged(Changed)          = 0;
 
-  virtual operator bool() const { return getValue(); }
+  operator bool() const { return getValue(); }
 };
 
 using ID = std::shared_ptr<Base>;
