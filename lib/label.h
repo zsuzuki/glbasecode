@@ -7,8 +7,6 @@
 
 namespace Label
 {
-static constexpr const char* DefaultLayer = "default";
-
 //
 struct Base : public Parts::ID
 {
@@ -25,9 +23,9 @@ void initialize(FontDraw::WidgetPtr font);
 //
 ID create(std::string str, double x, double y, Color fg, Color bg);
 //
-void bindLayer(std::string layer = DefaultLayer);
+void bindLayer(std::string layer = Parts::DefaultLayer);
 //
-void clearLayer(std::string layer = DefaultLayer);
+void clearLayer(std::string layer = Parts::DefaultLayer);
 //
 void erase(ID);
 //

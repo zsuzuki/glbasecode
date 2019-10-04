@@ -6,8 +6,6 @@
 
 namespace Sheet
 {
-static constexpr const char* DefaultLayer = "default";
-
 //
 struct Base : public Parts::ID
 {
@@ -25,9 +23,9 @@ void initialize();
 void update();
 
 //
-void bindLayer(std::string = DefaultLayer);
+void bindLayer(std::string = Parts::DefaultLayer);
 //
-void clearLayer(std::string = DefaultLayer);
+void clearLayer(std::string = Parts::DefaultLayer);
 //
 void erase(ID);
 

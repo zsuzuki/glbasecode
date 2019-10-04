@@ -23,14 +23,12 @@ struct Item : public Parts::ID
 };
 using ItemPtr = std::shared_ptr<Item>;
 
-static constexpr const char* DefaultLayer = "default";
-
 //
 void initialize(FontDraw::WidgetPtr font);
 //
-void bindLayer(std::string layer = DefaultLayer);
+void bindLayer(std::string layer = Parts::DefaultLayer);
 //
-void clearLayer(std::string layer = DefaultLayer);
+void clearLayer(std::string layer = Parts::DefaultLayer);
 //
 void eraseItem(ItemPtr);
 //

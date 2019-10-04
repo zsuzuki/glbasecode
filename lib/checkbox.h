@@ -8,8 +8,6 @@
 
 namespace CheckBox
 {
-//
-static constexpr const char* DefaultLayer = "default";
 // 値変更コールバック
 using Changed = std::function<void(bool)>;
 
@@ -34,9 +32,9 @@ void initialize(FontDraw::WidgetPtr font);
 //
 ID create(std::string on_str, double x, double y, bool sw);
 //
-void bindLayer(std::string layer = DefaultLayer);
+void bindLayer(std::string layer = Parts::DefaultLayer);
 //
-void clearLayer(std::string layer = DefaultLayer);
+void clearLayer(std::string layer = Parts::DefaultLayer);
 //
 void erase(ID);
 //

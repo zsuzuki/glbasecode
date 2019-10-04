@@ -24,4 +24,6 @@ struct ID
 
 using IDPtr = std::shared_ptr<ID>;
 
+static constexpr const char* DefaultLayer = "default";
+
 } // namespace Parts

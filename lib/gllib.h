@@ -58,7 +58,7 @@ terminate()
 
 // レイヤー変更
 inline void
-bindLayer(std::string name = "default")
+bindLayer(std::string name = Parts::DefaultLayer)
 {
   ScrollBox::bindLayer(name);
   TextButton::bindLayer(name);

@@ -9,8 +9,6 @@
 
 namespace Pulldown
 {
-static constexpr const char* DefaultLayer = "default";
-
 using Selected = std::function<void(int, const std::string&)>;
 //
 struct Base : public Parts::ID
@@ -36,9 +34,9 @@ void update();
 // nb_disp 画面に表示する個数
 ID create(List&& l, size_t nb_disp);
 //
-void bindLayer(std::string layer = DefaultLayer);
+void bindLayer(std::string layer = Parts::DefaultLayer);
 //
-void clearLayer(std::string layer = DefaultLayer);
+void clearLayer(std::string layer = Parts::DefaultLayer);
 //
 void erase(ID);
 

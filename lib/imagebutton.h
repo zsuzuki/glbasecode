@@ -9,8 +9,6 @@ namespace ImageButton
 {
 // ボタンを押したときのコールバック
 using PressCallback = std::function<void()>;
-//
-static constexpr const char* DefaultLayer = "default";
 
 //
 struct Button : public Parts::ID
@@ -31,9 +29,9 @@ void initialize();
 void update();
 
 //
-void bindLayer(std::string = DefaultLayer);
+void bindLayer(std::string = Parts::DefaultLayer);
 //
-void clearLayer(std::string = DefaultLayer);
+void clearLayer(std::string = Parts::DefaultLayer);
 //
 void erase(ID);
 

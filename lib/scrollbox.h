@@ -22,12 +22,10 @@ struct Base : public Parts::ID
 
 using SBoxPtr = std::shared_ptr<Base>;
 
-static constexpr const char* DefaultLayer = "default";
-
 //
-void bindLayer(std::string layer = DefaultLayer);
+void bindLayer(std::string layer = Parts::DefaultLayer);
 //
-void clearLayer(std::string layer = DefaultLayer);
+void clearLayer(std::string layer = Parts::DefaultLayer);
 //
 void erase(SBoxPtr);
 

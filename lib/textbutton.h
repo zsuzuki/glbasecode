@@ -21,7 +21,6 @@ enum class ColorType : int
   PressFont,
   Border
 };
-static constexpr const char* DefaultLayer = "default";
 
 //
 struct Base : public Parts::ID
@@ -41,9 +40,9 @@ ID setButton(std::string caption, double x, double y, PressCallback cb,
 //
 void setDefaultColor(ColorType ct, Graphics::Color c);
 //
-void bindLayer(std::string layer = DefaultLayer);
+void bindLayer(std::string layer = Parts::DefaultLayer);
 //
-void clearLayer(std::string layer = DefaultLayer);
+void clearLayer(std::string layer = Parts::DefaultLayer);
 //
 void erase(ID);
 //
