@@ -12,9 +12,7 @@ namespace TextBox
 {
 namespace
 {
-using BBox   = BoundingBox::Rect;
-using Parent = const Parts::ID;
-using Color  = Graphics::Color;
+using Color = Graphics::Color;
 
 constexpr double BaseX = 12.0;
 constexpr double BaseY = 24.0;
@@ -24,10 +22,6 @@ struct ItemImpl : public Item
 {
   std::string  text;
   std::string  place_holder;
-  BBox         bbox{};
-  double       x, y;
-  double       w, h;
-  double       ox, oy;
   size_t       max_length  = 99;
   Color        font_color  = Graphics::White;
   Color        bg_color    = Graphics::Black;
@@ -35,18 +29,12 @@ struct ItemImpl : public Item
   double       ofs_y       = 0.0;
   bool         draw_border = true;
   bool         on_edit     = false;
-  Parent*      parent      = nullptr;
   Pulldown::ID pulldown;
 
   ItemImpl()  = default;
   ~ItemImpl() = default;
 
-  double getX() const override { return bbox.getLeftX(); }
-  double getY() const override { return bbox.getTopY(); }
-  int    getWidth() const override { return w; }
-  int    getHeight() const override { return h; }
-  void   setParent(const Parts::ID* p) override { parent = p; }
-  void   setPulldown(Pulldown::ID pd) override
+  void setPulldown(Pulldown::ID pd) override
   {
     pulldown = pd;
     if (pulldown)
@@ -61,9 +49,8 @@ struct ItemImpl : public Item
   void setPlaceHolderColor(Graphics::Color pc) override { ph_color = pc; }
   void setMaxLength(size_t ml) override { max_length = ml; }
 
-  std::pair<bool, bool> update();
-  void                  draw();
-  void                  drawCursor();
+  void draw();
+  void drawCursor();
 };
 using ItemImplPtr = std::shared_ptr<ItemImpl>;
 using ClickAct    = Graphics::ClickCallback::Action;
@@ -127,25 +114,6 @@ on_click(ClickAct action, bool enter)
         TextInput::setIndex(xp);
     }
   }
-}
-
-//
-std::pair<bool, bool>
-ItemImpl::update()
-{
-  float depth = 0.0f;
-  bool  en    = true;
-  if (parent)
-  {
-    ox    = parent->getPlacementX();
-    oy    = parent->getPlacementY();
-    en    = parent->getFocus();
-    depth = parent->getDepth() - 0.01f;
-  }
-  Primitive2D::setDepth(depth);
-  font->setDepth(depth - 0.02f);
-  bbox = BBox{x + ox, y + oy, w, h};
-  return std::make_pair(parent ? parent->inRect(bbox) : true, en);
 }
 
 //
@@ -264,8 +232,7 @@ create(std::string t, double x, double y, double w, double h)
   item->y    = y;
   item->w    = w;
   item->h    = h;
-  item->ox   = 0.0;
-  item->oy   = 0.0;
+  item->bbox = BoundingBox::Rect{x, y, item->w, item->h};
 
   auto& item_list = layer.getCurrent();
   item_list.push_back(item);
@@ -291,20 +258,18 @@ update()
   focus_input     = ItemImplPtr{};
   for (auto& item : item_list)
   {
-    auto r = item->update();
-    if (r.first == false)
-    {
-      if (edit_input == item)
-        input_finish(edit_input);
-      continue;
-    }
-    if (r.second && item->bbox.check(mpos.x, mpos.y))
-    {
-      if (focus_input != item)
-        focus_input = item;
-    }
-
-    item->draw();
+    bool no_input = true;
+    item->update([&](bool enabled) {
+      no_input = false;
+      if (enabled && item->checkHit(mpos.x, mpos.y))
+      {
+        if (focus_input != item)
+          focus_input = item;
+      }
+      item->draw();
+    });
+    if (no_input && edit_input == item)
+      input_finish(edit_input);
   }
   Primitive2D::popDepth();
   font->popDepth();

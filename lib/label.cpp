@@ -18,66 +18,39 @@ FontDraw::WidgetPtr font;
 //
 struct Item : public Base
 {
-  using BBox   = BoundingBox::Rect;
-  using Parent = const Parts::ID;
-  ~Item()      = default;
+  ~Item() = default;
   std::string label;
-  BBox        bbox;
-  double      x, y;
-  double      w, h;
-  double      ox, oy;
   double      length;
-  Parent*     parent;
   Color       fgcol;
   Color       bgcol;
-
-  double getX() const override { return x + ox; }
-  double getY() const override { return y + oy; }
-  int    getWidth() const override { return w; }
-  int    getHeight() const override { return h; }
-  void   setParent(const Parts::ID* p) override { parent = p; }
 
   void setText(std::string l) override;
   void setFontColor(Graphics::Color col) override { fgcol = col; }
   void setBGColor(Graphics::Color col) override { bgcol = col; }
 
   void draw();
-  bool update();
 };
 
 using ItemPtr = std::shared_ptr<Item>;
 Layer<Item> layer;
 
 //
-bool
-Item::update()
-{
-  float depth = 0.0f;
-  if (parent)
-  {
-    ox    = parent->getPlacementX();
-    oy    = parent->getPlacementY();
-    depth = parent->getDepth() - 0.01f;
-  }
-  Primitive2D::setDepth(depth);
-  font->setDepth(depth - 0.02f);
-  bbox = BBox{x + ox, y + oy, w, h};
-  return parent ? parent->inRect(bbox) : true;
-}
-
-//
 void
 Item::draw()
 {
+  float ldepth = depth;
   if (parent)
   {
     auto px = parent->getX();
     auto py = parent->getY();
     auto pw = parent->getWidth();
     auto ph = parent->getHeight();
+    ldepth += parent->getDepth();
     Graphics::enableScissor(px, py, pw, ph);
     font->setDrawArea(px, py, pw, ph);
   }
+  Primitive2D::setDepth(ldepth);
+  font->setDepth(ldepth - 0.02f);
   auto loc = bbox.getLocate();
   auto btm = bbox.getBottom();
   if (bgcol.a > 0.0)
@@ -118,13 +91,10 @@ create(std::string str, double x, double y, Color fg, Color bg)
 {
   auto item = std::make_shared<Item>();
 
-  item->x      = x;
-  item->y      = y;
-  item->ox     = 0.0;
-  item->oy     = 0.0;
-  item->parent = nullptr;
-  item->fgcol  = fg;
-  item->bgcol  = bg;
+  item->x     = x;
+  item->y     = y;
+  item->fgcol = fg;
+  item->bgcol = bg;
   item->setText(str);
 
   auto& item_list = layer.getCurrent();
@@ -162,9 +132,7 @@ update()
   auto& item_list = layer.getCurrent();
   for (auto& item : item_list)
   {
-    if (item->update() == false)
-      continue;
-    item->draw();
+    item->update([&](bool) { item->draw(); });
   }
   font->popDepth();
   Primitive2D::popDepth();

@@ -13,8 +13,6 @@ namespace ImageButton
 namespace
 {
 using ImagePtr = Texture2D::ImagePtr;
-using BBox     = BoundingBox::Rect;
-using Parent   = const Parts::ID;
 using Color    = Graphics::Color;
 
 //
@@ -23,25 +21,13 @@ struct ButtonImpl : public Button
   ImagePtr      focus_image;
   ImagePtr      unfocus_image;
   PressCallback callback;
-  BBox          bbox;
-  double        x, y;
-  double        ox, oy;
-  double        w, h;
-  double        depth;
   bool          press;
-  Parent*       parent;
   Color         focus_color;
   Color         unfocus_color;
 
   ~ButtonImpl() = default;
-  double getX() const override { return x + ox; }
-  double getY() const override { return y + oy; }
-  int    getWidth() const override { return w; }
-  int    getHeight() const override { return h; }
-  float  getDepth() const override { return depth; }
-  void   setParent(const Parts::ID* p) override { parent = p; }
-  bool   getFocus() const override;
-  void   setFocusIcon(const char* fname) override
+  bool getFocus() const override;
+  void setFocusIcon(const char* fname) override
   {
     focus_image = new_image(fname);
   }
@@ -60,22 +46,6 @@ struct ButtonImpl : public Button
   {
     auto img = Texture2D::create(fname);
     return img;
-  }
-
-  std::pair<bool, bool> update()
-  {
-    float inrect   = true;
-    bool  en_focus = true;
-    if (parent)
-    {
-      ox       = parent->getPlacementX();
-      oy       = parent->getPlacementY();
-      en_focus = parent->getFocus();
-    }
-    bbox = BBox{x + ox, y + oy, w, h};
-    if (parent)
-      inrect = parent->inRect(bbox);
-    return std::make_pair(inrect, en_focus);
   }
 };
 //
@@ -189,14 +159,9 @@ update()
   bool  focus       = !Graphics::isEnabledEvent();
   for (auto& btn : button_list)
   {
-    auto ef = btn->update();
-    if (!ef.first)
-      continue;
-    bool my_focus = focus_button == btn;
-    if (!focus)
-    {
-      bool inbox = btn->bbox.check(mpos.x, mpos.y);
-      if (ef.second && inbox)
+    btn->update([&](bool enabled) {
+      bool my_focus = focus_button == btn;
+      if (!focus && enabled && btn->checkHit(mpos.x, mpos.y))
       {
         // カーソルが乗っている場合のみ
         my_focus = true;
@@ -208,8 +173,8 @@ update()
           btn->press   = false;
         }
       }
-    }
-    btn->draw(my_focus);
+      btn->draw(my_focus);
+    });
   }
   // どこにもフォーカスしていない(enterによるホールドもされていない)
   if (!focus && focus_button && focus_button->press == false)
@@ -231,8 +196,6 @@ create(const char* in, double x, double y, PressCallback cb, bool c_ent)
   btn->y             = y;
   btn->w             = img->getWidth();
   btn->h             = img->getHeight();
-  btn->ox            = 0.0;
-  btn->oy            = 0.0;
   btn->depth         = -0.01f;
   btn->bbox          = BoundingBox::Rect{x, y, btn->w, btn->h};
   btn->callback      = cb;

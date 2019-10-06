@@ -29,19 +29,16 @@ enum class Select : int
 //
 struct Body : public Base
 {
-  using BBox    = BoundingBox::Rect;
   using Message = std::list<std::string>;
   using OfsList = std::vector<double>;
 
   BBox       bb_ok;
   BBox       bb_cancel;
-  double     x, y;
   double     width, height;
   DecideFunc df_ok;
   DecideFunc df_cancel;
   Message    message;
   double     max_length;
-  float      depth;
   OfsList    offset;
   bool       need_cancel;
   Select     sel_state;

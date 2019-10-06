@@ -33,19 +33,12 @@ std::map<ColorType, Color> color_map = {
 //
 struct Button : public Base
 {
-  using BBox   = BoundingBox::Rect;
-  using Parent = const Parts::ID;
-  ~Button()    = default;
+  ~Button() = default;
   std::string   caption;
-  BBox          bbox;
-  double        x, y;
-  double        w, h;
-  double        ox, oy;
   double        length;
   PressCallback cb;
   bool          catch_enter;
   bool          press;
-  Parent*       parent;
   Color         c_ufbg;
   Color         c_fbg;
   Color         c_pbg;
@@ -55,14 +48,9 @@ struct Button : public Base
   Color         c_bd;
   Pulldown::ID  pulldown;
 
-  void   setCaption(std::string c) override { caption = c; }
-  double getX() const override { return x + ox; }
-  double getY() const override { return y + oy; }
-  int    getWidth() const override { return w; }
-  int    getHeight() const override { return h; }
-  void   setParent(const Parts::ID* p) override { parent = p; }
-  bool   getFocus() const override;
-  void   setColor(ColorType ct, Graphics::Color col) override
+  void setCaption(std::string c) override { caption = c; }
+  bool getFocus() const override;
+  void setColor(ColorType ct, Graphics::Color col) override
   {
     switch (ct)
     {
@@ -123,22 +111,6 @@ struct Button : public Base
     pulldown = pd;
     if (pulldown)
       pulldown->setParent(this);
-  }
-
-  std::pair<bool, bool> update()
-  {
-    float inrect   = true;
-    bool  en_focus = true;
-    if (parent)
-    {
-      ox       = parent->getPlacementX();
-      oy       = parent->getPlacementY();
-      en_focus = parent->getFocus();
-    }
-    bbox = BBox{x + ox, y + oy, w, h};
-    if (parent)
-      inrect = parent->inRect(bbox);
-    return std::make_pair(inrect, en_focus);
   }
 
   void draw(ColorType fg, ColorType bg);
@@ -278,8 +250,6 @@ setButton(std::string caption, double x, double y, PressCallback cb,
   btn->y           = y;
   btn->w           = rx - x;
   btn->h           = by - y;
-  btn->ox          = 0.0;
-  btn->oy          = 0.0;
   btn->bbox        = BoundingBox::Rect{x, y, btn->w, btn->h};
   btn->cb          = cb;
   btn->press       = false;
@@ -343,14 +313,9 @@ update()
   bool focus = !Graphics::isEnabledEvent();
   for (auto& btn : button_list)
   {
-    auto ef = btn->update();
-    if (!ef.first)
-      continue;
-    bool my_focus = focus_button == btn;
-    if (!focus)
-    {
-      bool inbox = btn->bbox.check(mpos.x, mpos.y);
-      if (ef.second && inbox)
+    btn->update([&](bool enabled) {
+      bool my_focus = focus_button == btn;
+      if (!focus && enabled && btn->checkHit(mpos.x, mpos.y))
       {
         // カーソルが乗っている場合のみ
         my_focus = true;
@@ -362,20 +327,20 @@ update()
           btn->press   = false;
         }
       }
-    }
-    // フォーカスによる色選択
-    ColorType bg, fg;
-    if (my_focus)
-    {
-      bg = btn->press ? ColorType::PressBG : ColorType::FocusBG;
-      fg = btn->press ? ColorType::PressFont : ColorType::FocusFont;
-    }
-    else
-    {
-      bg = ColorType::UnFocusBG;
-      fg = ColorType::UnFocusFont;
-    }
-    btn->draw(fg, bg);
+      // フォーカスによる色選択
+      ColorType bg, fg;
+      if (my_focus)
+      {
+        bg = btn->press ? ColorType::PressBG : ColorType::FocusBG;
+        fg = btn->press ? ColorType::PressFont : ColorType::FocusFont;
+      }
+      else
+      {
+        bg = ColorType::UnFocusBG;
+        fg = ColorType::UnFocusFont;
+      }
+      btn->draw(fg, bg);
+    });
   }
   // どこにもフォーカスしていない(enterによるホールドもされていない)
   if (!focus && focus_button && focus_button->press == false)

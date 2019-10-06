@@ -12,7 +12,6 @@ struct Base : public Parts::ID
   virtual void setSize(double, double)         = 0;
   virtual void setBorderColor(Graphics::Color) = 0;
   virtual void setFillColor(Graphics::Color)   = 0;
-  virtual void setDepth(float)                 = 0;
 };
 using ID = std::shared_ptr<Base>;
 

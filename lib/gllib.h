@@ -12,6 +12,7 @@
 #include "pulldown.h"
 #include "scrollbox.h"
 #include "sheet.h"
+#include "slidebar.h"
 #include "textbox.h"
 #include "textbutton.h"
 #include "texture2d.h"
@@ -42,6 +43,7 @@ initialize(const char* appname, const char* fontname, int w, int h)
   Texture2D::initialize();
   ImageButton::initialize();
   Sheet::initialize();
+  SlideBar::initialize();
 
   return font;
 }
@@ -68,6 +70,7 @@ bindLayer(std::string name = Parts::DefaultLayer)
   Pulldown::bindLayer(name);
   ImageButton::bindLayer(name);
   Sheet::bindLayer(name);
+  SlideBar::bindLayer(name);
 }
 
 // フレーム内実行
@@ -86,6 +89,7 @@ update(Func func)
 
   ScrollBox::update();
   Sheet::update();
+  SlideBar::update();
   TextBox::update();
   TextButton::update();
   Pulldown::update();

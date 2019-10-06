@@ -15,24 +15,23 @@ struct Box : public Base
 {
   using ItemPtr  = std::weak_ptr<Parts::ID>;
   using ItemList = std::list<ItemPtr>;
+  using Color    = Graphics::Color;
 
-  ItemList          items{};
-  BoundingBox::Rect bbox{};
-  double            xofs         = 0.0;
-  double            yofs         = 0.0;
-  double            depth        = 0.0;
-  double            max_x        = 0.0;
-  double            max_y        = 0.0;
-  bool              focus        = false;
-  bool              xsc_const    = false;
-  bool              ysc_const    = false;
-  bool              draw_sheet   = false;
-  bool              sticky_x     = false;
-  bool              sticky_y     = false;
-  double            stick_ofs_x  = 0.0;
-  double            stick_ofs_y  = 0.0;
-  Graphics::Color   sheet_color  = Graphics::Gray;
-  Graphics::Color   border_color = Graphics::Orange;
+  ItemList items{};
+  double   xofs         = 0.0;
+  double   yofs         = 0.0;
+  double   max_x        = 0.0;
+  double   max_y        = 0.0;
+  bool     focus        = false;
+  bool     xsc_const    = false;
+  bool     ysc_const    = false;
+  bool     draw_sheet   = false;
+  bool     sticky_x     = false;
+  bool     sticky_y     = false;
+  double   stick_ofs_x  = 0.0;
+  double   stick_ofs_y  = 0.0;
+  Color    sheet_color  = Graphics::Gray;
+  Color    border_color = Graphics::Orange;
 
   ~Box() = default;
   void set(double x, double y, double w, double h) override;
@@ -40,7 +39,7 @@ struct Box : public Base
   void erase(Parts::IDPtr) override;
   void clear() override;
   void drawSheet(bool s, Graphics::Color scol) override;
-  void setDepth(float d) override;
+  void setDepth(float d) override { depth = d; }
   void setFocusBorderColor(Graphics::Color c) override { border_color = c; }
   void setScrollConstraint(bool sx, bool sy) override
   {
@@ -68,10 +67,6 @@ struct Box : public Base
   bool   getFocus() const override { return focus; }
   double getPlacementX() const override { return getX() + xofs; }
   double getPlacementY() const override { return getY() + yofs; }
-  bool   inRect(const BoundingBox::Rect& r) const override
-  {
-    return bbox.checkHit(r);
-  }
 
   void scroll_clip();
   void update_sticky();
@@ -88,12 +83,6 @@ Box::drawSheet(bool s, Graphics::Color scol)
 {
   draw_sheet  = s;
   sheet_color = scol;
-}
-//
-void
-Box::setDepth(float d)
-{
-  depth = d;
 }
 
 //

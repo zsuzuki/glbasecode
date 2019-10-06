@@ -19,9 +19,7 @@ FontDraw::WidgetPtr font;
 //
 struct Item : public Base
 {
-  using BBox   = BoundingBox::Rect;
-  using Parent = const Parts::ID;
-  using Color  = Graphics::Color;
+  using Color = Graphics::Color;
   struct Info
   {
     std::string label;
@@ -31,22 +29,11 @@ struct Item : public Base
   ~Item() = default;
   Info    on_info;
   Info    off_info;
-  BBox    bbox;
-  double  x, y;
-  double  w, h;
-  double  ox, oy;
   double  length;
   bool    value;
-  Parent* parent;
   Changed change_func;
 
-  double getX() const override { return x + ox; }
-  double getY() const override { return y + oy; }
-  int    getWidth() const override { return w; }
-  int    getHeight() const override { return h; }
-  void   setParent(const Parts::ID* p) override { parent = p; }
-  void   setChanged(Changed ch) override { change_func = ch; }
-
+  void setChanged(Changed ch) override { change_func = ch; }
   void setText(std::string) override;
   void setOffText(std::string) override;
   void setValue(bool v) override { value = v; }
@@ -57,7 +44,6 @@ struct Item : public Base
 
   double setBBox(const std::string& s);
   void   draw(bool);
-  bool   update();
 };
 
 using ItemPtr  = std::shared_ptr<Item>;
@@ -81,35 +67,23 @@ on_click(ClickAct action, bool enter)
 }
 
 //
-bool
-Item::update()
-{
-  float depth = 0.0f;
-  if (parent)
-  {
-    ox    = parent->getPlacementX();
-    oy    = parent->getPlacementY();
-    depth = parent->getDepth() - 0.01f;
-  }
-  Primitive2D::setDepth(depth);
-  font->setDepth(depth - 0.02f);
-  bbox = BBox{x + ox, y + oy, w, h};
-  return parent ? parent->inRect(bbox) : true;
-}
-
-//
 void
 Item::draw(bool focus)
 {
+  float ldepth = depth;
   if (parent)
   {
     auto px = parent->getX();
     auto py = parent->getY();
     auto pw = parent->getWidth();
     auto ph = parent->getHeight();
+    ldepth += parent->getDepth();
     Graphics::enableScissor(px, py, pw, ph);
     font->setDrawArea(px, py, pw, ph);
   }
+
+  Primitive2D::setDepth(ldepth);
+  font->setDepth(ldepth - 0.02f);
 
   auto loc = bbox.getLocate();
   auto btm = bbox.getBottom();
@@ -176,9 +150,6 @@ create(std::string str, double x, double y, bool sw)
 
   item->x      = x;
   item->y      = y;
-  item->ox     = 0.0;
-  item->oy     = 0.0;
-  item->parent = nullptr;
   item->value  = sw;
   item->length = 0;
 
@@ -223,12 +194,9 @@ update()
   bool  focus     = !Graphics::isEnabledEvent();
   for (auto& item : item_list)
   {
-    if (item->update() == false)
-      continue;
-    bool my_focus = focus_item == item;
-    if (!focus)
-    {
-      if (item->bbox.check(mpos.x, mpos.y))
+    item->update([&](bool enabled) {
+      bool my_focus = focus_item == item;
+      if (!focus && enabled && item->checkHit(mpos.x, mpos.y))
       {
         // on cursor
         my_focus = true;
@@ -238,8 +206,8 @@ update()
           focus_item = item;
         }
       }
-    }
-    item->draw(my_focus);
+      item->draw(my_focus);
+    });
   }
   if (!focus && focus_item)
     focus_item.reset();

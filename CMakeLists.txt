@@ -3,6 +3,7 @@ enable_language(CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+# set(CMAKE_CXX_FLAGS "-g")
 
 project(gltest)
 
@@ -43,6 +44,7 @@ set(main_src
     lib/imagebutton.cpp
     lib/sheet.cpp
     lib/notification.cpp
+    lib/slidebar.cpp
     lib/exec.cpp)
 
 add_executable(${PROJECT_NAME} ${main_src})

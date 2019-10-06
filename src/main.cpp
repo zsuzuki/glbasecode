@@ -182,6 +182,25 @@ setupMenu3()
 
 //
 void
+setupMenu4()
+{
+  Label::create("PARAMETER", 100, 80, Graphics::Cyan, Graphics::Gray);
+  TextButton::setButton("Return", 100, 150, []() { GLLib::bindLayer(); });
+
+  double x = 300;
+  double y = 300;
+
+  auto sb = SlideBar::create(x, y, 400, 50);
+  sb->setNumber(0.5);
+  y += sb->getHeight() + 20;
+  sb = SlideBar::create(x, y, 500, 50);
+  y += sb->getHeight() + 20;
+  sb = SlideBar::create(x, y, 600, 50);
+  sb->setNumber(1.0);
+}
+
+//
+void
 setup(FontDraw::WidgetPtr font)
 {
   Graphics::setDropCallback(drop_file);
@@ -223,7 +242,7 @@ setup(FontDraw::WidgetPtr font)
       cnt = !cnt;
     });
   }
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 4; i++)
   {
     int  idx = i + 1;
     auto t   = std::string("MENU") + std::to_string(idx);
@@ -242,6 +261,9 @@ setup(FontDraw::WidgetPtr font)
       break;
     case 3:
       setupMenu3();
+      break;
+    case 4:
+      setupMenu4();
       break;
     default:
       break;
