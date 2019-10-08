@@ -25,6 +25,7 @@ struct OffEventCallback
   enum class Action : int
   {
     Click,
+    Release,
     EnterKey,
     EscapeKey
   };

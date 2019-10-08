@@ -127,6 +127,7 @@ KeyInputImpl keyinput;
 
 std::list<ClickCallback> click_callback;
 using ClickAct = ClickCallback::Action;
+using OffAct   = OffEventCallback::Action;
 
 OffEventCallback off_event_callback;
 
@@ -161,9 +162,9 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
     // イベント発行が禁止されている場合の解除用イベント
     bool cancel_di = false;
     if (key == GLFW_KEY_ENTER)
-      cancel_di = off_event_callback.func(OffEventCallback::Action::EnterKey);
+      cancel_di = off_event_callback.func(OffAct::EnterKey);
     else if (key == GLFW_KEY_ESCAPE)
-      cancel_di = off_event_callback.func(OffEventCallback::Action::EscapeKey);
+      cancel_di = off_event_callback.func(OffAct::EscapeKey);
     if (cancel_di)
       enableEvent();
   }
@@ -197,7 +198,8 @@ mousebutton_callback(GLFWwindow* window, int btn, int action, int mods)
     // イベント発行が禁止されている場合の解除用イベント
     if (btn == GLFW_MOUSE_BUTTON_LEFT)
     {
-      if (off_event_callback.func(OffEventCallback::Action::Click))
+      auto act = action == GLFW_PRESS ? OffAct::Click : OffAct::Release;
+      if (off_event_callback.func(act))
         enableEvent();
     }
   }
