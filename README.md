@@ -46,13 +46,16 @@ macはbrew、もしくは自前ビルドで用意。
 - [drawbox.cpp](lib/drawbox.cpp)([.h](lib/drawbox.h)) スクロール対応描画領域
 - [exec.cpp](lib/exec.cpp)([.h](lib/exec.h)) 子プロセス起動
 - [font.cpp](lib/font.cpp)([.h](lib/font.h)) フォント描画
+- [imagebutton.cpp](lib/imagebutton.cpp)([.h](lib/imagebutton.h)) 画像ボタン
 - [label.cpp](lib/label.cpp)([.h](lib/label.h)) 文字ラベル
 - [primitive2d.cpp](lib/primitive2d.cpp)([.h](lib/primitive2d.h)) プリミティブ描画
 - [pulldown.cpp](lib/pulldown.cpp)([.h](lib/pulldown.h)) プルダウンメニュー
 - [scrollbox.cpp](lib/scrollbox.cpp)([.h](lib/scrollbox.h)) スクロールボックス
+- [slidebar.cpp](lib/slidebar.cpp)([.h](lib/slidebar.h)) スライドバー
 - [text.cpp](lib/text.cpp)([.h](lib/text.h)) テキスト入力
 - [textbox.cpp](lib/textbox.cpp)([.h](lib/textbox.h)) テキスト入力(パーツ)
 - [textbutton.cpp](lib/textbutton.cpp)([.h](lib/textbutton.h)) テキストボタン
+- [texture2d.cpp](lib/texture2d.cpp)([.h](lib/texture2d.h)) テクスチャ描画
 
 # クラス
 
