@@ -184,13 +184,16 @@ setupMenu3()
 void
 setupMenu4()
 {
-  Label::create("PARAMETER", 100, 80, Graphics::Cyan, Graphics::Gray);
+  Label::create("PARAMETER", 100, 80, Graphics::Yellow, Graphics::Gray);
   TextButton::setButton("Return", 100, 150, []() { GLLib::bindLayer(); });
 
   double x = 300;
   double y = 300;
 
   auto sb = SlideBar::create(x, y, 400, 50);
+  auto lx = x + sb->getWidth() + 20;
+  auto lb = Label::create("", lx, y, Graphics::White, Graphics::ClearColor);
+  lb->setSlider(sb);
   sb->setNumber(0.5);
   y += sb->getHeight() + 20;
   sb = SlideBar::create(x, y, 500, 50);

@@ -4,6 +4,7 @@
 #include "gl.h"
 #include "layer.h"
 #include "primitive2d.h"
+#include "slidebar.h"
 #include <iostream>
 #include <list>
 #include <map>
@@ -19,16 +20,26 @@ FontDraw::WidgetPtr font;
 struct Item : public Base
 {
   ~Item() = default;
-  std::string label;
-  double      length;
-  Color       fgcol;
-  Color       bgcol;
+  std::string  label;
+  double       length;
+  Color        fgcol;
+  Color        bgcol;
+  Parts::IDPtr slider;
 
   void setText(std::string l) override;
   void setFontColor(Graphics::Color col) override { fgcol = col; }
   void setBGColor(Graphics::Color col) override { bgcol = col; }
+  void setSlider(Parts::IDPtr s) override { slider = s; }
 
   void draw();
+  void updateLink()
+  {
+    auto s = std::dynamic_pointer_cast<SlideBar::Bar>(slider);
+    if (s)
+    {
+      setText(std::to_string(s->getNumber()));
+    }
+  }
 };
 
 using ItemPtr = std::shared_ptr<Item>;
@@ -128,7 +139,10 @@ update()
   auto& item_list = layer.getCurrent();
   for (auto& item : item_list)
   {
-    item->update([&](bool) { item->draw(); });
+    item->update([&](bool) {
+      item->updateLink();
+      item->draw();
+    });
   }
   font->popDepth();
   Primitive2D::popDepth();

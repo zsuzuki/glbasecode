@@ -9,17 +9,28 @@ using BBox  = BoundingBox::Rect;
 using Color = Graphics::Color;
 
 constexpr double pinchW = 20.0;
-constexpr double pinchH = 42.0;
+// constexpr double pinchH = 42.0;
 
 namespace
 {
 struct BarImpl : public Bar
 {
+  enum class PStat : int
+  {
+    UnFocus,
+    Left,
+    Hold,
+    Right,
+  };
+
   double  value;
   double  v_min, v_max;
   double  v_step;
+  double  p_x;
+  double  h_x;
   Changed change_func;
   bool    hold;
+  PStat   p_stat;
 
   ~BarImpl() = default;
   bool   getFocus() const override;
@@ -34,10 +45,63 @@ struct BarImpl : public Bar
   void setChanged(Changed cf) override { change_func = cf; }
 
   void draw(bool focus);
+  bool updatePinch(double x)
+  {
+    double rate = (value - v_min) / (v_max - v_min);
+    p_x         = (getWidth() - pinchW) * rate + getX();
+    if (hold)
+    {
+      auto rate = (x - getX()) / getWidth();
+      value     = rate * (v_max - v_min) + v_min;
+      if (value < v_min)
+        value = v_min;
+      else if (value > v_max)
+        value = v_max;
+    }
+    else
+    {
+      if (p_x > x)
+        p_stat = PStat::Left;
+      else if (p_x + pinchW < x)
+        p_stat = PStat::Right;
+      else
+        p_stat = PStat::Hold;
+    }
+    return p_stat == PStat::Hold;
+  }
+  void valueStep()
+  {
+    switch (p_stat)
+    {
+    case PStat::Hold:
+      hold = true;
+      h_x  = p_x;
+      break;
+    case PStat::Left:
+      value -= v_step;
+      if (value < v_min)
+        value = v_min;
+      break;
+    case PStat::Right:
+      value += v_step;
+      if (value > v_max)
+        value = v_max;
+      break;
+    case PStat::UnFocus:
+      break;
+    }
+  }
+  void statClear()
+  {
+    hold   = false;
+    p_stat = PStat::UnFocus;
+    h_x    = 0.0;
+  }
 };
 
 using BarPtr   = std::shared_ptr<BarImpl>;
 using ClickAct = Graphics::ClickCallback::Action;
+using HoldAct  = Graphics::OffEventCallback::Action;
 BarPtr         focus_item;
 Layer<BarImpl> layer;
 
@@ -45,6 +109,19 @@ Layer<BarImpl> layer;
 void
 on_click(ClickAct action, bool enter)
 {
+  if (auto b = focus_item)
+  {
+    if (action == ClickAct::Press)
+    {
+      focus_item->valueStep();
+      auto rcb = [](auto act) {
+        if (focus_item)
+          focus_item->hold = false;
+        return act == HoldAct::Release;
+      };
+      Graphics::disableEvent({rcb});
+    }
+  }
 }
 
 //
@@ -77,10 +154,8 @@ BarImpl::draw(bool focus)
     Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, bgcol, false);
 
   Primitive2D::setDepth(ldepth - 0.02f);
-  double rate = (value - v_min) / (v_max - v_min);
-  double xp   = (getWidth() - pinchW) * rate + loc.x;
-  auto   pcol = Graphics::Cyan;
-  Primitive2D::drawBox(xp, loc.y + 1, xp + pinchW, btm.y - 1, pcol, true);
+  auto pcol = p_stat == PStat::Hold ? Graphics::Green : Graphics::Cyan;
+  Primitive2D::drawBox(p_x, loc.y + 1, p_x + pinchW, btm.y - 1, pcol, true);
 
   Graphics::disableScissor();
 }
@@ -126,20 +201,31 @@ update()
   for (auto& bar : item_list)
   {
     bar->update([&](bool enabled) {
-      bool my_focus = focus_item == bar;
-      if (!focus && enabled && bar->checkHit(mpos.x, mpos.y))
+      if (bar->hold)
       {
-        // カーソルが乗っている場合のみ
-        my_focus = true;
-        focus    = true;
-        if (focus_item != bar)
-        {
-          // フォーカスが切り替わった
-          focus_item = bar;
-          bar->hold  = false;
-        }
+        bar->updatePinch(mpos.x);
+        bar->draw(bar->hold);
       }
-      bar->draw(my_focus);
+      else
+      {
+        bool my_focus = focus_item == bar;
+        if (!focus && enabled && bar->checkHit(mpos.x, mpos.y))
+        {
+          // カーソルが乗っている場合のみ
+          my_focus = true;
+          focus    = true;
+          if (focus_item != bar)
+          {
+            // フォーカスが切り替わった
+            if (focus_item)
+              focus_item->statClear();
+            bar->statClear();
+            focus_item = bar;
+          }
+        }
+        bar->updatePinch(mpos.x);
+        bar->draw(my_focus);
+      }
     });
   }
   if (!focus && focus_item && focus_item->hold == false)
@@ -158,6 +244,8 @@ create(double x, double y, double w, double h)
   bar->v_min  = 0.0;
   bar->v_max  = 1.0;
   bar->v_step = 0.1;
+  bar->p_stat = BarImpl::PStat::UnFocus;
+  bar->p_x    = 0.0;
   bar->initGeometry(x, y, w, h, -0.01f);
 
   auto& item_list = layer.getCurrent();

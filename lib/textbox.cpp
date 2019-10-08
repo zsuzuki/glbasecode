@@ -89,8 +89,6 @@ on_click(ClickAct action, bool enter)
         // プルダウンがオープンしているときはそちらの処理しかしない
         if (pd->isOpened())
           return;
-        // else
-        //   pd->open();
       }
     }
 

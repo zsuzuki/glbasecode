@@ -22,20 +22,14 @@ struct SelItem
 //
 struct Item : public Base
 {
-  using BBox     = BoundingBox::Rect;
-  using Parent   = const Parts::ID;
   using SelItems = std::vector<SelItem>;
 
-  double      x, y;
-  double      width, height;
-  Parent*     parent;
   std::string filter;
   int         select_index;
   int         mouse_focus;
   bool        opened;
   bool        open_request;
   bool        close_request;
-  BBox        bbox;
   List        items;
   size_t      nb_disp;
   size_t      disp_top;
@@ -48,7 +42,6 @@ struct Item : public Base
   double getY() const override { return y; }
   int    getWidth() const override { return width; }
   int    getHeight() const override { return height; }
-  void   setParent(const Parts::ID* p) override { parent = p; }
   bool   setFilter(std::string f) override;
   size_t getIndex() const override { return select_index; }
   void   open() override;
@@ -66,6 +59,7 @@ struct Item : public Base
   void update_list();
   void selected();
   void changed(int);
+  bool getParentFocus() const { return parent ? parent->getFocus() : false; }
 };
 using ItemPtr  = std::shared_ptr<Item>;
 using ClickAct = Graphics::ClickCallback::Action;
@@ -89,7 +83,7 @@ on_click(ClickAct action, bool enter)
         focus_item->close();
       }
     }
-    else if (open_item && open_item->parent->getFocus() == false)
+    else if (open_item && open_item->getParentFocus() == false)
       open_item->close();
   }
 }
@@ -372,9 +366,6 @@ ID
 create(List&& l, size_t nb_disp)
 {
   auto item          = std::make_shared<Item>();
-  item->x            = 0.0;
-  item->y            = 0.0;
-  item->parent       = nullptr;
   item->filter       = "";
   item->select_index = 0;
   item->opened       = false;
@@ -391,11 +382,12 @@ create(List&& l, size_t nb_disp)
   item->sel_items.reserve(nd);
   if (nd > nb_disp)
     nd = nb_disp;
-  item->width    = ml + 20 + 20;
-  item->height   = nd * 42.0 + 20;
   item->nb_disp  = nd;
   item->disp_top = 0;
   item->items    = l;
+  double w       = ml + 20 + 20;
+  double h       = nd * 42.0 + 20;
+  item->initGeometry(0.0, 0.0, w, h);
   item->update_list();
 
   auto& item_list = layer.getCurrent();
