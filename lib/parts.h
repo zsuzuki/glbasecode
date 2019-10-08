@@ -13,12 +13,16 @@ struct ID
 {
   using BBox = BoundingBox::Rect;
 
+protected:
   BBox      bbox{};
   const ID* parent = nullptr;
   float     depth  = 0.0f;
-  double    x, y;
-  double    w, h;
+  double    x      = 0.0;
+  double    y      = 0.0;
+  double    width  = 0.0;
+  double    height = 0.0;
 
+public:
   virtual ~ID() = default;
   virtual double getX() const { return bbox.getLeftX(); }
   virtual double getY() const { return bbox.getTopY(); }
@@ -30,6 +34,23 @@ struct ID
   virtual double getPlacementX() const { return getX(); }
   virtual double getPlacementY() const { return getY(); }
 
+  void initGeometry(double ax, double ay)
+  {
+    x    = ax;
+    y    = ay;
+    bbox = BoundingBox::Rect{x, y, width, height};
+  }
+  void initGeometry(double ax, double ay, double w, double h)
+  {
+    width  = w;
+    height = h;
+    initGeometry(ax, ay);
+  }
+  void initGeometry(double ax, double ay, double w, double h, float d)
+  {
+    initGeometry(ax, ay, w, h);
+    depth = d;
+  }
   bool inRect(const BBox& r) const { return bbox.checkHit(r); }
   bool checkHit(double x, double y) const { return bbox.check(x, y); }
 
@@ -45,7 +66,7 @@ struct ID
       oy     = parent->getPlacementY();
       enable = parent->getFocus();
     }
-    bbox = BBox{x + ox, y + oy, w, h};
+    bbox = BBox{x + ox, y + oy, width, height};
     if (parent)
       inrect = parent->inRect(bbox);
 

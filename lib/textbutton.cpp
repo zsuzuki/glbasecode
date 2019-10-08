@@ -246,14 +246,8 @@ setButton(std::string caption, double x, double y, PressCallback cb,
   auto btn         = std::make_shared<Button>();
   btn->caption     = caption;
   btn->length      = l;
-  btn->x           = x;
-  btn->y           = y;
-  btn->w           = rx - x;
-  btn->h           = by - y;
-  btn->bbox        = BoundingBox::Rect{x, y, btn->w, btn->h};
   btn->cb          = cb;
   btn->press       = false;
-  btn->parent      = nullptr;
   btn->catch_enter = catch_enter;
   btn->c_ufbg      = color_map[ColorType::UnFocusBG];
   btn->c_fbg       = color_map[ColorType::FocusBG];
@@ -262,6 +256,7 @@ setButton(std::string caption, double x, double y, PressCallback cb,
   btn->c_ff        = color_map[ColorType::FocusFont];
   btn->c_pf        = color_map[ColorType::PressFont];
   btn->c_bd        = color_map[ColorType::Border];
+  btn->initGeometry(x, y, rx - x, by - y);
 
   auto& button_list = layer.getCurrent();
   button_list.push_back(btn);

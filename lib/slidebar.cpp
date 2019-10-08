@@ -152,20 +152,13 @@ update()
 ID
 create(double x, double y, double w, double h)
 {
-  auto bar = std::make_shared<BarImpl>();
-
-  bar->x      = x;
-  bar->y      = y;
-  bar->w      = w;
-  bar->h      = h;
-  bar->depth  = -0.01f;
-  bar->bbox   = BoundingBox::Rect{x, y, bar->w, bar->h};
-  bar->parent = nullptr;
+  auto bar    = std::make_shared<BarImpl>();
   bar->hold   = false;
   bar->value  = 0.0;
   bar->v_min  = 0.0;
   bar->v_max  = 1.0;
   bar->v_step = 0.1;
+  bar->initGeometry(x, y, w, h, -0.01f);
 
   auto& item_list = layer.getCurrent();
   item_list.push_back(bar);

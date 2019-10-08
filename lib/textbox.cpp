@@ -228,11 +228,7 @@ create(std::string t, double x, double y, double w, double h)
   if (o >= 0.0)
     item->ofs_y = BaseY + o;
   item->text = t;
-  item->x    = x;
-  item->y    = y;
-  item->w    = w;
-  item->h    = h;
-  item->bbox = BoundingBox::Rect{x, y, item->w, item->h};
+  item->initGeometry(x, y, w, h);
 
   auto& item_list = layer.getCurrent();
   item_list.push_back(item);

@@ -10,13 +10,13 @@ namespace ScrollBox
 {
 namespace
 {
+using ItemPtr  = std::weak_ptr<Parts::ID>;
+using ItemList = std::list<ItemPtr>;
+using Color    = Graphics::Color;
+
 //
 struct Box : public Base
 {
-  using ItemPtr  = std::weak_ptr<Parts::ID>;
-  using ItemList = std::list<ItemPtr>;
-  using Color    = Graphics::Color;
-
   ItemList items{};
   double   xofs         = 0.0;
   double   yofs         = 0.0;
@@ -38,9 +38,9 @@ struct Box : public Base
   void append(Parts::IDPtr) override;
   void erase(Parts::IDPtr) override;
   void clear() override;
-  void drawSheet(bool s, Graphics::Color scol) override;
+  void drawSheet(bool s, Color scol) override;
   void setDepth(float d) override { depth = d; }
-  void setFocusBorderColor(Graphics::Color c) override { border_color = c; }
+  void setFocusBorderColor(Color c) override { border_color = c; }
   void setScrollConstraint(bool sx, bool sy) override
   {
     xsc_const = sx;
@@ -59,17 +59,14 @@ struct Box : public Base
       stick_ofs_y = 0.0;
   }
 
-  double getX() const override { return bbox.getLeftX(); }
-  double getY() const override { return bbox.getTopY(); }
-  int    getWidth() const override { return bbox.getWidth(); }
-  int    getHeight() const override { return bbox.getHeight(); }
-  float  getDepth() const override { return depth; }
   bool   getFocus() const override { return focus; }
   double getPlacementX() const override { return getX() + xofs; }
   double getPlacementY() const override { return getY() + yofs; }
 
   void scroll_clip();
   void update_sticky();
+
+  void draw(const Color&);
 };
 using BoxPtr = std::weak_ptr<Box>;
 Layer<Box> layer;
@@ -79,7 +76,7 @@ bool   initialized = false;
 
 //
 void
-Box::drawSheet(bool s, Graphics::Color scol)
+Box::drawSheet(bool s, Color scol)
 {
   draw_sheet  = s;
   sheet_color = scol;
@@ -176,6 +173,23 @@ Box::scroll_clip()
 
 //
 void
+Box::draw(const Color& fcol)
+{
+  auto loc = bbox.getLocate();
+  auto btm = bbox.getBottom();
+  Primitive2D::pushDepth(depth);
+  if (draw_sheet)
+  {
+    Primitive2D::setDepth(depth + 0.1f);
+    Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, sheet_color, true);
+  }
+  Primitive2D::setDepth(depth + 0.08f);
+  Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, fcol, false);
+  Primitive2D::popDepth();
+}
+
+//
+void
 key_callback(int key, int scancode, int action, int mods)
 {
   if (action != GLFW_PRESS && action != GLFW_REPEAT)
@@ -243,30 +257,19 @@ update()
   std::shared_ptr<Box> new_focus;
   for (auto box : box_list)
   {
-    auto& bb = box->bbox;
     box->update_sticky();
 
-    Graphics::Color col = Graphics::White;
+    auto col = Graphics::White;
     if (!new_focus)
     {
-      box->focus = bb.check(mpos.x, mpos.y);
+      box->focus = box->checkHit(mpos.x, mpos.y);
       if (box->focus)
         col = box->border_color;
       new_focus = box;
     }
     else
       box->focus = false;
-    auto loc = bb.getLocate();
-    auto btm = bb.getBottom();
-    Primitive2D::pushDepth(box->depth);
-    if (box->draw_sheet)
-    {
-      Primitive2D::setDepth(box->depth + 0.1f);
-      Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, box->sheet_color, true);
-    }
-    Primitive2D::setDepth(box->depth + 0.08f);
-    Primitive2D::drawBox(loc.x, loc.y, btm.x, btm.y, col, false);
-    Primitive2D::popDepth();
+    box->draw(col);
   }
   focus_box = new_focus;
 }

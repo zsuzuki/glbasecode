@@ -72,9 +72,7 @@ Item::setText(std::string str)
 
   label  = str;
   length = l;
-  w      = rx - x;
-  h      = by - y;
-  bbox   = BoundingBox::Rect{x, y, w, h};
+  initGeometry(x, y, rx - x, by - y);
 }
 
 } // namespace
@@ -89,12 +87,10 @@ initialize(FontDraw::WidgetPtr f)
 ID
 create(std::string str, double x, double y, Color fg, Color bg)
 {
-  auto item = std::make_shared<Item>();
-
-  item->x     = x;
-  item->y     = y;
+  auto item   = std::make_shared<Item>();
   item->fgcol = fg;
   item->bgcol = bg;
+  item->initGeometry(x, y);
   item->setText(str);
 
   auto& item_list = layer.getCurrent();

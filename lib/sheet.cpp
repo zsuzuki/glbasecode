@@ -21,8 +21,8 @@ struct SheetImpl : public Base
   void setFillColor(Graphics::Color c) override { fill = c; }
   void setSize(double wd, double ht) override
   {
-    w = wd;
-    h = ht;
+    width  = wd;
+    height = ht;
   }
 
   void draw()
@@ -40,7 +40,7 @@ struct SheetImpl : public Base
       d += parent->getDepth();
       Graphics::enableScissor(px, py, pw, ph);
     }
-    bbox = BBox{x + ox, y + oy, w, h};
+    initGeometry(x + ox, y + oy, width, height);
 
     auto loc = bbox.getLocate();
     auto btm = bbox.getBottom();
@@ -104,14 +104,9 @@ ID
 create(double x, double y, double w, double h)
 {
   auto sh    = std::make_shared<SheetImpl>();
-  sh->x      = x;
-  sh->y      = y;
-  sh->w      = w;
-  sh->h      = h;
   sh->border = Graphics::White;
   sh->fill   = Graphics::DarkGray;
-  sh->parent = nullptr;
-  sh->depth  = 0.05f;
+  sh->initGeometry(x, y, w, h);
 
   auto& sheet_list = layer.getCurrent();
   sheet_list.push_back(sh);

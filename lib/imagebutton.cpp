@@ -188,21 +188,15 @@ create(const char* in, double x, double y, PressCallback cb, bool c_ent)
   auto img = Texture2D::create(in);
   if (!img)
     return ID{};
-  auto btn = std::make_shared<ButtonImpl>();
 
+  auto btn           = std::make_shared<ButtonImpl>();
   btn->focus_image   = img;
   btn->unfocus_image = img;
-  btn->x             = x;
-  btn->y             = y;
-  btn->w             = img->getWidth();
-  btn->h             = img->getHeight();
-  btn->depth         = -0.01f;
-  btn->bbox          = BoundingBox::Rect{x, y, btn->w, btn->h};
   btn->callback      = cb;
-  btn->parent        = nullptr;
   btn->press         = false;
   btn->focus_color   = Graphics::White;
   btn->unfocus_color = Graphics::White;
+  btn->initGeometry(x, y, img->getWidth(), img->getHeight(), -0.01f);
 
   auto& button_list = layer.getCurrent();
   button_list.push_back(btn);

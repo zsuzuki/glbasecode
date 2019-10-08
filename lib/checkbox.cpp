@@ -110,9 +110,7 @@ Item::setBBox(const std::string& s)
     auto by = y + 20 + 32 + 10;
 
     length = l;
-    w      = rx - x;
-    h      = by - y;
-    bbox   = BoundingBox::Rect{x, y, w, h};
+    initGeometry(x, y, rx - x, by - y);
   }
   return l;
 }
@@ -146,15 +144,12 @@ initialize(FontDraw::WidgetPtr f)
 ID
 create(std::string str, double x, double y, bool sw)
 {
-  auto item = std::make_shared<Item>();
-
-  item->x      = x;
-  item->y      = y;
-  item->value  = sw;
-  item->length = 0;
-
+  auto item            = std::make_shared<Item>();
+  item->value          = sw;
+  item->length         = 0;
   item->on_info.color  = Graphics::White;
   item->off_info.color = Graphics::Gray;
+  item->initGeometry(x, y);
   item->setText(str);
   item->setOffText(str);
 
