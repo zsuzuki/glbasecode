@@ -195,8 +195,16 @@ setupMenu4()
   auto lb = Label::create("", lx, y, Graphics::White, Graphics::ClearColor);
   lb->setSlider(sb);
   sb->setNumber(0.5);
+  //
   y += sb->getHeight() + 20;
   sb = SlideBar::create(x, y, 500, 50);
+  sb->setMinMax(-1, 20);
+  sb->setStep(1);
+  sb->setNumberType(SlideBar::Type::Integer);
+  sb->setChanged([](auto n) { std::cout << "Slide: " << n << std::endl; });
+  lb = Label::create("", x, y, Graphics::White, Graphics::ClearColor);
+  lb->setSlider(sb);
+  //
   y += sb->getHeight() + 20;
   sb = SlideBar::create(x, y, 600, 50);
   sb->setNumber(1.0);

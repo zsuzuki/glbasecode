@@ -30,6 +30,7 @@ struct BarImpl : public Bar
   Changed change_func;
   bool    hold;
   PStat   p_stat;
+  Type    n_type;
 
   ~BarImpl() = default;
   bool   getFocus() const override;
@@ -39,6 +40,14 @@ struct BarImpl : public Bar
     value = n;
     updatePinch(-1.0);
   }
+  void setNumberType(Type t) override
+  {
+    if (n_type != t)
+    {
+      n_type = t;
+      updatePinch(-1.0);
+    }
+  };
   void setMinMax(double min, double max) override
   {
     v_min = min;
@@ -48,6 +57,15 @@ struct BarImpl : public Bar
   void setChanged(Changed cf) override { change_func = cf; }
 
   void draw(bool focus);
+  // 値の変更
+  void updateValue(double p)
+  {
+    if (n_type == Type::Integer)
+      value = (long)value;
+    if (p != value && change_func)
+      change_func(value);
+  }
+
   // つまみ
   bool updatePinch(double x)
   {
@@ -56,12 +74,17 @@ struct BarImpl : public Bar
     if (hold)
     {
       // 掴んでいるならその位置が値を表す
-      auto rate = (x - getX()) / getWidth();
+      auto pw = n_type == Type::Real ? -pinchW * 0.5 : v_step / (v_max - v_min);
+      auto rate = (x - getX() + pw) / (getWidth() - pinchW);
+      auto prev = value;
       value     = rate * (v_max - v_min) + v_min;
+      if (n_type == Type::Integer && value < 0)
+        value -= 0.99;
       if (value < v_min)
         value = v_min;
       else if (value > v_max)
         value = v_max;
+      updateValue(prev);
     }
     else
     {
@@ -78,6 +101,7 @@ struct BarImpl : public Bar
   // 値の増減
   void valueStep()
   {
+    auto prev = value;
     switch (p_stat)
     {
     case PStat::Hold:
@@ -96,6 +120,7 @@ struct BarImpl : public Bar
     case PStat::UnFocus:
       break;
     }
+    updateValue(prev);
   }
   void statClear()
   {
@@ -255,6 +280,7 @@ create(double x, double y, double w, double h)
   bar->v_step = 0.1;
   bar->p_stat = BarImpl::PStat::UnFocus;
   bar->p_x    = 0.0;
+  bar->n_type = Type::Real;
   bar->initGeometry(x, y, w, h, -0.01f);
   bar->updatePinch(-1.0);
 
