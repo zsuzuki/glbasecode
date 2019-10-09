@@ -27,7 +27,6 @@ struct BarImpl : public Bar
   double  v_min, v_max;
   double  v_step;
   double  p_x;
-  double  h_x;
   Changed change_func;
   bool    hold;
   PStat   p_stat;
@@ -35,8 +34,12 @@ struct BarImpl : public Bar
   ~BarImpl() = default;
   bool   getFocus() const override;
   double getNumber() const override { return value; }
-  void   setNumber(double n) override { value = n; }
-  void   setMinMax(double min, double max) override
+  void   setNumber(double n) override
+  {
+    value = n;
+    updatePinch(-1.0);
+  }
+  void setMinMax(double min, double max) override
   {
     v_min = min;
     v_max = max;
@@ -45,12 +48,14 @@ struct BarImpl : public Bar
   void setChanged(Changed cf) override { change_func = cf; }
 
   void draw(bool focus);
+  // つまみ
   bool updatePinch(double x)
   {
     double rate = (value - v_min) / (v_max - v_min);
     p_x         = (getWidth() - pinchW) * rate + getX();
     if (hold)
     {
+      // 掴んでいるならその位置が値を表す
       auto rate = (x - getX()) / getWidth();
       value     = rate * (v_max - v_min) + v_min;
       if (value < v_min)
@@ -60,6 +65,7 @@ struct BarImpl : public Bar
     }
     else
     {
+      // 掴んでいない場合は位置によって状態が決まる
       if (p_x > x)
         p_stat = PStat::Left;
       else if (p_x + pinchW < x)
@@ -69,13 +75,13 @@ struct BarImpl : public Bar
     }
     return p_stat == PStat::Hold;
   }
+  // 値の増減
   void valueStep()
   {
     switch (p_stat)
     {
     case PStat::Hold:
       hold = true;
-      h_x  = p_x;
       break;
     case PStat::Left:
       value -= v_step;
@@ -95,7 +101,6 @@ struct BarImpl : public Bar
   {
     hold   = false;
     p_stat = PStat::UnFocus;
-    h_x    = 0.0;
   }
 };
 
@@ -201,14 +206,15 @@ update()
   for (auto& bar : item_list)
   {
     bar->update([&](bool enabled) {
+      bool my_focus = false;
       if (bar->hold)
       {
         bar->updatePinch(mpos.x);
-        bar->draw(bar->hold);
+        my_focus = true;
       }
       else
       {
-        bool my_focus = focus_item == bar;
+        my_focus = focus_item == bar;
         if (!focus && enabled && bar->checkHit(mpos.x, mpos.y))
         {
           // カーソルが乗っている場合のみ
@@ -222,10 +228,13 @@ update()
             bar->statClear();
             focus_item = bar;
           }
+          if (Graphics::isEnabledEvent())
+            bar->updatePinch(mpos.x);
         }
-        bar->updatePinch(mpos.x);
-        bar->draw(my_focus);
+        else
+          bar->statClear();
       }
+      bar->draw(my_focus);
     });
   }
   if (!focus && focus_item && focus_item->hold == false)
@@ -247,6 +256,7 @@ create(double x, double y, double w, double h)
   bar->p_stat = BarImpl::PStat::UnFocus;
   bar->p_x    = 0.0;
   bar->initGeometry(x, y, w, h, -0.01f);
+  bar->updatePinch(-1.0);
 
   auto& item_list = layer.getCurrent();
   item_list.push_back(bar);
