@@ -10,10 +10,10 @@ namespace Label
 //
 struct Base : public Parts::ID
 {
-  virtual void setText(std::string)          = 0;
-  virtual void setFontColor(Graphics::Color) = 0;
-  virtual void setBGColor(Graphics::Color)   = 0;
-  virtual void setSlider(Parts::IDPtr)       = 0;
+  virtual void setText(std::string)             = 0;
+  virtual void setFontColor(Graphics::Color)    = 0;
+  virtual void setBGColor(Graphics::Color)      = 0;
+  virtual void setSlider(Parts::IDPtr, int = 3) = 0;
 };
 
 using ID    = std::shared_ptr<Base>;

@@ -5,9 +5,11 @@
 #include "layer.h"
 #include "primitive2d.h"
 #include "slidebar.h"
+#include <iomanip>
 #include <iostream>
 #include <list>
 #include <map>
+#include <sstream>
 
 namespace Label
 {
@@ -25,11 +27,16 @@ struct Item : public Base
   Color        fgcol;
   Color        bgcol;
   Parts::IDPtr slider;
+  int          sl_prec;
 
   void setText(std::string l) override;
   void setFontColor(Graphics::Color col) override { fgcol = col; }
   void setBGColor(Graphics::Color col) override { bgcol = col; }
-  void setSlider(Parts::IDPtr s) override { slider = s; }
+  void setSlider(Parts::IDPtr s, int pr) override
+  {
+    slider  = s;
+    sl_prec = pr;
+  }
 
   void draw();
   void updateLink()
@@ -37,7 +44,9 @@ struct Item : public Base
     auto s = std::dynamic_pointer_cast<SlideBar::Bar>(slider);
     if (s)
     {
-      setText(std::to_string(s->getNumber()));
+      std::ostringstream out;
+      out << std::fixed << std::setprecision(sl_prec) << s->getNumber();
+      setText(out.str());
     }
   }
 };
@@ -98,9 +107,10 @@ initialize(FontDraw::WidgetPtr f)
 ID
 create(std::string str, double x, double y, Color fg, Color bg)
 {
-  auto item   = std::make_shared<Item>();
-  item->fgcol = fg;
-  item->bgcol = bg;
+  auto item     = std::make_shared<Item>();
+  item->fgcol   = fg;
+  item->bgcol   = bg;
+  item->sl_prec = 0;
   item->initGeometry(x, y);
   item->setText(str);
 

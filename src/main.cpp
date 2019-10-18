@@ -190,11 +190,22 @@ setupMenu4()
   double x = 300;
   double y = 300;
 
+  double sx = x, sy = y, sw = 0.0, sh = 0.0;
+  auto   adjsh = [&](auto w) {
+    double tx = w->getX() + w->getWidth();
+    if (tx > sw)
+      sw = tx;
+    double ty = w->getY() + w->getHeight();
+    if (ty > sh)
+      sh = ty;
+  };
+
   auto sb = SlideBar::create(x, y, 400, 50);
   auto lx = x + sb->getWidth() + 20;
   auto lb = Label::create("", lx, y, Graphics::White, Graphics::ClearColor);
   lb->setSlider(sb);
   sb->setNumber(0.5);
+  adjsh(sb);
   //
   y += sb->getHeight() + 20;
   sb = SlideBar::create(x, y, 500, 50);
@@ -203,11 +214,21 @@ setupMenu4()
   sb->setNumberType(SlideBar::Type::Integer);
   sb->setChanged([](auto n) { std::cout << "Slide: " << n << std::endl; });
   lb = Label::create("", x, y, Graphics::White, Graphics::ClearColor);
-  lb->setSlider(sb);
+  lb->setSlider(sb, 0);
+  adjsh(sb);
   //
   y += sb->getHeight() + 20;
   sb = SlideBar::create(x, y, 600, 50);
   sb->setNumber(1.0);
+  adjsh(sb);
+  //
+  sx -= 20;
+  sy -= 20;
+  sw += 20;
+  sh += 20;
+  auto st = Sheet::create(sx, sy, sw - sx, sh - sy);
+  st->setFillColor({0.0f, 0.2f, 0.1f, 0.8f});
+  st->setBorderColor(Graphics::White);
 }
 
 //
@@ -306,7 +327,7 @@ onUpdate(FontDraw::WidgetPtr font, DBoxList dbl, ImgList imgl)
   // グラフィック座標系で毎フレーム描画
   font->setColor(Graphics::Green);
   font->setDepth(-0.5f);
-  font->print("こんにちは、世界", -0.25f, 0.5f);
+  font->print("こんにちは、世界", -0.25f, 0.55f);
   font->setColor(Graphics::Cyan);
   font->print("Status: Echo", -0.98f, -0.98f);
 
