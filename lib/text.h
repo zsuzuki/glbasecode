@@ -6,6 +6,12 @@
 
 namespace TextInput
 {
+//
+enum class InputStyle : int
+{
+  Text,
+  Number,
+};
 
 using Buffer = std::vector<int>;
 struct CursorOffset
@@ -32,5 +38,7 @@ std::string get();
 void setBuffer(Buffer& buff, std::string initial);
 // プルダウンを設定
 void setPulldown(Parts::IDPtr);
+// 入力スタイルの指定
+void setInputStyle(InputStyle);
 
 } // namespace TextInput

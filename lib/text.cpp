@@ -15,7 +15,9 @@ struct Manage
   Buffer::iterator index;
   size_t           max_length;
   Pulldown::ID     pulldown;
-  Manage(Buffer& b, size_t m) : buffer(b), max_length(m)
+  InputStyle       input_style;
+  Manage(Buffer& b, size_t m)
+      : buffer(b), max_length(m), input_style(InputStyle::Text)
   {
     index = buffer.end();
   }
@@ -168,11 +170,60 @@ key_input(int num, int scancode, int action, int mods)
 }
 
 //
+bool
+check_number(int code)
+{
+  auto& buff = manage->buffer;
+  if (buff.empty() == false && buff[0] == '-')
+  {
+    // 先頭に既に符号が置かれていたら、その前には入力できない
+    if (manage->index == buff.begin())
+      return false;
+  }
+  // 数字は通過
+  if (std::isdigit(code))
+    return true;
+  if (code == '.')
+  {
+    // 複数置けない
+    for (auto c : manage->buffer)
+      if (c == '.')
+        return false;
+    return true;
+  }
+  else if (code == '-')
+  {
+    // 符号は先頭に１つのみ
+    return manage->index == buff.begin();
+  }
+  return false;
+}
+
+//
+bool
+check_style_code(int code)
+{
+  switch (manage->input_style)
+  {
+  case InputStyle::Text:
+    // テキスト入力は全て通過
+    break;
+  case InputStyle::Number:
+    // 数値チェック
+    return check_number(code);
+  }
+  return true;
+}
+
+//
 void
 text_input(int code)
 {
   auto& buff = manage->buffer;
   if (manage->max_length <= buff.size())
+    return;
+
+  if (check_style_code(code) == false)
     return;
 
   if (manage->index == buff.end())
@@ -288,6 +339,13 @@ setPulldown(Parts::IDPtr pd)
     // if (new_pd->isOpened() == false)
     //   new_pd->open();
   }
+}
+
+//
+void
+setInputStyle(InputStyle st)
+{
+  manage->input_style = st;
 }
 
 } // namespace TextInput
