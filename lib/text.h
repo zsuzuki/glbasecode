@@ -1,19 +1,14 @@
 #pragma once
 
 #include "parts.h"
+#include "text_def.h"
 #include <string>
 #include <vector>
 
 namespace TextInput
 {
-//
-enum class InputStyle : int
-{
-  Text,
-  Number,
-};
-
-using Buffer = std::vector<int>;
+using InputStyle = Text::InputStyle;
+using Buffer     = std::vector<int>;
 struct CursorOffset
 {
   double left;

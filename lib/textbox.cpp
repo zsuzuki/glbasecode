@@ -29,6 +29,7 @@ struct ItemImpl : public Item
   double       ofs_y       = 0.0;
   bool         draw_border = true;
   bool         on_edit     = false;
+  InputStyle   input_style = InputStyle::Text;
   Pulldown::ID pulldown;
 
   ItemImpl()  = default;
@@ -48,6 +49,7 @@ struct ItemImpl : public Item
   void        setBGColor(Graphics::Color bc) override { bg_color = bc; }
   void setPlaceHolderColor(Graphics::Color pc) override { ph_color = pc; }
   void setMaxLength(size_t ml) override { max_length = ml; }
+  void setInputStyle(InputStyle st) override { input_style = st; }
 
   void draw();
   void drawCursor();
@@ -101,6 +103,7 @@ on_click(ClickAct action, bool enter)
         input_finish(edit_input);
         TextInput::setBuffer(text_buffer, focus_input->text);
         TextInput::start(text_buffer, focus_input->max_length);
+        TextInput::setInputStyle(focus_input->input_style);
         TextInput::setPulldown(focus_input->pulldown);
         focus_input->on_edit = true;
         edit_input           = focus_input;

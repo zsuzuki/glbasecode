@@ -178,6 +178,12 @@ setupMenu3()
   tt = TextBox::create("", 200, y, 400, 70);
   tt->setMaxLength(16);
   tt->setPlaceHolder("normal text");
+
+  y += tt->getHeight() + 50;
+  tt = TextBox::create("", 200, y, 400, 70);
+  tt->setMaxLength(16);
+  tt->setInputStyle(Text::InputStyle::Number);
+  tt->setPlaceHolder("number input");
 }
 
 //
