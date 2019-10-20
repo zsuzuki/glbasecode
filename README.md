@@ -15,6 +15,8 @@ macはbrew、もしくは自前ビルドで用意。
 - glfw3
 - freetype2
 - glew(windowでは必要)
+- libpng(1.6以上)
+- boost(1.65以上)
 
 ## ビルド手順
 
@@ -48,9 +50,11 @@ macはbrew、もしくは自前ビルドで用意。
 - [font.cpp](lib/font.cpp)([.h](lib/font.h)) フォント描画
 - [imagebutton.cpp](lib/imagebutton.cpp)([.h](lib/imagebutton.h)) 画像ボタン
 - [label.cpp](lib/label.cpp)([.h](lib/label.h)) 文字ラベル
+- [notification.cpp](lib/notification.cpp)([.h](lib/notification.h)) 通知表示
 - [primitive2d.cpp](lib/primitive2d.cpp)([.h](lib/primitive2d.h)) プリミティブ描画
 - [pulldown.cpp](lib/pulldown.cpp)([.h](lib/pulldown.h)) プルダウンメニュー
 - [scrollbox.cpp](lib/scrollbox.cpp)([.h](lib/scrollbox.h)) スクロールボックス
+- [sheet.cpp](lib/sheet.cpp)([.h](lib/sheet.h)) 下敷きになる矩形描画
 - [slidebar.cpp](lib/slidebar.cpp)([.h](lib/slidebar.h)) スライドバー
 - [text.cpp](lib/text.cpp)([.h](lib/text.h)) テキスト入力
 - [textbox.cpp](lib/textbox.cpp)([.h](lib/textbox.h)) テキスト入力(パーツ)
@@ -59,188 +63,55 @@ macはbrew、もしくは自前ビルドで用意。
 
 # クラス
 
+かなり機能が増えたので改装予定。
+
 ## Graphics
+glfwの機能を下地とした、グラフィック・システム機能。
 
-現状ではOpenGL(glfw3)のラッパーであり、基本的なループのための機能を提供。
-初期化と終了の他、現状では
+## Font
+FreeType2を使用したフォント描画機能。
 
-- キー入力コールバック
-- ファイルのドラッグアンドドロップのコールバック
-- ウィンドウサイズの取得
+## Primitive(2D)
+矩形・ライン・円などの基本的な図形描画機能。
 
-程度の機能がある。
+## Texture
+テクスチャ読み込み・描画機能。現在はpng形式のみサポート。
 
-```c++
-#include "gl.h"
+## Label
+文字列を表示する。
 
-int
-main()
-{
-    if (!Graphics::initialize())
-        return 1; // エラー
+## Check Box
+チェックボックス。
 
-    while (auto window = Graphics::setupFrame())
-    {
-        Graphics::cleanupFrame();
-    }
+## Text Button
+文字列を使ったボタン。
 
-    Graphics::terminate();
-}
-```
+## Image Button
+テクスチャを使用した画像ボタン。
 
-## FontDraw
+## Pulldown
+プルダウンによる選択リスト。
 
-FreeType2を使用してフォントの描画を行う。
+## Draw Box
+階層化したパーツを指定領域内に描画する。シンプルなスクロールボックス。
 
-```c++
-#include "font.h"
+## Scroll Box
+階層化したパーツを指定領域内に描画する。
 
-int
-main()
-{
-    FontDraw::initialize();
+## Text Box
+文字列入力。
 
-    auto font = FontDraw::create("font/SourceHanCodeJP-Normal.otf");
-    while (auto window = Graphics::setupFrame())
-    {
-        font->setColor(0.0f, 1.0f, 0.0f);
-        font->print("Hello,World", 0.0f, 0.0f);
+## Slide Bar
+スライダー。数値を設定する。LabelやText Boxを連携できる。
 
-        FontDraw::render(window);
-        Graphics::cleanupFrame();
-    }
-    FontDraw::terminate();
-}
-```
+## Sheet
+ただの下敷きとなる矩形を描画する。
 
-### initialize()/terminate()
-初期化と終了処理。
+## Dialog
+ダイアログを表示。OKのみと・キャンセル付きを選択できる。
 
-### render()
-Widget(後述)の`print()`によってリクエストされた文字列を描画する。
-このメソッドが呼ばれないと、`Widget::print()`で設定された文字列は表示されない。
-
-### class Widget
-フォント1つの管理単位。
-
-| 関数                                      | 機能               |
-| ----------------------------------------- | ------------------ |
-| setColor(float r,float g,float b,float a) | 色の設定           |
-| setSize(float width,float heigth)         | フォントサイズ指定 |
-| print(const char* msg,float x,float y)    | 文字列描画         |
-
-
-## Primitive2D
-
-シンプルな2Dプリミティブの描画。
-
-```c++
-#include "primitive2d.h"
-
-int
-main()
-{
-    Primitive2D::initialize();
-
-    auto font = FontDraw::create("font/SourceHanCodeJP-Normal.otf");
-    while (auto window = Graphics::setupFrame())
-    {
-        Primitive2D::setup(window);
-        Primitive2D::cleanup();
-        Graphics::cleanupFrame();
-    }
-    Primitive2D::terminate();
-}
-```
-
-## initialize()/terminate()
-初期化と終了処理。
-
-## Vertex/VertexList
-頂点データ(Vertex)と頂点データ配列(VertexList)。
-```c++
-struct Vertex {
-    float x, y;
-    float r, g, b, a;
-};
-using VertexList = std::vector<Vertex>;
-```
-
-## 描画メソッド
-
-| 関数                                                       | 機能         |
-| ---------------------------------------------------------- | ------------ |
-| drawLines(const VertexList& vl,float width)                | ラインの描画 |
-| drawQuads(const VertexList& vl)                            | 四角形の描画 |
-| drawTriangles(const VertexList& vl)                        | 三角形の描画 |
-| drawCircle(const Vertex& vl,float rad,int num,float width) | 円の描画     |
-
-## TextButton
-
-シンプルなボタンサポート。
-
-```c++
-#include "textbutton.h"
-
-int
-main()
-{
-    auto font = FontDraw::create("font/SourceHanCodeJP-Normal.otf");
-    TextButton::initialize(font);
-
-    TextButton::setButton("Hello",100,100,[]() { std::cout << "Push Button" << std::endl; });
-
-    while (auto window = Graphics::setupFrame())
-    {
-        Primitive2D::setup(window);
-
-        TextButton::update();
-
-        Primitive2D::cleanup();
-        FontDraw::render(window);
-        Graphics::cleanupFrame();
-    }
-}
-
-```
-
-## TextInput
-
-テキスト入力。
-
-```c++
-#include "text.h"
-
-TextInput::Buffer text_buffer;
-bool to_input = false;
-bool end_input = false;
-
-int
-main()
-{
-  if (!Graphics::initialize("Sample", w, h))
-    return 1;
-
-  TextInput::setBuffer(text_buffer, "Hello");
-  while ()
-  {
-      if (TextInput::onInput())
-      {
-          if (end_input)
-          {
-            TextInput::finish();              
-            end_input = false;
-            std::cout << TextInput.get() << std::endl;
-          }
-      }
-      else if (to_input)
-      {
-        TextInput::start(text_buffer, 20);
-        to_input = false;
-      }
-  }
-}
-```
+## Notification
+通知メッセージを表示する。
 
 # 参考
 
