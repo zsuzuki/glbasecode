@@ -26,27 +26,34 @@ struct Item : public Base
   double       length;
   Color        fgcol;
   Color        bgcol;
-  Parts::IDPtr slider;
+  SlideBar::ID slider;
   int          sl_prec;
+  double       sl_num;
 
   void setText(std::string l) override;
   void setFontColor(Graphics::Color col) override { fgcol = col; }
   void setBGColor(Graphics::Color col) override { bgcol = col; }
   void setSlider(Parts::IDPtr s, int pr) override
   {
-    slider  = s;
+    slider  = std::dynamic_pointer_cast<SlideBar::Bar>(s);
     sl_prec = pr;
+    sl_num  = (slider && slider->getNumber() == 0.0) ? 1.0 : 0.0;
+    updateLink();
   }
 
   void draw();
   void updateLink()
   {
-    auto s = std::dynamic_pointer_cast<SlideBar::Bar>(slider);
-    if (s)
+    if (slider)
     {
-      std::ostringstream out;
-      out << std::fixed << std::setprecision(sl_prec) << s->getNumber();
-      setText(out.str());
+      auto n = slider->getNumber();
+      if (n != sl_num)
+      {
+        std::ostringstream out;
+        out << std::fixed << std::setprecision(sl_prec) << n;
+        setText(out.str());
+        sl_num = n;
+      }
     }
   }
 };
@@ -111,6 +118,7 @@ create(std::string str, double x, double y, Color fg, Color bg)
   item->fgcol   = fg;
   item->bgcol   = bg;
   item->sl_prec = 0;
+  item->sl_num  = 0.0;
   item->initGeometry(x, y);
   item->setText(str);
 
