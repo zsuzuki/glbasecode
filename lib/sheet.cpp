@@ -24,6 +24,7 @@ struct SheetImpl : public Base
     width  = wd;
     height = ht;
   }
+  void setDepth(float d) override { depth = d; }
 
   void draw()
   {
