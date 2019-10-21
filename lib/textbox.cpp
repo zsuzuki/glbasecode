@@ -3,10 +3,13 @@
 #include "gl.h"
 #include "layer.h"
 #include "primitive2d.h"
+#include "slidebar.h"
 #include "text.h"
+#include <iomanip>
 #include <iostream>
 #include <list>
 #include <map>
+#include <sstream>
 
 namespace TextBox
 {
@@ -27,9 +30,12 @@ struct ItemImpl : public Item
   Color        bg_color    = Graphics::Black;
   Color        ph_color    = Graphics::Gray;
   double       ofs_y       = 0.0;
+  double       sl_num      = 0.0;
   bool         draw_border = true;
   bool         on_edit     = false;
+  int          sl_prec     = 0;
   InputStyle   input_style = InputStyle::Text;
+  SlideBar::ID slider;
   Pulldown::ID pulldown;
 
   ItemImpl()  = default;
@@ -50,9 +56,16 @@ struct ItemImpl : public Item
   void setPlaceHolderColor(Graphics::Color pc) override { ph_color = pc; }
   void setMaxLength(size_t ml) override { max_length = ml; }
   void setInputStyle(InputStyle st) override { input_style = st; }
+  void setSlider(Parts::IDPtr s, int pr) override
+  {
+    slider      = std::dynamic_pointer_cast<SlideBar::Bar>(s);
+    sl_prec     = pr;
+    input_style = InputStyle::Number;
+  }
 
   void draw();
   void drawCursor();
+  void updateLink();
 };
 using ItemImplPtr = std::shared_ptr<ItemImpl>;
 using ClickAct    = Graphics::ClickCallback::Action;
@@ -113,6 +126,49 @@ on_click(ClickAct action, bool enter)
       auto xp   = (mpos.x - focus_input->getX() - 10.0) / 21.0;
       if (xp >= 0)
         TextInput::setIndex(xp);
+    }
+  }
+}
+
+//
+void
+ItemImpl::updateLink()
+{
+  if (slider)
+  {
+    auto n = slider->getNumber();
+    if (n != sl_num)
+    {
+      std::ostringstream out;
+      out << std::fixed << std::setprecision(sl_prec) << n;
+      text   = out.str();
+      sl_num = n;
+      if (on_edit && TextInput::onInput())
+      {
+        // TextInput::setBuffer(text_buffer, text);
+        input_finish(edit_input);
+        edit_input.reset();
+      }
+    }
+    else if (text.empty() == false)
+    {
+      try
+      {
+        auto nn = std::stod(text);
+        if (nn != sl_num)
+        {
+          if (slider->setNumber(nn) == false)
+            sl_num = nn;
+        }
+      }
+      catch (std::invalid_argument& e)
+      {
+        // '-'だけとかは何もしない
+      }
+      catch (std::out_of_range& e)
+      {
+        // 不正な値もやっぱり何もしない
+      }
     }
   }
 }
@@ -258,6 +314,7 @@ update()
     bool no_input = true;
     item->update([&](bool enabled) {
       no_input = false;
+      item->updateLink();
       if (enabled && item->checkHit(mpos.x, mpos.y))
       {
         if (focus_input != item)

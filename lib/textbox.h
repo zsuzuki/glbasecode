@@ -24,6 +24,7 @@ struct Item : public Parts::ID
   virtual void        setMaxLength(size_t)                 = 0;
   virtual void        setPulldown(Pulldown::ID)            = 0;
   virtual void        setInputStyle(InputStyle)            = 0;
+  virtual void        setSlider(Parts::IDPtr, int = 3)     = 0;
 };
 using ItemPtr = std::shared_ptr<Item>;
 

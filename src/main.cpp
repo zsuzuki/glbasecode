@@ -228,11 +228,23 @@ setupMenu4()
   sb->setNumber(1.0);
   adjsh(sb);
   //
+  y += sb->getHeight() + 20;
+  sb = SlideBar::create(x, y, 350, 50);
+  sb->setStep(0.2);
+  sb->setMinMax(1.0, 10.0);
+  sb->setNumber(2.0);
+  lx      = x + sb->getWidth() + 20;
+  auto tb = TextBox::create("0.0", lx, y, 200, 50);
+  tb->setSlider(sb, 2);
+  tb->setMaxLength(7);
+  adjsh(sb);
+  //
   sx -= 20;
   sy -= 20;
   sw += 20;
   sh += 20;
   auto st = Sheet::create(sx, sy, sw - sx, sh - sy);
+  st->setDepth(0.1f);
   st->setFillColor({0.0f, 0.2f, 0.1f, 0.8f});
   st->setBorderColor(Graphics::White);
 }
