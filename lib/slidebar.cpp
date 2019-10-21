@@ -35,10 +35,23 @@ struct BarImpl : public Bar
   ~BarImpl() = default;
   bool   getFocus() const override;
   double getNumber() const override { return value; }
-  void   setNumber(double n) override
+  bool   setNumber(double n) override
   {
+    bool clip = false;
+    if (n < v_min)
+    {
+      n    = v_min;
+      clip = true;
+    }
+    else if (n > v_max)
+    {
+      n    = v_max;
+      clip = true;
+    }
     value = n;
-    updatePinch(-1.0);
+    if (!hold)
+      updatePinch(-1.0);
+    return clip;
   }
   void setNumberType(Type t) override
   {

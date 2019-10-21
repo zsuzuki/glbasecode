@@ -20,8 +20,11 @@ enum class Type : int
 //
 struct Bar : public Parts::ID
 {
+  // スライダーに数値を設定
+  // param n: 設定する数値
+  // return: trueなら設定範囲外の値を設定した(クリップされた)
+  virtual bool   setNumber(double n)               = 0;
   virtual double getNumber() const                 = 0;
-  virtual void   setNumber(double n)               = 0;
   virtual void   setMinMax(double min, double max) = 0;
   virtual void   setStep(double s)                 = 0;
   virtual void   setChanged(Changed)               = 0;
