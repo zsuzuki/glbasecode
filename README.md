@@ -61,6 +61,43 @@ macはbrew、もしくは自前ビルドで用意。
 - [textbutton.cpp](lib/textbutton.cpp)([.h](lib/textbutton.h)) テキストボタン
 - [texture2d.cpp](lib/texture2d.cpp)([.h](lib/texture2d.h)) テクスチャ描画
 
+# Hello,World
+
+Labelを使ったHello,World。
+```c++
+#include <gllib.h>
+
+int
+main()
+{
+  const char* fontname = "res/SourceHanCodeJP-Normal.otf";
+
+  double w    = 1024;
+  double h    = 1024;
+  auto   font = GLLib::initialize("Hello,World", fontname, w, h);
+  if (!font)
+    return 1;
+
+  GLLib::bindLayer();
+
+  auto x     = w / 2;
+  auto y     = h / 2;
+  auto fg    = Graphics::White;
+  auto bg    = Graphics::DarkGray;
+  auto lx    = x - font->getSizeX() * 6;
+  auto label = Label::create("Hello,World", lx, y, fg, bg);
+
+  for (;;)
+  {
+    if (GLLib::update([&]() { return true; }) == false)
+      break;
+  }
+
+  GLLib::terminate();
+  return 0;
+}
+```
+
 # クラス
 
 かなり機能が増えたので改装予定。
