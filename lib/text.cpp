@@ -2,6 +2,7 @@
 #include "codeconv.h"
 #include "gl.h"
 #include "pulldown.h"
+#include <cctype>
 #include <iostream>
 #include <memory>
 

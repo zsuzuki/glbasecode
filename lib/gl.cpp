@@ -259,16 +259,14 @@ initialize(const char* appname, int w, int h)
 
   // バージョン3.2指定
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
   // コンテキストの作成
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
 
-#if GLFW_VERSION_MAJOR > 3 || \
-    (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3)
   glfwGetWindowContentScale(window, &xscale, &yscale);
-#endif
+  std::cout << "Scale: " << xscale << "," << yscale << std::endl;
 
   // モニタの最大解像度を取得
   int   count;
@@ -320,8 +318,8 @@ switchFullScreen()
   auto* mode    = glfwGetVideoMode(monitor);
   if (now_fullscreen)
   {
-    glfwSetWindowMonitor(window, nullptr, 0, 0, base_size.width / xscale,
-                         base_size.height / yscale, mode->refreshRate);
+    glfwSetWindowMonitor(window, nullptr, 0, 0, base_size.width,
+                         base_size.height, mode->refreshRate);
     glfwSetWindowPos(window, base_pos.x, base_pos.y);
     window_size = base_size;
   }
@@ -379,12 +377,16 @@ setScrollBoxFunction(ScrollCallback scb, KeyCallback kcb)
 Locate
 calcLocate(double x, double y, bool asp)
 {
+  // auto   width  = window_size.width * xscale;
+  // auto   height = window_size.height * yscale;
+  auto   width  = window_size.width;
+  auto   height = window_size.height;
   Locate ret;
-  ret.x = -1.0 + x * 2.0 / window_size.width;
-  ret.y = 1.0 - y * 2.0 / window_size.height;
+  ret.x = -1.0 + x * 2.0 / width;
+  ret.y = 1.0 - y * 2.0 / height;
   if (asp)
   {
-    ret.x *= window_size.width / window_size.height;
+    ret.x *= width / height;
   }
   return ret;
 }
@@ -404,14 +406,14 @@ setupFrame()
   if (pulldown_mode)
   {
     glfwGetCursorPos(window, &mouse_pos_pd.x, &mouse_pos_pd.y);
-    mouse_pos_pd.x *= xscale;
-    mouse_pos_pd.y *= yscale;
+    // mouse_pos_pd.x *= xscale;
+    // mouse_pos_pd.y *= yscale;
   }
   else
   {
     glfwGetCursorPos(window, &mouse_pos.x, &mouse_pos.y);
-    mouse_pos.x *= xscale;
-    mouse_pos.y *= yscale;
+    // mouse_pos.x *= xscale;
+    // mouse_pos.y *= yscale;
   }
 
   glViewport(0, 0, w, h);
@@ -440,9 +442,9 @@ cleanupFrame()
 void
 setWindowSize(WindowSize ws)
 {
-  window_size.width  = ws.width;
-  window_size.height = ws.height;
-  glfwSetWindowSize(window, ws.width / xscale, ws.height / yscale);
+  window_size.width  = ws.width / xscale;
+  window_size.height = ws.height / yscale;
+  glfwSetWindowSize(window, ws.width, ws.height);
 }
 
 //
