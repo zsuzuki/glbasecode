@@ -266,7 +266,6 @@ initialize(const char* appname, int w, int h)
   glfwSwapInterval(1);
 
   glfwGetWindowContentScale(window, &xscale, &yscale);
-  std::cout << "Scale: " << xscale << "," << yscale << std::endl;
 
   // モニタの最大解像度を取得
   int   count;
