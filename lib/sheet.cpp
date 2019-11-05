@@ -28,12 +28,9 @@ struct SheetImpl : public Base
 
   void draw()
   {
-    auto   d  = depth;
-    double ox = 0.0, oy = 0.0;
+    auto d = depth;
     if (parent)
     {
-      ox      = parent->getPlacementX();
-      oy      = parent->getPlacementY();
       auto px = parent->getX();
       auto py = parent->getY();
       auto pw = parent->getWidth();
@@ -41,7 +38,6 @@ struct SheetImpl : public Base
       d += parent->getDepth();
       Graphics::enableScissor(px, py, pw, ph);
     }
-    initGeometry(x + ox, y + oy, width, height);
 
     auto loc = bbox.getLocate();
     auto btm = bbox.getBottom();
