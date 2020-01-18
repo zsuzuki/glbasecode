@@ -120,11 +120,18 @@ ButtonImpl::draw(bool focus)
 
   if (caption.empty() == false)
   {
+    static constexpr float scale = 0.7f;
     font->setDepth(ldepth);
     font->setColor(color);
-    auto c   = (loc.x + btm.x - caption.length() * font->getSizeX()) * 0.5;
-    auto pos = Graphics::calcLocate(c, btm.y + font->getSizeY() - 5.0);
+    auto fsc = font->getScale();
+    auto fsx = font->getSizeX() * scale;
+    auto fsy = font->getSizeY() * scale;
+    auto cx  = (loc.x + btm.x - caption.length() * fsx) * 0.5;
+    auto cy  = btm.y + fsy;
+    auto pos = Graphics::calcLocate(cx, cy);
+    font->setScale(scale);
     font->print(caption.c_str(), pos.x, pos.y);
+    font->setScale(fsc);
   }
 
   Texture2D::clearDrawArea();
