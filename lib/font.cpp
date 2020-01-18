@@ -55,6 +55,7 @@ struct DrawSet
   float       x      = 0.0f;
   float       y      = 0.0f;
   float       depth  = 0.0f;
+  float       scale  = 1.0f;
   DrawArea    da{};
   Color       color{};
   const char* msg = nullptr;
@@ -72,6 +73,7 @@ class WidgetImpl : public Widget
   bool     valid;
   float    depth;
   float    sdepth;
+  float    scale;
   DrawArea da;
 
 public:
@@ -80,6 +82,7 @@ public:
 
   void setSize(float w, float h) override;
   void setColor(Graphics::Color c) override;
+  void setScale(float s) override { scale = s; }
   void print(const char* msg, float x, float y) override;
   void setDepth(float d) override { depth = d; }
   void pushDepth(float d) override
@@ -97,8 +100,9 @@ public:
     da.e = true;
   }
   void  clearDrawArea() override { da.e = false; }
-  float getSizeX() const override { return 21.0f; }
-  float getSizeY() const override { return 42.0f; }
+  float getSizeX() const override { return 21.0f * scale; }
+  float getSizeY() const override { return 42.0f * scale; }
+  float getScale() const override { return scale; }
 };
 
 // 文字テクスチャキャッシュ
@@ -280,8 +284,10 @@ render(GLFWwindow* window)
     glUniform4fv(uniform_color, 1, (GLfloat*)&ds.color);
     glUniform1f(DEPTH, ds.depth);
     ds.da.set(da);
-    da = ds.da;
-    render(ds.face, ds.msg, (float)ds.x, (float)ds.y, (float)bsx, (float)bsy);
+    da         = ds.da;
+    float lbsx = bsx * ds.scale;
+    float lbsy = bsy * ds.scale;
+    render(ds.face, ds.msg, (float)ds.x, (float)ds.y, lbsx, lbsy);
   }
   Graphics::disableScissor();
 
@@ -314,6 +320,7 @@ WidgetImpl::WidgetImpl(const char* fontname)
   valid        = true;
   current.face = face;
   depth        = DrawDepth;
+  scale        = 1.0;
   setSize(32, 32);
 }
 
@@ -345,6 +352,7 @@ WidgetImpl::print(const char* msg, float x, float y)
   nds.depth = depth;
   nds.msg   = &message_buffer[p];
   nds.da    = da;
+  nds.scale = scale;
   draw_set.emplace_back(nds);
 }
 
