@@ -292,6 +292,11 @@ setup(FontDraw::WidgetPtr font)
         n->setIcon(nficon_id);
       cnt = !cnt;
     });
+    // caption test
+    ib = ImageButton::create("res/notification_important.png", Width * 0.5, 20,
+                             []() { std::cout << "click" << std::endl; });
+    ib->setFocusColor(Graphics::Orange);
+    ib->setCaption("Notify");
   }
   for (int i = 0; i < 4; i++)
   {

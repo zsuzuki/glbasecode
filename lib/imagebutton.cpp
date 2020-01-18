@@ -12,8 +12,12 @@ namespace ImageButton
 
 namespace
 {
-using ImagePtr = Texture2D::ImagePtr;
-using Color    = Graphics::Color;
+using FontWidget = FontDraw::WidgetPtr;
+using ImagePtr   = Texture2D::ImagePtr;
+using Color      = Graphics::Color;
+
+//
+FontWidget font;
 
 //
 struct ButtonImpl : public Button
@@ -24,6 +28,7 @@ struct ButtonImpl : public Button
   bool          press;
   Color         focus_color;
   Color         unfocus_color;
+  std::string   caption;
 
   ~ButtonImpl() = default;
   bool getFocus() const override;
@@ -39,6 +44,11 @@ struct ButtonImpl : public Button
   void setUnFocusColor(Graphics::Color c) override { unfocus_color = c; };
   void setImageWidth(double) override {}
   void setImageHeight(double) override {}
+  void setCaption(std::string c) override
+  {
+    caption = c;
+    // initGeometry(getX(), getY(), getWidth(), getHeight(), -0.01f);
+  }
 
   void draw(bool focus);
 
@@ -88,6 +98,7 @@ ButtonImpl::draw(bool focus)
     auto ph = parent->getHeight();
     ldepth += parent->getDepth();
     Texture2D::setDrawArea(px, py, pw, ph);
+    font->setDrawArea(px, py, pw, ph);
   }
 
   Texture2D::DrawSet dset;
@@ -102,11 +113,22 @@ ButtonImpl::draw(bool focus)
   dset.height = lt.y - rb.y;
   dset.depth  = ldepth;
   dset.align  = Texture2D::Align::LeftTop;
-  dset.color  = focus ? focus_color : unfocus_color;
+  auto color  = focus ? focus_color : unfocus_color;
+  dset.color  = color;
   dset.aspect = false;
   Texture2D::draw(dset);
 
+  if (caption.empty() == false)
+  {
+    font->setDepth(ldepth);
+    font->setColor(color);
+    auto c   = (loc.x + btm.x - caption.length() * font->getSizeX()) * 0.5;
+    auto pos = Graphics::calcLocate(c, btm.y + font->getSizeY() - 5.0);
+    font->print(caption.c_str(), pos.x, pos.y);
+  }
+
   Texture2D::clearDrawArea();
+  font->clearDrawArea();
 }
 
 //
@@ -120,8 +142,9 @@ ButtonImpl::getFocus() const
 
 //
 void
-initialize()
+initialize(FontDraw::WidgetPtr f)
 {
+  font = f;
   Graphics::setClickCallback({button_click, true});
 }
 
@@ -157,6 +180,8 @@ update()
   auto& button_list = layer.getCurrent();
   auto  mpos        = Graphics::getMousePosition();
   bool  focus       = !Graphics::isEnabledEvent();
+  font->pushDepth(0);
+  font->setColor(Graphics::White);
   for (auto& btn : button_list)
   {
     btn->update([&](bool enabled) {
@@ -179,6 +204,7 @@ update()
   // どこにもフォーカスしていない(enterによるホールドもされていない)
   if (!focus && focus_button && focus_button->press == false)
     focus_button.reset();
+  font->popDepth();
 }
 
 //

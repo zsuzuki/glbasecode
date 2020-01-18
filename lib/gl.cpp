@@ -376,8 +376,8 @@ setScrollBoxFunction(ScrollCallback scb, KeyCallback kcb)
 Locate
 calcLocate(double x, double y, bool asp)
 {
-  // auto   width  = window_size.width * xscale;
-  // auto   height = window_size.height * yscale;
+  // auto width  = window_size.width * xscale;
+  // auto height = window_size.height * yscale;
   auto   width  = window_size.width;
   auto   height = window_size.height;
   Locate ret;
@@ -411,8 +411,8 @@ setupFrame()
   else
   {
     glfwGetCursorPos(window, &mouse_pos.x, &mouse_pos.y);
-    // mouse_pos.x *= xscale;
-    // mouse_pos.y *= yscale;
+    mouse_pos.x *= xscale;
+    mouse_pos.y *= yscale;
   }
 
   glViewport(0, 0, w, h);
@@ -443,7 +443,7 @@ setWindowSize(WindowSize ws)
 {
   window_size.width  = ws.width / xscale;
   window_size.height = ws.height / yscale;
-  glfwSetWindowSize(window, ws.width, ws.height);
+  glfwSetWindowSize(window, window_size.width, window_size.height);
 }
 
 //

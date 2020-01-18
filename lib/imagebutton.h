@@ -1,5 +1,6 @@
 #pragma once
 
+#include "font.h"
 #include "parts.h"
 #include <functional>
 #include <memory>
@@ -19,11 +20,12 @@ struct Button : public Parts::ID
   virtual void setImageHeight(double)           = 0;
   virtual void setFocusColor(Graphics::Color)   = 0;
   virtual void setUnFocusColor(Graphics::Color) = 0;
+  virtual void setCaption(std::string)          = 0;
 };
 using ID = std::shared_ptr<Button>;
 
 //
-void initialize();
+void initialize(FontDraw::WidgetPtr);
 
 //
 void update();

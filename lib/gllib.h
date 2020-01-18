@@ -41,7 +41,7 @@ initialize(const char* appname, const char* fontname, int w, int h)
   Notification::initialize(font);
   DrawBox::initialize();
   Texture2D::initialize();
-  ImageButton::initialize();
+  ImageButton::initialize(font);
   Sheet::initialize();
   SlideBar::initialize();
 
