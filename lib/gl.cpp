@@ -443,7 +443,11 @@ setWindowSize(WindowSize ws)
 {
   window_size.width  = ws.width / xscale;
   window_size.height = ws.height / yscale;
+#if _MSC_VER
+  glfwSetWindowSize(window, ws.width, ws.height);
+#else
   glfwSetWindowSize(window, window_size.width, window_size.height);
+#endif
 }
 
 //
