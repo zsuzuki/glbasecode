@@ -411,8 +411,10 @@ setupFrame()
   else
   {
     glfwGetCursorPos(window, &mouse_pos.x, &mouse_pos.y);
+#if !_MSC_VER
     mouse_pos.x *= xscale;
     mouse_pos.y *= yscale;
+#endif
   }
 
   glViewport(0, 0, w, h);
